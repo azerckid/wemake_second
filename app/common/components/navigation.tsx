@@ -15,30 +15,30 @@ const menus = [
         items: [
             {
                 name: "Leaderboards",
+                description: "See the top performers in your community",
                 to: "/products/leaderboards",
-                description: "See the top performers in your community"
             },
             {
                 name: "Categories",
+                description: "See the top categories in your community",
                 to: "/products/categories",
-                description: "See the categories in your community"
             },
             {
                 name: "Search",
+                description: "Search for a product",
                 to: "/products/search",
-                description: "Search for a product in your community"
             },
             {
                 name: "Submit a Product",
+                description: "Submit a product to our community",
                 to: "/products/submit",
-                description: "Submit a product to your community"
             },
             {
-                name: "Promote a Product",
+                name: "Promote",
+                description: "Promote a product to our community",
                 to: "/products/promote",
-                description: "Promote a product to your community"
             },
-        ]
+        ],
     },
     {
         name: "Jobs",
@@ -46,30 +46,30 @@ const menus = [
         items: [
             {
                 name: "Remote Jobs",
+                description: "Find a remote job in our community",
                 to: "/jobs?location=remote",
-                description: "See the remote jobs in your community"
             },
             {
                 name: "Full-Time Jobs",
+                description: "Find a full-time job in our community",
                 to: "/jobs?type=full-time",
-                description: "See the full-time jobs in your community"
             },
             {
                 name: "Freelance Jobs",
+                description: "Find a freelance job in our community",
                 to: "/jobs?type=freelance",
-                description: "See the freelance jobs in your community"
             },
             {
                 name: "Internships",
+                description: "Find an internship in our community",
                 to: "/jobs?type=internship",
-                description: "See the internships in your community"
             },
             {
-                name: "Submit a Job",
+                name: "Post a Job",
+                description: "Post a job to our community",
                 to: "/jobs/submit",
-                description: "Submit a job to your community"
             },
-        ]
+        ],
     },
     {
         name: "Community",
@@ -77,44 +77,29 @@ const menus = [
         items: [
             {
                 name: "All Posts",
+                description: "See all posts in our community",
                 to: "/community",
-                description: "See the all posts in your community"
             },
             {
                 name: "Top Posts",
-                to: "/community?sort=top",
-                description: "See the top posts in your community"
+                description: "See the top posts in our community",
+                to: "/community?sorting=popular",
             },
             {
                 name: "New Posts",
-                to: "/community?sort=new",
-                description: "See the new posts in your community"
+                description: "See the new posts in our community",
+                to: "/community?sorting=newest",
             },
             {
                 name: "Create a Post",
-                to: "/community/create",
-                description: "Create a post in your community"
+                description: "Create a post in our community",
+                to: "/community/submit",
             },
-            {
-                name: "Hot Posts",
-                to: "/community?sort=hot",
-                description: "See the hot posts in your community"
-            },
-            {
-                name: "Old Posts",
-                to: "/community?sort=old",
-                description: "See the old posts in your community"
-            },
-            {
-                name: "Submit a Post",
-                to: "/community?submit=true",
-                description: "Submit a post to your community"
-            },
-        ]
+        ],
     },
     {
         name: "IdeasGPT",
-        to: "/ideasgpt",
+        to: "/ideas",
     },
     {
         name: "Teams",
@@ -122,25 +107,15 @@ const menus = [
         items: [
             {
                 name: "All Teams",
+                description: "See all teams in our community",
                 to: "/teams",
-                description: "See the all teams in your community"
             },
             {
                 name: "Create a Team",
+                description: "Create a team in our community",
                 to: "/teams/create",
-                description: "Create a team in your community"
             },
-            {
-                name: "Join a Team",
-                to: "/teams/join",
-                description: "Join a team in your community"
-            },
-            {
-                name: "Leave a Team",
-                to: "/teams/leave",
-                description: "Leave a team in your community"
-            },
-        ]
+        ],
     },
 ]
 

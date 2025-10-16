@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { Button } from "../components/ui/button";
-import type { Route } from "./+types/home";
+import type { Route } from "./+types/home-page";
 import { ProductCard } from "~/features/products/components/product-card";
 import { PostCard } from "~/features/ community/components/post-card";
 import { IdeaCard } from "~/features/ideas/components/idea-card";
@@ -8,25 +8,21 @@ import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
 
 export function loader({ request }: Route.LoaderArgs) {
+    console.log(request);
     return {
-        title: "Welcome to WeMake",
-        description: "Your creative workspace for building amazing things"
+        hello: "world",
     };
 }
 
-export function action({ request }: Route.ActionArgs) {
-    // Handle form submissions or other actions here
-    return {};
-}
-
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
     return [
-        { title: data?.title || "WeMake" },
-        { name: "description", content: data?.description || "Your creative workspace" }
+        { title: "Home | WeMake Clone" },
+        { name: "description", content: "Welcome to WeMake" }
     ];
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
+export default function HomePage({ loaderData }: Route.ComponentProps) {
+    console.log(loaderData);
     return (
         <div className="px-20 space-y-40">
             <div className="grid grid-cols-3 gap-4">

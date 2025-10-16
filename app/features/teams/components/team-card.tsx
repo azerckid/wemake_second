@@ -45,7 +45,7 @@ export function TeamCard({
                         </Badge>
                         <span> is looking for </span>
                         {positions.map((position, index) => (
-                            <Badge key={index} className="text-base">
+                            <Badge key={index} className="text-sm">
                                 {position}
                             </Badge>
                         ))}

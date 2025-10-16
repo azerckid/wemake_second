@@ -102,3 +102,8 @@ Thumbs.db
 # React Router specific
 /build
 /.react-router
+
+
+# Cursor rules
+.cursor/
+.cursor/rules/wemake.mdc

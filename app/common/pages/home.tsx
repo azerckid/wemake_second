@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Button } from "../components/ui/button";
 import type { Route } from "./+types/home";
 import { ProductCard } from "~/features/products/components/product-card";
+import { PostCard } from "~/features/ community/components/post-card";
 
 export function loader({ request }: Route.LoaderArgs) {
     return {
@@ -24,10 +25,10 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="px-20">
+        <div className="px-20 space-y-40">
             <div className="grid grid-cols-3 gap-4">
                 <div>
-                    <h2 className="text-5xl font-bold leading-tight tracking-tight">
+                    <h2 className="text-4xl font-bold leading-tight tracking-tight">
                         Today's Products
                     </h2>
                     <p className="text-xl font-light text-foreground">
@@ -52,7 +53,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             </div>
             <div className="grid grid-cols-3 gap-4">
                 <div>
-                    <h2 className="text-5xl font-bold leading-tight tracking-tight">
+                    <h2 className="text-4xl font-bold leading-tight tracking-tight">
                         Latest Discussions
                     </h2>
                     <p className="text-xl font-light text-foreground">
@@ -64,7 +65,16 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                         </Link>
                     </Button>
                 </div>
-
+                {Array.from({ length: 11 }).map((_, index) => (
+                    <PostCard
+                        id={`postId-${index}`}
+                        title="What is the best productivity tool?"
+                        author="Azer.C"
+                        authorAvatarUrl="https://github.com/apple.png"
+                        category="Productivity"
+                        postedAt="12 hours ago"
+                    />
+                ))}
             </div>
         </div>
     );

@@ -1,9 +1,12 @@
 import { Link } from "react-router";
+import { BarChart3Icon, BellIcon, LogOut, MessageCircleIcon, Settings, User } from "lucide-react";
+
+import { cn } from "~/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu";
 import { Separator } from "./ui/separator";
-import { cn } from "~/lib/utils";
-import { Button } from "./ui/button";
-import { User } from "lucide-react";
 
 const menus = [
     {
@@ -141,7 +144,7 @@ const menus = [
     },
 ]
 
-export default function Navigation({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }: { isLoggedIn: boolean, hasNotifications: boolean, hasMessages: boolean }) {
     return (
         <nav className="flex justify-between items-center px-20 h-16 backdrop-blur fixed top-0 left-0 right-0 z-50 bg-background/50">
             <div className="flex items-center">
@@ -187,10 +190,80 @@ export default function Navigation({ isLoggedIn }: { isLoggedIn: boolean }) {
                 </NavigationMenu>
                 <Separator orientation="vertical" className="h-6 mx-4" />
             </div>
-            {isLoggedIn ? null : (
+            {isLoggedIn ? (
+                <div className="flex justify-center items-center gap-2">
+                    <Button variant="ghost" size="icon" className="relative" asChild>
+                        <Link to="/my-account/notifications">
+                            <BellIcon className="size-4" />
+                            {hasNotifications && (
+                                <span className="absolute top-0 right-0 size-2 bg-red-500 rounded-full">
+                                    {hasNotifications}
+                                </span>
+                            )}
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="relative" asChild>
+                        <Link to="/my-account/messages">
+                            <MessageCircleIcon className="size-4" />
+                            {hasMessages && (
+                                <span className="absolute top-0 right-0 size-2 bg-red-500 rounded-full">
+                                    {hasMessages}
+                                </span>
+                            )}
+                        </Link>
+                    </Button>
+
+                    <DropdownMenu >
+                        <DropdownMenuTrigger asChild className="ml-2">
+                            <Avatar className="cursor-pointer">
+                                <AvatarImage src="https://github.com/zizimoos.png" alt="User avatar" />
+                                <AvatarFallback>U</AvatarFallback>
+                            </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end">
+                            <DropdownMenuLabel className="flex flex-col gap-1">
+                                <span className="text-sm font-medium">Azerc kid</span>
+                                <span className="text-xs text-muted-foreground">azerckid@example.com</span>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem asChild>
+                                    <Link to="/my-account/profile">
+                                        <User className="mr-2 h-4 w-4" />
+                                        Profile
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link to="/my-account/settings">
+                                        <Settings className="mr-2 h-4 w-4" />
+                                        Settings
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link to="/my-account/dashboard">
+                                        <BarChart3Icon className="mr-2 h-4 w-4" />
+                                        Dashboard
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild className="text-red-600">
+                                <Link to="/auth/logout">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Log out
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ) : (
                 <div className="flex items-center gap-2">
-                    <Button variant="outline">Login</Button>
-                    <Button>Sign up</Button>
+                    <Button variant="secondary" asChild>
+                        <Link to="auth/login">Login</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link to="auth/signup">Join</Link>
+                    </Button>
                 </div>
             )}
         </nav>

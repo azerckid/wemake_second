@@ -1,4 +1,7 @@
+import { Link } from "react-router";
+import { Button } from "../components/ui/button";
 import type { Route } from "./+types/home";
+import { ProductCard } from "~/features/products/components/product-card";
 
 export function loader({ request }: Route.LoaderArgs) {
     return {
@@ -21,33 +24,47 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="min-h-screen bg-background">
-            <div className="container mx-auto px-4 py-16">
-                <div className="text-center space-y-8">
-                    <h1 className="text-4xl font-bold text-foreground">
-                        {loaderData.title}
-                    </h1>
-
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                        {loaderData.description}
+        <div className="px-20">
+            <div className="grid grid-cols-3 gap-4">
+                <div>
+                    <h2 className="text-5xl font-bold leading-tight tracking-tight">
+                        Today's Products
+                    </h2>
+                    <p className="text-xl font-light text-foreground">
+                        The best products made by our community today.
                     </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a
-                            href="/docs"
-                            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
-                        >
-                            Get Started
-                        </a>
-
-                        <a
-                            href="/learn"
-                            className="inline-flex items-center justify-center px-6 py-3 border border-border text-base font-medium rounded-md text-foreground bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                            Learn More
-                        </a>
-                    </div>
+                    <Button variant="link" className="text-lg p-0" asChild>
+                        <Link to="/products/leaderboards">
+                            Explore All Products &rarr;
+                        </Link>
+                    </Button>
                 </div>
+                {Array.from({ length: 10 }).map((_, index) => (
+                    <ProductCard
+                        id={`productId-${index}`}
+                        name="Product Name"
+                        description="Product Description"
+                        commentsCount={12}
+                        viewsCount={12}
+                        votesCount={120}
+                    />
+                ))}
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+                <div>
+                    <h2 className="text-5xl font-bold leading-tight tracking-tight">
+                        Latest Discussions
+                    </h2>
+                    <p className="text-xl font-light text-foreground">
+                        The latest discussions from our community.
+                    </p>
+                    <Button variant="link" className="text-lg p-0" asChild>
+                        <Link to="/community">
+                            Explore All Discussions &rarr;
+                        </Link>
+                    </Button>
+                </div>
+
             </div>
         </div>
     );

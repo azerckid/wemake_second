@@ -1,37 +1,65 @@
+import { z } from "zod";
+import { Form } from "react-router";
+
 import type { Route } from "./+types/search-page";
 
-export function loader({ request }: Route.LoaderArgs) {
-    const url = new URL(request.url);
-    const query = url.searchParams.get("q") || "";
+import { Hero } from "~/common/components/hero";
+import { Button } from "~/common/components/ui/button";
+import { Input } from "~/common/components/ui/input";
+import { ProductCard } from "../components/product-card";
+import ProductPagination from "~/common/components/product-pagination";
 
-    return {
-        query,
-        results: [], // Add search logic
-    };
-}
+const paramsSchema = z.object({
+    query: z.string().optional().default(""),
+    page: z.coerce.number().optional().default(1),
+});
 
-export function meta({ data }: Route.MetaArgs) {
+export const meta: Route.MetaFunction = () => {
     return [
-        { title: "Search Products | ProductHunt Clone" },
+        { title: "Search Products | wemake" },
         { name: "description", content: "Search for products" },
     ];
 }
 
+export function loader({ request }: Route.LoaderArgs) {
+    const url = new URL(request.url);
+    const { success, data: parsedData } = paramsSchema.safeParse(
+        Object.fromEntries(url.searchParams)
+    );
+    if (!success) {
+        throw new Error("Invalid params");
+    }
+}
+
 export default function SearchPage({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="px-20 py-16">
-            <div className="mb-8">
-                <h1 className="text-5xl font-bold leading-tight tracking-tight">
-                    {loaderData.query}
-                </h1>
-                <p className="text-xl font-light text-muted-foreground">
-                    Search for products
-                </p>
+        <div className="space-y-10">
+            <Hero
+                title="Search"
+                subtitle="Search for products by title or description"
+            />
+            <Form className="flex justify-center h-14 max-w-screen-sm items-center gap-2 mx-auto">
+                <Input
+                    name="query"
+                    placeholder="Search for products"
+                    className="text-lg"
+                />
+                <Button type="submit">Search</Button>
+            </Form>
+            <div className="space-y-5 w-full max-w-screen-md mx-auto">
+                {Array.from({ length: 11 }).map((_, index) => (
+                    <ProductCard
+                        key={`productId-${index}`}
+                        id={`productId-${index}`}
+                        name="Product Name"
+                        description="Product Description"
+                        commentsCount={12}
+                        viewsCount={12}
+                        votesCount={120}
+                    />
+                ))}
             </div>
-
-            <div className="space-y-4">
-                <p className="text-muted-foreground">Search functionality coming soon...</p>
-            </div>
+            <ProductPagination totalPages={10} />
         </div>
     );
 }

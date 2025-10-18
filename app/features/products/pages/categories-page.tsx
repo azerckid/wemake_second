@@ -1,32 +1,27 @@
 import type { Route } from "./+types/categories-page";
 
-export function loader({ request }: Route.LoaderArgs) {
-    return {
-        categories: [],
-    };
-}
+import { Hero } from "~/common/components/hero";
+import { CategoryCard } from "../components/category-card";
 
-export function meta({ data }: Route.MetaArgs) {
-    return [
-        { title: "Categories | ProductHunt Clone" },
-        { name: "description", content: "Browse by category" }
-    ];
-}
 
-export default function CategoriesPage({ loaderData }: Route.ComponentProps) {
+export const meta: Route.MetaFunction = () => [
+    { title: "Categories | ProductHunt Clone" },
+    { name: "description", content: "Browse products by category" },
+];
+
+export default function CategoriesPage() {
     return (
-        <div className="px-20 py-16">
-            <div className="mb-8">
-                <h1 className="text-5xl font-bold leading-tight tracking-tight">
-                    Categories
-                </h1>
-                <p className="text-xl font-light text-muted-foreground">
-                    Browse by category
-                </p>
-            </div>
-
-            <div className="space-y-4">
-                <p className="text-muted-foreground">Categories content coming soon...</p>
+        <div className="space-y-10">
+            <Hero title="Categories" subtitle="Browse products by category" />
+            <div className="grid grid-cols-4 gap-10">
+                {Array.from({ length: 10 }).map((_, index) => (
+                    <CategoryCard
+                        key={`categoryId-${index}`}
+                        id={`categoryId-${index}`}
+                        name="Category Name"
+                        description="Category Description"
+                    />
+                ))}
             </div>
         </div>
     );

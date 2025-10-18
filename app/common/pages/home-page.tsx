@@ -8,7 +8,6 @@ import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
 
 export function loader({ request }: Route.LoaderArgs) {
-    console.log(request);
     return {
         hello: "world",
     };
@@ -22,7 +21,6 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
-    console.log(loaderData);
     return (
         <div className="px-20 space-y-40">
             <div className="grid grid-cols-3 gap-4">
@@ -41,6 +39,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 </div>
                 {Array.from({ length: 10 }).map((_, index) => (
                     <ProductCard
+                        key={`productId-${index}`}
                         id={`productId-${index}`}
                         name="Product Name"
                         description="Product Description"
@@ -66,6 +65,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 </div>
                 {Array.from({ length: 11 }).map((_, index) => (
                     <PostCard
+                        key={`postId-${index}`}
                         id={`postId-${index}`}
                         title="What is the best productivity tool?"
                         author="Azer.C"

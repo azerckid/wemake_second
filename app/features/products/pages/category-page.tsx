@@ -1,30 +1,37 @@
 import type { Route } from "./+types/category-page";
 
-export function loader({ request, params }: Route.LoaderArgs) {
-    return {
-        category: params.category,
-        products: []
-    };
-}
+import { Hero } from "~/common/components/hero";
+import { ProductCard } from "../components/product-card";
+import ProductPagination from "~/common/components/product-pagination";
 
-export function meta({ params }: Route.MetaArgs) {
+export const meta = ({ params }: Route.MetaArgs) => {
     return [
-        { title: `Category - ${params.category} | ProductHunt Clone` }
+        { name: "description", content: `Browse ${params.category} products` },
+        { name: "description", content: `Browse Developer Tools products` },
     ];
 }
-
-export default function CategoryPage({ loaderData }: Route.ComponentProps) {
+export default function CategoryPage() {
     return (
-        <div className="px-20 py-16">
-            <div className="mb-8">
-                <h1 className="text-5xl font-bold leading-tight tracking-tight">
-                    {loaderData.category}
-                </h1>
-            </div>
+        <div className="space-y-10">
+            <Hero
+                title={"Developer Tools"}
+                subtitle={`Tools for developers to build products faster`}
+            />
 
-            <div className="space-y-4">
-                <p className="text-muted-foreground">Products in category: {loaderData.category}</p>
+            <div className="space-y-5 w-full max-w-screen-md mx-auto">
+                {Array.from({ length: 11 }).map((_, index) => (
+                    <ProductCard
+                        key={`productId-${index}`}
+                        id={`productId-${index}`}
+                        name="Product Name"
+                        description="Product Description"
+                        commentsCount={12}
+                        viewsCount={12}
+                        votesCount={120}
+                    />
+                ))}
             </div>
+            <ProductPagination totalPages={10} />
         </div>
     );
 }

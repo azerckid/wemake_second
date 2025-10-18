@@ -1,11 +1,13 @@
-import type { Route } from "./+types/monthly-leaderboard-page";
 import { data, isRouteErrorResponse, Link } from "react-router";
+import { DateTime } from "luxon";
 import { z } from "zod";
+
+import type { Route } from "./+types/monthly-leaderboard-page";
+
 import { Hero } from "~/common/components/hero";
-import { ProductCard } from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import ProductPagination from "~/common/components/product-pagination";
-import { DateTime } from "luxon";
+import { ProductCard } from "../components/product-card";
 
 const paramsSchema = z.object({
     year: z.coerce.number(),
@@ -53,12 +55,22 @@ export const loader = ({ params }: Route.LoaderArgs) => {
     };
 }
 
-export function meta({ params }: Route.MetaArgs) {
+export const meta: Route.MetaFunction = ({ params }) => {
+    const date = DateTime.fromObject({
+        year: Number(params.year),
+        month: Number(params.month),
+    })
+        .setZone("Asia/Seoul")
+        .setLocale("ko");
     return [
-        { title: `Monthly Leaderboard - ${params.year}/${params.month} | ProductHunt Clone` },
-        { name: "description", content: "See the top performers in your community" }
+        {
+            title: `Best of ${date.toLocaleString({
+                month: "long",
+                year: "2-digit",
+            })} | wemake`,
+        },
     ];
-}
+};
 
 export default function MonthlyLeaderboardPage({ loaderData }: Route.ComponentProps) {
     const urlDate = DateTime.fromObject({

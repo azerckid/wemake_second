@@ -1,7 +1,9 @@
-import type { Route } from "./+types/daily-leaderboard-page";
-import { DateTime } from "luxon";
 import { data, isRouteErrorResponse, Link } from "react-router";
+import { DateTime } from "luxon";
 import { z } from "zod";
+
+import type { Route } from "./+types/daily-leaderboard-page";
+
 import { Hero } from "~/common/components/hero";
 import ProductPagination from "~/common/components/product-pagination";
 import { ProductCard } from "../components/product-card";
@@ -51,12 +53,22 @@ export const loader = ({ params }: Route.LoaderArgs) => {
     };
 };
 
-export function meta({ params }: Route.MetaArgs) {
+export const meta: Route.MetaFunction = ({ params }) => {
+    const date = DateTime.fromObject({
+        year: Number(params.year),
+        month: Number(params.month),
+        day: Number(params.day),
+    })
+        .setZone("Asia/Seoul")
+        .setLocale("ko");
     return [
-        { title: `Daily Leaderboard - ${params.year}/${params.month}/${params.day} | ProductHunt Clone` },
-        { name: "description", content: "See the top performers in your community" }
+        {
+            title: `The best products of ${date.toLocaleString(
+                DateTime.DATE_MED
+            )} | wemake`,
+        },
     ];
-}
+};
 
 export default function DailyLeaderboardPage({ loaderData }: Route.ComponentProps) {
     const urlDate = DateTime.fromObject({

@@ -157,7 +157,7 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
                             ) :
-                                <Link className={navigationMenuTriggerStyle()} to={menu.to}>
+                                <Link className={navigationMenuTriggerStyle()} to={menu.to} key={menu.to}>
                                     {menu.name}
                                 </Link>
                         )}

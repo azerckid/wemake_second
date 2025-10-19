@@ -237,7 +237,7 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                         <Link to="auth/login">Login</Link>
                     </Button>
                     <Button asChild>
-                        <Link to="auth/signup">Join</Link>
+                        <Link to="auth/join">Join</Link>
                     </Button>
                 </div>
             )}

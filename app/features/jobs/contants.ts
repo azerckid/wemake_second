@@ -8,8 +8,12 @@ export const JOB_TYPES = [
         value: "part-time",
     },
     {
-        label: "Remote",
-        value: "remote",
+        label: "Freelance",
+        value: "freelance",
+    },
+    {
+        label: "Internship",
+        value: "internship",
     },
 ] as const;
 

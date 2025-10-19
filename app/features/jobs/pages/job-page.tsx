@@ -17,12 +17,12 @@ export default function JobPage() {
                     <div>
                         <div className="size-40 bg-white rounded-full  overflow-hidden relative left-10">
                             <img
-                                src="https://github.com/facebook.png"
+                                src="https://github.com/google.png"
                                 className="object-cover"
                             />
                         </div>
                         <h1 className="text-4xl font-bold">Software Engineer</h1>
-                        <h4 className="text-lg text-muted-foreground">Meta Inc.</h4>
+                        <h4 className="text-lg text-muted-foreground">Google Inc.</h4>
                     </div>
                     <div className="flex gap-2">
                         <Badge variant={"secondary"}>Full-time</Badge>

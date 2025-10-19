@@ -1,53 +1,56 @@
+import { useState } from "react";
+
 import type { Route } from "./+types/product-reviews-page";
 
-interface LoaderData {
-    productId: string;
-    reviews: Array<{
-        id: string;
-        content: string;
-        rating: number;
-    }>;
-}
-
-export function loader({ params }: Route.LoaderArgs) {
-    // In a real app, you would fetch reviews from your database
-    return {
-        productId: params.productId,
-        reviews: [],
-    };
-}
+import { Button } from "~/common/components/ui/button";
+import { Dialog, DialogTrigger } from "~/common/components/ui/dialog";
+import { ReviewCard } from "../components/review-card";
+import CreateReviewDialog from "../components/create-review-dialog";
 
 export function meta() {
     return [
-        { title: "Product Reviews" },
+        { title: "Product Reviews | wemake" },
         { name: "description", content: "Read and write product reviews" },
     ];
 }
 
-export default function ProductReviewsPage({
-    loaderData,
-}: Route.ComponentProps) {
+export async function action({ request }: Route.ActionArgs) {
+    const formData = await request.formData();
+    const rating = formData.get("rating");
+    const content = formData.get("content");
+
+    // 여기서 데이터베이스에 저장
+    console.log("Review submitted:", { rating, content });
+
+    return { success: true };
+}
+
+export default function ProductReviewsPage() {
+    const [open, setOpen] = useState(false);
+
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-6">Product Reviews</h1>
-            <div className="space-y-4">
-                {loaderData.reviews.length === 0 ? (
-                    <p className="text-gray-500">No reviews yet.</p>
-                ) : (
-                    loaderData.reviews.map((review: { id: string; rating: number; content: string }) => (
-                        <div key={review.id} className="bg-white rounded-lg shadow p-6">
-                            <div className="flex items-center mb-2">
-                                <span className="text-yellow-400">
-                                    {"★".repeat(review.rating)}
-                                </span>
-                                <span className="text-gray-300">
-                                    {"★".repeat(5 - review.rating)}
-                                </span>
-                            </div>
-                            <p className="text-gray-700">{review.content}</p>
-                        </div>
-                    ))
-                )}
+        <div className="space-y-10 max-w-xl">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">10 Reviews </h2>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant={"secondary"}>Write a review</Button>
+                    </DialogTrigger>
+                    <CreateReviewDialog />
+                </Dialog>
+            </div>
+            <div className="space-y-6">
+                {Array.from({ length: 10 }).map((_, i) => (
+                    <ReviewCard
+                        key={i}
+                        username="John Doe"
+                        handle="@username"
+                        avatarUrl="https://github.com/google.png"
+                        rating={5}
+                        content="Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos."
+                        postedAt="10 days ago"
+                    />
+                ))}
             </div>
         </div>
     );

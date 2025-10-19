@@ -2,6 +2,7 @@ import { type RouteConfig, index, route, prefix, layout } from "@react-router/de
 
 export default [
     index("common/pages/home-page.tsx"),
+
     ...prefix("products", [
         index("features/products/pages/products-page.tsx"),
         ...prefix("leaderboards", [
@@ -40,9 +41,19 @@ export default [
                 route("/overview", "features/products/pages/product-overview-page.tsx"),
                 ...prefix("/reviews", [
                     index("features/products/pages/product-reviews-page.tsx"),
-                    route("/new", "features/products/pages/new-product-review-page.tsx"),
                 ]),
             ]),
         ]),
+    ]),
+
+    ...prefix("ideas", [
+        index("features/ideas/pages/ideas-page.tsx"),
+        route("/:ideaId", "features/ideas/pages/idea-page.tsx"),
+    ]),
+
+    ...prefix("jobs", [
+        index("features/jobs/pages/jobs-page.tsx"),
+        route("/:jobId", "features/jobs/pages/job-page.tsx"),
+        route("/submit", "features/jobs/pages/submit-job-page.tsx"),
     ]),
 ] satisfies RouteConfig;

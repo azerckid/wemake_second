@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { Route } from "./+types/submit-page";
+import type { Route } from "./+types/submit-product-page";
 
 import { Hero } from "~/common/components/hero";
 import { Form } from "react-router";
@@ -26,7 +26,7 @@ export function meta({ data }: Route.MetaArgs) {
     ];
 }
 
-export default function SubmitPage({ loaderData }: Route.ComponentProps) {
+export default function SubmitProductPage({ loaderData }: Route.ComponentProps) {
     const [icon, setIcon] = useState<string | null>(null);
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {

@@ -168,7 +168,7 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
             {isLoggedIn ? (
                 <div className="flex justify-center items-center gap-2">
                     <Button variant="ghost" size="icon" className="relative" asChild>
-                        <Link to="/my-account/notifications">
+                        <Link to="/my/notifications">
                             <BellIcon className="size-4" />
                             {hasNotifications && (
                                 <span className="absolute top-0 right-0 size-2 bg-red-500 rounded-full">
@@ -178,7 +178,7 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                         </Link>
                     </Button>
                     <Button variant="ghost" size="icon" className="relative" asChild>
-                        <Link to="/my-account/messages">
+                        <Link to="/my/messages">
                             <MessageCircleIcon className="size-4" />
                             {hasMessages && (
                                 <span className="absolute top-0 right-0 size-2 bg-red-500 rounded-full">
@@ -203,19 +203,19 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
                                 <DropdownMenuItem asChild>
-                                    <Link to="/my-account/profile">
+                                    <Link to="/my/profile">
                                         <User className="mr-2 h-4 w-4" />
                                         Profile
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                    <Link to="/my-account/settings">
+                                    <Link to="/my/settings">
                                         <Settings className="mr-2 h-4 w-4" />
                                         Settings
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                    <Link to="/my-account/dashboard">
+                                    <Link to="/my/dashboard">
                                         <BarChart3Icon className="mr-2 h-4 w-4" />
                                         Dashboard
                                     </Link>

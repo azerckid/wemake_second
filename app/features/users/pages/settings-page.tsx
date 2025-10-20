@@ -49,6 +49,15 @@ export default function SettingsPage() {
                             ]}
                         />
                         <InputPair
+                            label="Headline"
+                            description="An introduction to your profile."
+                            required
+                            id="headline"
+                            name="headline"
+                            placeholder="A brief introduction to your profile."
+                            textArea
+                        />
+                        <InputPair
                             label="Bio"
                             description="Your public bio. It will be displayed on your profile page."
                             required

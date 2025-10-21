@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { BarChart3Icon, BellIcon, LogOut, MessageCircleIcon, Settings, User } from "lucide-react";
+import { BarChart3Icon, BellIcon, LogOut, Menu, MessageCircleIcon, Settings, User, X } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "./ui/navigation-menu";
 import { Separator } from "./ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 const menus = [
     {
@@ -121,49 +122,124 @@ const menus = [
 
 export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }: { isLoggedIn: boolean, hasNotifications: boolean, hasMessages: boolean }) {
     return (
-        <nav className="flex justify-between items-center px-20 h-16 backdrop-blur fixed top-0 left-0 right-0 z-50 bg-background/50">
-            <div className="flex items-center">
-                <Link to="/" className="font - bold tracking - tighter text - lg">wemake</Link>
-                <Separator orientation="vertical" className="h-6 mx-4" />
-                <NavigationMenu>
-                    <NavigationMenuList>
-                        {menus.map((menu) =>
-                            menu.items && menu.items.length > 0 ? (
-                                <NavigationMenuItem key={menu.to}>
-                                    <Link to={menu.to}>
-                                        <NavigationMenuTrigger>{menu.name}</NavigationMenuTrigger>
+        <nav className="flex justify-between items-center px-4 sm:px-8 lg:px-20 h-16 backdrop-blur fixed top-0 left-0 right-0 z-50 bg-background/50">
+            <div className="flex items-center gap-2 sm:gap-4">
+                {/* Mobile Menu */}
+                <Sheet>
+                    <SheetTrigger asChild className="lg:hidden">
+                        <Button variant="ghost" size="icon">
+                            <Menu className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                        <SheetHeader>
+                            <SheetTitle>Menu</SheetTitle>
+                        </SheetHeader>
+                        <div className="mt-6 space-y-2">
+                            {menus.map((menu) => (
+                                <div key={menu.to} className="space-y-2">
+                                    <Link
+                                        to={menu.to}
+                                        className="block px-3 py-2 text-sm font-medium rounded-md hover:bg-accent transition-colors"
+                                    >
+                                        {menu.name}
                                     </Link>
-                                    <NavigationMenuContent>
-                                        <ul className="grid w-[600px] font-light gap-3 p-4 grid-cols-2">
+                                    {menu.items && menu.items.length > 0 && (
+                                        <div className="pl-4 space-y-1">
                                             {menu.items.map((item) => (
-                                                <NavigationMenuItem key={item.to} className={cn([
-                                                    "select-none rounded-md transition-colors focus:bg-accent hover:bg-accent",
-                                                    item.to === "/products/promote" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
-                                                    item.to === "/jobs/submit" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
-                                                    item.to === "/community/create" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
-                                                    item.to === "/ideasgpt" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
-                                                    item.to === "/teams/join" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
-                                                ])}
+                                                <Link
+                                                    key={item.to}
+                                                    to={item.to}
+                                                    className="block px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
                                                 >
-                                                    <NavigationMenuLink asChild>
-                                                        <Link to={item.to} className="p-3 space-y-1 block leading-none no-underline outline-none">
-                                                            <span className="text-sm font-medium leading-none">{item.name}</span>
-                                                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                                                        </Link>
-                                                    </NavigationMenuLink>
-                                                </NavigationMenuItem>
+                                                    {item.name}
+                                                </Link>
                                             ))}
-                                        </ul>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
-                            ) :
-                                <Link className={navigationMenuTriggerStyle()} to={menu.to} key={menu.to}>
-                                    {menu.name}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {isLoggedIn && (
+                            <div className="mt-8 pt-8 border-t space-y-2">
+                                <Link
+                                    to="/my/profile"
+                                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                                >
+                                    <User className="h-4 w-4" />
+                                    Profile
                                 </Link>
+                                <Link
+                                    to="/my/settings"
+                                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                                >
+                                    <Settings className="h-4 w-4" />
+                                    Settings
+                                </Link>
+                                <Link
+                                    to="/my/dashboard"
+                                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                                >
+                                    <BarChart3Icon className="h-4 w-4" />
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    to="/auth/logout"
+                                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-md hover:bg-accent transition-colors"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    Log out
+                                </Link>
+                            </div>
                         )}
-                    </NavigationMenuList>
-                </NavigationMenu>
-                <Separator orientation="vertical" className="h-6 mx-4" />
+                    </SheetContent>
+                </Sheet>
+
+                <Link to="/" className="font-bold tracking-tighter text-lg">wemake</Link>
+                <Separator orientation="vertical" className="h-6 mx-2 hidden sm:block" />
+
+                {/* Desktop Navigation */}
+                <div className="hidden lg:flex items-center">
+                    <NavigationMenu>
+                        <NavigationMenuList>
+                            {menus.map((menu) =>
+                                menu.items && menu.items.length > 0 ? (
+                                    <NavigationMenuItem key={menu.to}>
+                                        <Link to={menu.to}>
+                                            <NavigationMenuTrigger>{menu.name}</NavigationMenuTrigger>
+                                        </Link>
+                                        <NavigationMenuContent>
+                                            <ul className="grid w-[600px] font-light gap-3 p-4 grid-cols-2">
+                                                {menu.items.map((item) => (
+                                                    <NavigationMenuItem key={item.to} className={cn([
+                                                        "select-none rounded-md transition-colors focus:bg-accent hover:bg-accent",
+                                                        item.to === "/products/promote" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
+                                                        item.to === "/jobs/submit" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
+                                                        item.to === "/community/create" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
+                                                        item.to === "/ideasgpt" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
+                                                        item.to === "/teams/join" && "col-span-2 bg-primary/10 hover:bg-primary/20 focus:bg-primary/20",
+                                                    ])}
+                                                    >
+                                                        <NavigationMenuLink asChild>
+                                                            <Link to={item.to} className="p-3 space-y-1 block leading-none no-underline outline-none">
+                                                                <span className="text-sm font-medium leading-none">{item.name}</span>
+                                                                <p className="text-sm text-muted-foreground">{item.description}</p>
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </NavigationMenuItem>
+                                                ))}
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                ) :
+                                    <Link className={navigationMenuTriggerStyle()} to={menu.to} key={menu.to}>
+                                        {menu.name}
+                                    </Link>
+                            )}
+                        </NavigationMenuList>
+                    </NavigationMenu>
+                    <Separator orientation="vertical" className="h-6 mx-4" />
+                </div>
             </div>
             {isLoggedIn ? (
                 <div className="flex justify-center items-center gap-2">

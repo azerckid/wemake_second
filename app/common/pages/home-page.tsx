@@ -22,7 +22,7 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
     return (
-        <div className="px-20 space-y-40">
+        <div className="space-y-40">
             <div className="grid grid-cols-3 gap-4">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">

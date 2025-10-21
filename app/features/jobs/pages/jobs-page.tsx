@@ -24,8 +24,8 @@ export default function JobsPage() {
     return (
         <div className="space-y-20">
             <Hero title="Jobs" subtitle="Companies looking for makers" />
-            <div className="grid grid-cols-6 gap-20 items-start">
-                <div className="col-span-4 grid grid-cols-3  gap-5">
+            <div className="grid grid-cols-1 items-start lg:grid-cols-6 lg:gap-20 ">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:col-span-4 ">
                     {Array.from({ length: 20 }).map((_, index) => (
                         <JobCard
                             key={`jobId-${index}`}
@@ -41,7 +41,7 @@ export default function JobsPage() {
                         />
                     ))}
                 </div>
-                <div className="col-span-2 sticky top-20 flex flex-col gap-10">
+                <div className="xl:col-span-2 sticky top-20 flex flex-col gap-10">
                     <div className="flex flex-col items-start gap-2.5">
                         <h4 className="text-sm text-muted-foreground font-bold">Type</h4>
                         <div className="flex flex-wrap gap-2">

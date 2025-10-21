@@ -76,17 +76,27 @@ export default function SubmitProductPage({ loaderData }: Route.ComponentProps) 
                         type="text"
                         placeholder="A detailed description of your product"
                     />
+                    <InputPair
+                        textArea
+                        label="How it works"
+                        description="Explain how your product works"
+                        id="how_it_works"
+                        name="how_it_works"
+                        required
+                        type="text"
+                        placeholder="Explain how your product works"
+                    />
                     <SelectPair
                         label="Category"
                         description="The category of your product"
-                        name="category"
+                        name="category_id"
                         required
                         placeholder="Select a category"
                         options={[
-                            { label: "AI", value: "ai" },
-                            { label: "Design", value: "design" },
-                            { label: "Marketing", value: "marketing" },
-                            { label: "Development", value: "development" },
+                            { label: "AI", value: "1" },
+                            { label: "Design", value: "2" },
+                            { label: "Marketing", value: "3" },
+                            { label: "Development", value: "4" },
                         ]}
                     />
                     <Button type="submit" className="w-full" size="lg">

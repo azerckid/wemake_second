@@ -12,28 +12,31 @@ import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 interface PostCardProps {
-    id: string;
+    post_id: number;
     title: string;
     author: string;
     authorAvatarUrl: string;
-    category: string;
-    postedAt: string;
+    topic_id: number;
+    topic_name: string;
+    created_at: Date;
     expanded?: boolean;
     votesCount?: number;
 }
 
 export function PostCard({
-    id,
+    post_id,
     title,
     author,
     authorAvatarUrl,
-    category,
-    postedAt,
+    topic_id,
+    topic_name,
+    created_at,
     expanded = false,
     votesCount = 0,
 }: PostCardProps) {
+    const postedAt = new Date(created_at).toLocaleDateString();
     return (
-        <Link to={`/community/${id}`} className="block">
+        <Link to={`/community/${post_id}`} className="block">
             <Card
                 className={cn(
                     "bg-transparent hover:bg-card/50 transition-colors",
@@ -49,7 +52,7 @@ export function PostCard({
                         <CardTitle>{title}</CardTitle>
                         <div className="flex gap-2 text-sm leading-tight text-muted-foreground">
                             <span>
-                                {author} on {category}
+                                {author} on {topic_name}
                             </span>
                             <DotIcon className="w-4 h-4" />
                             <span>{postedAt}</span>

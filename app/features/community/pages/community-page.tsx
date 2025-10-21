@@ -96,13 +96,14 @@ export default function CommunityPage() {
                     <div className="space-y-5">
                         {Array.from({ length: 11 }).map((_, index) => (
                             <PostCard
-                                key={`postId-${index}`}
-                                id={`postId-${index}`}
+                                key={`post-${index}`}
+                                post_id={index + 1}
                                 title="What is the best productivity tool?"
                                 author="Azer.C"
                                 authorAvatarUrl="https://github.com/apple.png"
-                                category="Productivity"
-                                postedAt="12 hours ago"
+                                topic_id={1}
+                                topic_name="Productivity"
+                                created_at={new Date()}
                                 expanded
                             />
                         ))}

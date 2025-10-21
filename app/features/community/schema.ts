@@ -1,0 +1,81 @@
+import {
+    type AnyPgColumn,
+    bigint,
+    pgTable,
+    primaryKey,
+    text,
+    timestamp,
+    uuid,
+} from "drizzle-orm/pg-core";
+import { profiles } from "../users/schema";
+
+export const topics = pgTable("topics", {
+    topic_id: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+    name: text().notNull(),
+    slug: text().notNull(),
+    created_at: timestamp().notNull().defaultNow(),
+    updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+export const posts = pgTable("posts", {
+    post_id: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+    title: text().notNull(),
+    content: text().notNull(),
+    created_at: timestamp().notNull().defaultNow(),
+    updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+    topic_id: bigint({ mode: "number" }).references(() => topics.topic_id, {
+        onDelete: "cascade",
+    }),
+    profile_id: uuid().references(() => profiles.profile_id, {
+        onDelete: "cascade",
+    }),
+});
+
+export const postUpvotes = pgTable(
+    "post_upvotes",
+    {
+        post_id: bigint({ mode: "number" }).references(() => posts.post_id, {
+            onDelete: "cascade",
+        }),
+        profile_id: uuid().references(() => profiles.profile_id, {
+            onDelete: "cascade",
+        }),
+    },
+    (table) => [primaryKey({ columns: [table.post_id, table.profile_id] })]
+);
+
+export const postReplies = pgTable("post_replies", {
+    post_reply_id: bigint({ mode: "number" })
+        .primaryKey()
+        .generatedAlwaysAsIdentity(),
+    post_id: bigint({ mode: "number" }).references(() => posts.post_id, {
+        onDelete: "cascade",
+    }),
+    parent_id: bigint({ mode: "number" }).references(
+        (): AnyPgColumn => postReplies.post_reply_id,
+        {
+            onDelete: "cascade",
+        }
+    ),
+    profile_id: uuid()
+        .references(() => profiles.profile_id, {
+            onDelete: "cascade",
+        })
+        .notNull(),
+    reply: text().notNull(),
+    created_at: timestamp().notNull().defaultNow(),
+    updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+// TypeScript 타입 추론
+export type InsertTopic = typeof topics.$inferInsert;
+export type SelectTopic = typeof topics.$inferSelect;
+
+export type InsertPost = typeof posts.$inferInsert;
+export type SelectPost = typeof posts.$inferSelect;
+
+export type InsertPostUpvote = typeof postUpvotes.$inferInsert;
+export type SelectPostUpvote = typeof postUpvotes.$inferSelect;
+
+export type InsertPostReply = typeof postReplies.$inferInsert;
+export type SelectPostReply = typeof postReplies.$inferSelect;

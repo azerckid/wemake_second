@@ -96,7 +96,7 @@ export default function SubmitJobPage() {
                         id="companyName"
                         label="Company Name"
                         description="(40 characters max)"
-                        name="companyName"
+                        name="company_name"
                         maxLength={40}
                         type="text"
                         required
@@ -106,7 +106,7 @@ export default function SubmitJobPage() {
                         id="companyLogoUrl"
                         label="Company Logo URL"
                         description="(40 characters max)"
-                        name="companyLogoUrl"
+                        name="company_logo"
                         type="url"
                         required
                         placeholder="i.e https://wemake.services/logo.png"
@@ -115,7 +115,7 @@ export default function SubmitJobPage() {
                         id="companyLocation"
                         label="Company Location"
                         description="(40 characters max)"
-                        name="companyLocation"
+                        name="company_location"
                         maxLength={40}
                         type="text"
                         required
@@ -125,7 +125,7 @@ export default function SubmitJobPage() {
                         id="applyUrl"
                         label="Apply URL"
                         description="(40 characters max)"
-                        name="applyUrl"
+                        name="apply_url"
                         maxLength={40}
                         type="url"
                         required
@@ -134,7 +134,7 @@ export default function SubmitJobPage() {
                     <SelectPair
                         label="Job Type"
                         description="Select the type of job"
-                        name="jobType"
+                        name="job_type"
                         required
                         placeholder="Select the type of job"
                         options={JOB_TYPES.map((type) => ({
@@ -145,7 +145,7 @@ export default function SubmitJobPage() {
                     <SelectPair
                         label="Job Location"
                         description="Select the location of the job"
-                        name="jobLocation"
+                        name="location"
                         required
                         placeholder="Select the location of the job"
                         options={LOCATION_TYPES.map((location) => ({
@@ -156,7 +156,7 @@ export default function SubmitJobPage() {
                     <SelectPair
                         label="Salary Range"
                         description="Select the salary range of the job"
-                        name="salaryRange"
+                        name="salary_range"
                         required
                         placeholder="Select the salary range of the job"
                         options={SALARY_RANGE.map((salary) => ({

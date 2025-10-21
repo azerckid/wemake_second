@@ -11,26 +11,30 @@ import { DotIcon, EyeIcon, HeartIcon, LockIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 interface IdeaCardProps {
-    id: string;
-    title: string;
-    viewsCount: number;
-    postedAt: string;
+    gpt_idea_id: number;
+    idea: string;
+    views: number;
+    created_at: Date;
     likesCount: number;
-    claimed?: boolean;
+    claimed_at: Date | null;
+    claimed_by: string | null;
 }
 
 export function IdeaCard({
-    id,
-    title,
-    viewsCount,
-    postedAt,
+    gpt_idea_id,
+    idea,
+    views,
+    created_at,
     likesCount,
-    claimed,
+    claimed_at,
+    claimed_by,
 }: IdeaCardProps) {
+    const claimed = claimed_at !== null && claimed_by !== null;
+    const postedAt = new Date(created_at).toLocaleDateString();
     return (
         <Card className="bg-transparent hover:bg-card/50 transition-colors">
             <CardHeader>
-                <Link to={`/ideas/${id}`}>
+                <Link to={`/ideas/${gpt_idea_id}`}>
                     <CardTitle className="text-xl">
                         <span
                             className={cn(
@@ -39,7 +43,7 @@ export function IdeaCard({
                                     : ""
                             )}
                         >
-                            {title}
+                            {idea}
                         </span>
                     </CardTitle>
                 </Link>
@@ -47,7 +51,7 @@ export function IdeaCard({
             <CardContent className="flex items-center text-sm">
                 <div className="flex items-center gap-1">
                     <EyeIcon className="w-4 h-4" />
-                    <span>{viewsCount}</span>
+                    <span>{views}</span>
                 </div>
                 <DotIcon className="w-4 h-4" />
                 <span>{postedAt}</span>
@@ -59,7 +63,7 @@ export function IdeaCard({
                 </Button>
                 {!claimed ? (
                     <Button asChild>
-                        <Link to={`/ideas/${id}/claim`}>Claim idea now &rarr;</Link>
+                        <Link to={`/ideas/${gpt_idea_id}/claim`}>Claim idea now &rarr;</Link>
                     </Button>
                 ) : (
                     <Button variant="outline" disabled className="cursor-not-allowed">

@@ -95,8 +95,8 @@ export default function PostPage() {
                                     <Reply
                                         username="zizimoos"
                                         avatarUrl="https://github.com/zizimoos.png"
-                                        content="I've been using Todoist for a while now, and it's really great. It's simple, easy to use, and has a lot of features."
-                                        timestamp="12 hours ago"
+                                        reply="I've been using Todoist for a while now, and it's really great. It's simple, easy to use, and has a lot of features."
+                                        created_at={new Date()}
                                         topLevel
                                     />
                                 </div>

@@ -32,14 +32,14 @@ export default function SubmitPostPage() {
                 />
                 <SelectPair
                     required
-                    name="category"
-                    label="Category"
-                    description="Select the category that best fits your discussion"
+                    name="topic_id"
+                    label="Topic"
+                    description="Select the topic that best fits your discussion"
                     placeholder="i.e Productivity"
                     options={[
-                        { label: "Productivity", value: "productivity" },
-                        { label: "Programming", value: "programming" },
-                        { label: "Design", value: "design" },
+                        { label: "Productivity", value: "1" },
+                        { label: "Programming", value: "2" },
+                        { label: "Design", value: "3" },
                     ]}
                 />
                 <InputPair

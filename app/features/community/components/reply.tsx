@@ -12,18 +12,19 @@ import { Textarea } from "~/common/components/ui/textarea";
 interface ReplyProps {
     username: string;
     avatarUrl: string;
-    content: string;
-    timestamp: string;
+    reply: string;
+    created_at: Date;
     topLevel: boolean;
 }
 
 export function Reply({
     username,
     avatarUrl,
-    content,
-    timestamp,
+    reply,
+    created_at,
     topLevel,
 }: ReplyProps) {
+    const timestamp = new Date(created_at).toLocaleDateString();
     const [replying, setReplying] = useState(false);
     const toggleReplying = () => setReplying((prev) => !prev);
     return (
@@ -41,7 +42,7 @@ export function Reply({
                         <DotIcon className="size-5" />
                         <span className="text-xs text-muted-foreground">{timestamp}</span>
                     </div>
-                    <p className="text-muted-foreground">{content}</p>
+                    <p className="text-muted-foreground">{reply}</p>
                     <Button variant="ghost" className="self-end" onClick={toggleReplying}>
                         <MessageCircleIcon className="size-4" />
                         Reply
@@ -69,8 +70,8 @@ export function Reply({
                     <Reply
                         username="Azer.C"
                         avatarUrl="https://github.com/azerckid.png"
-                        content="I've been using Todoist for a while now, and it's really great. It's simple, easy to use, and has a lot of features."
-                        timestamp="12 hours ago"
+                        reply="I've been using Todoist for a while now, and it's really great. It's simple, easy to use, and has a lot of features."
+                        created_at={new Date()}
                         topLevel={false}
                     />
                 </div>

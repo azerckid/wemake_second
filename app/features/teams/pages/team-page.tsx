@@ -15,6 +15,21 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export default function TeamPage() {
+    // 실제로는 loader에서 데이터를 가져와야 함
+    const teamData = {
+        team_id: 1,
+        product_name: "Doggie Social",
+        team_size: 3,
+        equity_split: 50,
+        product_stage: "mvp",
+        roles: "React Developer, Backend Developer, Product Manager, UI/UX Designer",
+        product_description: "Doggie Social is a social media platform for dogs. It allows dogs to connect with each other and share their experiences.",
+        created_at: new Date(),
+        updated_at: new Date(),
+    };
+
+    const rolesArray = teamData.roles.split(',').map(role => role.trim());
+
     return (
         <div className="space-y-20">
             <Hero title="Join Azer.C's team" />
@@ -23,22 +38,22 @@ export default function TeamPage() {
                     {[
                         {
                             title: "Product name",
-                            value: "Doggie Social",
+                            value: teamData.product_name,
                         },
                         {
                             title: "Stage",
-                            value: "MVP",
+                            value: teamData.product_stage.toUpperCase(),
                         },
                         {
                             title: "Team size",
-                            value: 3,
+                            value: teamData.team_size,
                         },
                         {
                             title: "Available equity",
-                            value: 50,
+                            value: teamData.equity_split,
                         },
-                    ].map((item) => (
-                        <Card>
+                    ].map((item, index) => (
+                        <Card key={index}>
                             <CardHeader>
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     {item.title}
@@ -56,12 +71,7 @@ export default function TeamPage() {
                             </CardTitle>
                             <CardContent className="p-0 font-bold text-2xl">
                                 <ul className="text-lg list-disc list-inside">
-                                    {[
-                                        "React Developer",
-                                        "Backend Developer",
-                                        "Product Manager",
-                                        "UI/UX Designer",
-                                    ].map((item) => (
+                                    {rolesArray.map((item) => (
                                         <li key={item}>{item}</li>
                                     ))}
                                 </ul>
@@ -75,8 +85,7 @@ export default function TeamPage() {
                             </CardTitle>
                             <CardContent className="p-0 font-medium text-xl">
                                 <p>
-                                    Doggie Social is a social media platform for dogs. It allows
-                                    dogs to connect with each other and share their experiences.
+                                    {teamData.product_description}
                                 </p>
                             </CardContent>
                         </CardHeader>

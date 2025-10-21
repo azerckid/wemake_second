@@ -6,6 +6,7 @@ import { Hero } from "~/common/components/hero";
 import { Button } from "~/common/components/ui/button";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
+import { PRODUCT_STAGES } from "../constants";
 
 export const meta: Route.MetaFunction = () => [
     { title: "Create Team | wemake" },
@@ -21,43 +22,38 @@ export default function SubmitTeamPage() {
                         label="What is the name of your product?"
                         description="(20 characters max)"
                         placeholder="i.e Doggy Social"
-                        name="name"
+                        name="product_name"
                         maxLength={20}
                         type="text"
-                        id="name"
+                        id="product_name"
                         required
                     />
                     <SelectPair
                         label="What is the stage of your product?"
                         description="Select the stage of your product"
-                        name="stage"
+                        name="product_stage"
                         required
                         placeholder="Select the stage of your product"
-                        options={[
-                            { label: "Idea", value: "idea" },
-                            { label: "Prototype", value: "prototype" },
-                            { label: "MVP", value: "mvp" },
-                            { label: "Product", value: "product" },
-                        ]}
+                        options={PRODUCT_STAGES}
                     />
                     <InputPair
                         label="What is the size of your team?"
                         description="(1-100)"
-                        name="size"
+                        name="team_size"
                         max={100}
                         min={1}
                         type="number"
-                        id="size"
+                        id="team_size"
                         required
                     />
                     <InputPair
                         label="How much equity are you willing to give?"
                         description="(each)"
-                        name="equity"
+                        name="equity_split"
                         max={100}
                         min={1}
                         type="number"
-                        id="equity"
+                        id="equity_split"
                         required
                     />
                     <InputPair
@@ -73,10 +69,10 @@ export default function SubmitTeamPage() {
                         label="What is the description of your product?"
                         description="(200 characters max)"
                         placeholder="i.e We are building a new social media platform for dogs to connect with each other"
-                        name="description"
+                        name="product_description"
                         maxLength={200}
                         type="text"
-                        id="description"
+                        id="product_description"
                         required
                         textArea
                     />

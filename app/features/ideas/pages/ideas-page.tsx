@@ -16,13 +16,14 @@ export default function IdeasPage() {
             <div className="grid grid-cols-4 gap-4">
                 {Array.from({ length: 10 }).map((_, index) => (
                     <IdeaCard
-                        key={`ideaId-${index}`}
-                        id={`ideaId-${index}`}
-                        title="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-                        viewsCount={123}
-                        postedAt="12 hours ago"
+                        key={`gpt-idea-${index}`}
+                        gpt_idea_id={index + 1}
+                        idea="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
+                        views={123}
+                        created_at={new Date()}
                         likesCount={12}
-                        claimed={index % 2 === 0}
+                        claimed_at={index % 2 === 0 ? new Date() : null}
+                        claimed_by={index % 2 === 0 ? "user-123" : null}
                     />
                 ))}
             </div>

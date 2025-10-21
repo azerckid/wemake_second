@@ -14,22 +14,34 @@ import {
 import { Button } from "~/common/components/ui/button";
 
 interface TeamCardProps {
-    id: string;
+    team_id: number;
+    product_name: string;
+    team_size: number;
+    equity_split: number;
+    product_stage: string;
+    roles: string;
+    product_description: string;
+    created_at: Date;
     leaderUsername: string;
     leaderAvatarUrl: string;
-    positions: string[];
-    projectDescription: string;
 }
 
 export function TeamCard({
-    id,
+    team_id,
+    product_name,
+    team_size,
+    equity_split,
+    product_stage,
+    roles,
+    product_description,
+    created_at,
     leaderUsername,
     leaderAvatarUrl,
-    positions,
-    projectDescription,
 }: TeamCardProps) {
+    const rolesArray = roles.split(',').map(role => role.trim());
+
     return (
-        <Link to={`/teams/${id}`}>
+        <Link to={`/teams/${team_id}`}>
             <Card className="bg-transparent hover:bg-card/50 transition-colors">
                 <CardHeader className="flex flex-row items-center">
                     <CardTitle className="text-base leading-loose">
@@ -44,13 +56,13 @@ export function TeamCard({
                             </Avatar>
                         </Badge>
                         <span> is looking for </span>
-                        {positions.map((position, index) => (
+                        {rolesArray.map((position, index) => (
                             <Badge key={index} className="text-sm">
                                 {position}
                             </Badge>
                         ))}
                         <span> to build </span>
-                        <span>{projectDescription}</span>
+                        <span>{product_description}</span>
                     </CardTitle>
                 </CardHeader>
                 <CardFooter className="justify-end">

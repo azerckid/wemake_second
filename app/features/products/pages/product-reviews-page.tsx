@@ -17,10 +17,10 @@ export function meta() {
 export async function action({ request }: Route.ActionArgs) {
     const formData = await request.formData();
     const rating = formData.get("rating");
-    const content = formData.get("content");
+    const review = formData.get("review");
 
     // 여기서 데이터베이스에 저장
-    console.log("Review submitted:", { rating, content });
+    console.log("Review submitted:", { rating, review });
 
     return { success: true };
 }

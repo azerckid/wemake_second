@@ -66,6 +66,7 @@ export default function CreateReviewDialog() {
                     required
                     label="Review"
                     description="Maximum 1000 characters"
+                    name="review"
                     placeholder="Tell us more about your experience with this product"
                 />
                 <DialogFooter>

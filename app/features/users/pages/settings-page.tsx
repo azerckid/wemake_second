@@ -35,6 +35,14 @@ export default function SettingsPage() {
                             name="name"
                             placeholder="John Doe"
                         />
+                        <InputPair
+                            label="Username"
+                            description="Your unique username"
+                            required
+                            id="username"
+                            name="username"
+                            placeholder="johndoe"
+                        />
                         <SelectPair
                             label="Role"
                             description="What role do you do identify the most with"
@@ -43,9 +51,9 @@ export default function SettingsPage() {
                             options={[
                                 { label: "Developer", value: "developer" },
                                 { label: "Designer", value: "designer" },
+                                { label: "Marketer", value: "marketer" },
                                 { label: "Product Manager", value: "product-manager" },
                                 { label: "Founder", value: "founder" },
-                                { label: "Other", value: "other" },
                             ]}
                         />
                         <InputPair
@@ -87,7 +95,7 @@ export default function SettingsPage() {
                             className="w-1/2"
                             onChange={onChange}
                             required
-                            name="icon"
+                            name="avatar"
                         />
                         <div className="flex flex-col text-xs">
                             <span className=" text-muted-foreground">

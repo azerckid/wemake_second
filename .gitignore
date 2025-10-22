@@ -102,7 +102,15 @@ Thumbs.db
 # React Router specific
 /build
 /.react-router
+.react-router/
 
+# Vite cache
+.vite/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
 # Cursor rules
 .cursor/

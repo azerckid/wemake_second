@@ -43,6 +43,13 @@
       "when": 1761059445849,
       "tag": "0005_even_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761110835219,
+      "tag": "0006_yellow_warbird",
+      "breakpoints": true
     }
   ]
 }

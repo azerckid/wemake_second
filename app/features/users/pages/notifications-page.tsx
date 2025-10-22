@@ -16,7 +16,7 @@ export default function NotificationsPage() {
                     avatarFallback="B"
                     userName="Bluesky"
                     message=" liked your post."
-                    timestamp="1 day ago"
+                    created_at="1 day ago"
                     seen={false}
                 />
             </div>

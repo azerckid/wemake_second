@@ -38,7 +38,7 @@ export function TeamCard({
     leaderUsername,
     leaderAvatarUrl,
 }: TeamCardProps) {
-    const rolesArray = roles.split(',').map(role => role.trim());
+    const rolesArray = roles ? roles.split(',').map(role => role.trim()) : [];
 
     return (
         <Link to={`/teams/${team_id}`}>

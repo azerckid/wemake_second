@@ -5,20 +5,24 @@ import {
     CardHeader,
     CardTitle,
 } from "~/common/components/ui/card";
-import { Avatar, AvatarImage } from "~/common/components/ui/avatar";
-import { AvatarFallback } from "@radix-ui/react-avatar";
+import {
+    Avatar,
+    AvatarImage,
+    AvatarFallback,
+} from "~/common/components/ui/avatar";
 import { Button } from "~/common/components/ui/button";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { DateTime } from "luxon";
 
 interface PostCardProps {
     post_id: number;
     title: string;
     author: string;
-    authorAvatarUrl: string;
+    authorAvatarUrl: string | null;
     topic_id: number;
     topic_name: string;
-    created_at: Date;
+    created_at: string | Date;
     expanded?: boolean;
     votesCount?: number;
 }
@@ -34,7 +38,9 @@ export function PostCard({
     expanded = false,
     votesCount = 0,
 }: PostCardProps) {
-    const postedAt = new Date(created_at).toLocaleDateString();
+    const postedAt = typeof created_at === 'string'
+        ? DateTime.fromISO(created_at).toLocaleString(DateTime.DATE_MED)
+        : DateTime.fromJSDate(created_at).toLocaleString(DateTime.DATE_MED);
     return (
         <Link to={`/community/${post_id}`} className="block">
             <Card

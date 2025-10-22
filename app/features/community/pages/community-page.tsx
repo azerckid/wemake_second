@@ -15,11 +15,19 @@ import { Hero } from "~/common/components/hero";
 import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
 
+import { getPosts, getTopics } from "../queries";
+
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Community | wemake" }];
 };
 
-export default function CommunityPage() {
+export async function loader({ request }: Route.LoaderArgs) {
+    const topics = await getTopics();
+    const posts = await getPosts();
+    return { topics, posts };
+}
+
+export default function CommunityPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const sorting = searchParams.get("sorting") || "newest";
     const period = searchParams.get("period") || "all";
@@ -94,17 +102,18 @@ export default function CommunityPage() {
                         </Button>
                     </div>
                     <div className="space-y-5">
-                        {Array.from({ length: 11 }).map((_, index) => (
+                        {loaderData.posts.map((post: any) => (
                             <PostCard
-                                key={`post-${index}`}
-                                post_id={index + 1}
-                                title="What is the best productivity tool?"
-                                author="Azer.C"
-                                authorAvatarUrl="https://github.com/apple.png"
-                                topic_id={1}
-                                topic_name="Productivity"
-                                created_at={new Date()}
+                                key={post.post_id}
+                                post_id={post.post_id}
+                                title={post.title}
+                                author={post.author.name}
+                                authorAvatarUrl={post.author.avatar}
+                                topic_id={post.topic_id}
+                                topic_name={post.topic.name}
+                                created_at={post.created_at}
                                 expanded
+                                votesCount={post.upvotes?.length || 0}
                             />
                         ))}
                     </div>
@@ -114,15 +123,14 @@ export default function CommunityPage() {
                         Topics
                     </div>
                     <div className="flex flex-col items-start">
-                        {[
-                            "AI Tools",
-                            "Design Tools",
-                            "Dev Tools",
-                            "Note Taking Apps",
-                            "Productivity Tools",
-                        ].map((category) => (
-                            <Button asChild variant={"link"} key={category} className="pl-0">
-                                <Link to={`/community?topic=${category}`}>{category}</Link>
+                        {loaderData.topics.map((topic: any) => (
+                            <Button
+                                asChild
+                                variant={"link"}
+                                key={topic.topic_id}
+                                className="pl-0"
+                            >
+                                <Link to={`/community?topic=${topic.topic_id}`}>{topic.name}</Link>
                             </Button>
                         ))}
                     </div>

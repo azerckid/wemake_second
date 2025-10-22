@@ -18,7 +18,7 @@ interface NotificationCardProps {
     avatarFallback: string;
     userName: string;
     message: string;
-    timestamp: string;
+    created_at: string;
     seen: boolean;
 }
 
@@ -27,7 +27,7 @@ export function NotificationCard({
     avatarFallback,
     userName,
     message,
-    timestamp,
+    created_at,
     seen,
 }: NotificationCardProps) {
     return (
@@ -42,7 +42,7 @@ export function NotificationCard({
                         <span>{userName}</span>
                         <span>{message}</span>
                     </CardTitle>
-                    <small className="text-muted-foreground text-sm">{timestamp}</small>
+                    <small className="text-muted-foreground text-sm">{created_at}</small>
                 </div>
             </CardHeader>
             <CardFooter className="flex justify-end">

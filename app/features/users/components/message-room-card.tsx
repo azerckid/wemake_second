@@ -10,14 +10,14 @@ import {
 } from "~/common/components/ui/sidebar";
 
 interface MessageRoomCardProps {
-    id: string;
+    message_room_id: number;
     avatarUrl?: string;
     name: string;
     lastMessage: string;
 }
 
 export function MessageRoomCard({
-    id,
+    message_room_id,
     avatarUrl,
     name,
     lastMessage,
@@ -28,9 +28,9 @@ export function MessageRoomCard({
             <SidebarMenuButton
                 className="h-18"
                 asChild
-                isActive={location.pathname === `/my/messages/${id}`}
+                isActive={location.pathname === `/my/messages/${message_room_id}`}
             >
-                <Link to={`/my/messages/${id}`}>
+                <Link to={`/my/messages/${message_room_id}`}>
                     <div className="flex items-center gap-2">
                         <Avatar>
                             <AvatarImage src={avatarUrl} />

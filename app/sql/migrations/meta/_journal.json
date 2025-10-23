@@ -57,6 +57,13 @@
       "when": 1761196961514,
       "tag": "0007_safe_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761228473385,
+      "tag": "0008_low_northstar",
+      "breakpoints": true
     }
   ]
 }

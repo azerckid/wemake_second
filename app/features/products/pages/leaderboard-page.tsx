@@ -1,14 +1,12 @@
-import { Hero } from "~/common/components/hero";
-import type { Route } from "./+types/leaderboard-page";
-import { Button } from "~/common/components/ui/button";
 import { Link } from "react-router";
-import { ProductCard } from "../components/product-card";
 
-export function loader({ request }: Route.LoaderArgs) {
-    return {
-        topProducts: []
-    };
-}
+import type { Route } from "./+types/leaderboard-page";
+
+import { Hero } from "~/common/components/hero";
+import { Button } from "~/common/components/ui/button";
+import { ProductCard } from "../components/product-card";
+import { getProductsByDateRange } from "../queries";
+import { DateTime } from "luxon";
 
 export function meta({ data }: Route.MetaArgs) {
     return [
@@ -17,7 +15,36 @@ export function meta({ data }: Route.MetaArgs) {
     ];
 }
 
+export const loader = async () => {
+    const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] =
+        await Promise.all([
+            getProductsByDateRange({
+                startDate: DateTime.now().startOf("day"),
+                endDate: DateTime.now().endOf("day"),
+                limit: 7,
+            }),
+            getProductsByDateRange({
+                startDate: DateTime.now().startOf("week"),
+                endDate: DateTime.now().endOf("week"),
+                limit: 7,
+            }),
+            getProductsByDateRange({
+                startDate: DateTime.now().startOf("month"),
+                endDate: DateTime.now().endOf("month"),
+                limit: 7,
+            }),
+            getProductsByDateRange({
+                startDate: DateTime.now().startOf("year"),
+                endDate: DateTime.now().endOf("year"),
+                limit: 7,
+            }),
+        ]);
+    return { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts };
+};
+
 export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
+    const { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts } = loaderData;
+
     return (
         <div className="space-y-20">
             <Hero
@@ -33,15 +60,15 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         The most popular products on wemake by day.
                     </p>
                 </div>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {dailyProducts.map((product) => (
                     <ProductCard
-                        key={`productId-${index}`}
-                        id={`productId-${index}`}
-                        name="Product Name"
-                        description="Product Description"
-                        commentsCount={12}
-                        viewsCount={12}
-                        votesCount={120}
+                        key={product.product_id}
+                        id={product.product_id.toString()}
+                        name={product.name}
+                        description={product.description}
+                        commentsCount={product.reviews ?? 0}
+                        viewsCount={product.views ?? 0}
+                        votesCount={product.upvotes ?? 0}
                     />
                 ))}
                 <Button variant="link" asChild className="text-lg self-center">
@@ -59,15 +86,15 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         The most popular products on wemake by week.
                     </p>
                 </div>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {weeklyProducts.map((product) => (
                     <ProductCard
-                        key={`productId-${index}`}
-                        id={`productId-${index}`}
-                        name="Product Name"
-                        description="Product Description"
-                        commentsCount={12}
-                        viewsCount={12}
-                        votesCount={120}
+                        key={product.product_id}
+                        id={product.product_id.toString()}
+                        name={product.name}
+                        description={product.description}
+                        commentsCount={product.reviews ?? 0}
+                        viewsCount={product.views ?? 0}
+                        votesCount={product.upvotes ?? 0}
                     />
                 ))}
                 <Button variant="link" asChild className="text-lg self-center">
@@ -85,15 +112,15 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         The most popular products on wemake by month.
                     </p>
                 </div>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {monthlyProducts.map((product) => (
                     <ProductCard
-                        key={`productId-${index}`}
-                        id={`productId-${index}`}
-                        name="Product Name"
-                        description="Product Description"
-                        commentsCount={12}
-                        viewsCount={12}
-                        votesCount={120}
+                        key={product.product_id}
+                        id={product.product_id.toString()}
+                        name={product.name}
+                        description={product.description}
+                        commentsCount={product.reviews ?? 0}
+                        viewsCount={product.views ?? 0}
+                        votesCount={product.upvotes ?? 0}
                     />
                 ))}
                 <Button variant="link" asChild className="text-lg self-center">
@@ -111,15 +138,15 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         The most popular products on wemake by year.
                     </p>
                 </div>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {yearlyProducts.map((product) => (
                     <ProductCard
-                        key={`productId-${index}`}
-                        id={`productId-${index}`}
-                        name="Product Name"
-                        description="Product Description"
-                        commentsCount={12}
-                        viewsCount={12}
-                        votesCount={120}
+                        key={product.product_id}
+                        id={product.product_id.toString()}
+                        name={product.name}
+                        description={product.description}
+                        commentsCount={product.reviews ?? 0}
+                        viewsCount={product.views ?? 0}
+                        votesCount={product.upvotes ?? 0}
                     />
                 ))}
                 <Button variant="link" asChild className="text-lg self-center">

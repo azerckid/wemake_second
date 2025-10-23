@@ -1,17 +1,25 @@
 import { Link } from "react-router";
-import { Button } from "../components/ui/button";
+
 import type { Route } from "./+types/home-page";
+
 import { ProductCard } from "~/features/products/components/product-card";
 import { PostCard } from "~/features/community/components/post-card";
 import { IdeaCard } from "~/features/ideas/components/idea-card";
 import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
+import { Button } from "../components/ui/button";
+import { getProductsByDateRange } from "~/features/products/queries";
+import { DateTime } from "luxon";
 
-export function loader({ request }: Route.LoaderArgs) {
-    return {
-        hello: "world",
-    };
-}
+export const loader = async () => {
+    const products = await getProductsByDateRange({
+        startDate: DateTime.now().startOf("day"),
+        endDate: DateTime.now().endOf("day"),
+        limit: 7,
+    });
+    return { products };
+};
+
 
 export function meta({ }: Route.MetaArgs) {
     return [
@@ -21,6 +29,7 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
+    const { products } = loaderData;
     return (
         <div className="space-y-40">
             <div className="grid grid-cols-3 gap-4">
@@ -37,15 +46,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         </Link>
                     </Button>
                 </div>
-                {Array.from({ length: 10 }).map((_, index) => (
+                {products.map((product) => (
                     <ProductCard
-                        key={`productId-${index}`}
-                        id={`productId-${index}`}
-                        name="Product Name"
-                        description="Product Description"
-                        commentsCount={12}
-                        viewsCount={12}
-                        votesCount={120}
+                        key={product.product_id.toString()}
+                        id={product.product_id.toString()}
+                        name={product.name}
+                        description={product.description}
+                        commentsCount={product.reviews ?? 0}
+                        viewsCount={product.views ?? 0}
+                        votesCount={product.upvotes ?? 0}
                     />
                 ))}
             </div>
@@ -66,12 +75,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 {Array.from({ length: 11 }).map((_, index) => (
                     <PostCard
                         key={`postId-${index}`}
-                        id={`postId-${index}`}
+                        post_id={index}
                         title="What is the best productivity tool?"
                         author="Azer.C"
                         authorAvatarUrl="https://github.com/apple.png"
-                        category="Productivity"
-                        postedAt="12 hours ago"
+                        topic_id={1}
+                        topic_name="Productivity"
+                        created_at={new Date()}
+                        votesCount={Math.floor(Math.random() * 50)}
                     />
                 ))}
             </div>
@@ -92,12 +103,13 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 {Array.from({ length: 5 }).map((_, index) => (
                     <IdeaCard
                         key={`ideaId-${index}`}
-                        id={`ideaId-${index}`}
-                        title="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-                        viewsCount={123}
-                        postedAt="12 hours ago"
+                        gpt_idea_id={index + 1}
+                        idea="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
+                        views={123}
+                        created_at={new Date()}
                         likesCount={12}
-                        claimed={index % 2 === 0}
+                        claimed_at={index % 2 === 0 ? new Date() : null}
+                        claimed_by={index % 2 === 0 ? "user123" : null}
                     />
                 ))}
             </div>
@@ -143,15 +155,16 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 {Array.from({ length: 7 }).map((_, index) => (
                     <TeamCard
                         key={`teamId-${index}`}
-                        id={`teamId-${index}`}
+                        team_id={index + 1}
+                        product_name={`Product ${index + 1}`}
+                        team_size={3 + index}
+                        equity_split={20 + index * 5}
+                        product_stage="mvp"
+                        roles="React Developer, Backend Developer, Product Manager"
+                        product_description="a new social media platform"
+                        created_at={new Date()}
                         leaderUsername="Azer.C"
                         leaderAvatarUrl="https://github.com/azerckid.png"
-                        positions={[
-                            "React Developer",
-                            "Backend Developer",
-                            "Product Manager",
-                        ]}
-                        projectDescription="a new social media platform"
                     />
                 ))}
             </div>

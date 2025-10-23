@@ -1,4 +1,6 @@
-import { Form, Link, useSearchParams } from "react-router";
+import { Await, Form, isRouteErrorResponse, Link, useSearchParams } from "react-router";
+import { Suspense } from "react";
+import { Loader2Icon } from "lucide-react";
 
 import type { Route } from "./+types/community-page";
 
@@ -21,9 +23,9 @@ export const meta: Route.MetaFunction = () => {
     return [{ title: "Community | wemake" }];
 };
 
-export async function loader({ request }: Route.LoaderArgs) {
-    const topics = await getTopics();
-    const posts = await getPosts();
+export function loader({ request }: Route.LoaderArgs) {
+    const topics = getTopics();
+    const posts = getPosts();
     return { topics, posts };
 }
 
@@ -31,6 +33,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const sorting = searchParams.get("sorting") || "newest";
     const period = searchParams.get("period") || "all";
+    const { topics, posts } = loaderData;
     return (
         <div className="space-y-20">
             <Hero
@@ -101,41 +104,71 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                             <Link to={`/community/submit`}>Create Discussion</Link>
                         </Button>
                     </div>
-                    <div className="space-y-5">
-                        {loaderData.posts.map((post: any) => (
-                            <PostCard
-                                key={post.post_id}
-                                post_id={post.post_id}
-                                title={post.title}
-                                author={post.author}
-                                authorAvatarUrl={post.author_avatar}
-                                topic_id={0} // 뷰에는 topic_id가 없으므로 기본값 사용
-                                topic_name={post.topic}
-                                created_at={post.created_at}
-                                expanded
-                                votesCount={post.upvotes}
-                            />
-                        ))}
-                    </div>
+                    <Suspense fallback={
+                        <div>Loading posts...</div>
+                    }>
+                        <Await resolve={posts}>
+                            {(data) => (
+                                <div className="space-y-5">
+                                    {data.map((post: any) => (
+                                        <PostCard
+                                            key={post.post_id}
+                                            post_id={post.post_id}
+                                            title={post.title}
+                                            author={post.author}
+                                            authorAvatarUrl={post.author_avatar}
+                                            topic_id={0} // 뷰에는 topic_id가 없으므로 기본값 사용
+                                            topic_name={post.topic}
+                                            created_at={post.created_at}
+                                            expanded
+                                            votesCount={post.upvotes}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </Await>
+                    </Suspense>
                 </div>
                 <aside className="col-span-2 space-y-5 sticky top-20">
                     <div className="mb-5 text-sm font-bold text-muted-foreground uppercase">
                         Topics
                     </div>
                     <div className="flex flex-col items-start">
-                        {loaderData.topics.map((topic: any) => (
-                            <Button
-                                asChild
-                                variant={"link"}
-                                key={topic.topic_id}
-                                className="pl-0"
-                            >
-                                <Link to={`/community?topic=${topic.topic_id}`}>{topic.name}</Link>
-                            </Button>
-                        ))}
+                        <Suspense fallback={<div>Loading topics...</div>}>
+                            <Await resolve={topics}>
+                                {(data) => (
+                                    <div className="flex flex-col items-start">
+                                        {data.map((topic: any) => (
+                                            <Button
+                                                asChild
+                                                variant={"link"}
+                                                key={topic.topic_id}
+                                                className="pl-0"
+                                            >
+                                                <Link to={`/community?topic=${topic.topic_id}`}>{topic.name}</Link>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
+                            </Await>
+                        </Suspense>
                     </div>
                 </aside>
             </div>
-        </div>
+        </div >
     );
 }
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+    if (isRouteErrorResponse(error)) {
+        return (
+            <div>
+                {error.data?.message} / {error.data?.error_code}
+            </div>
+        );
+    }
+    if (error instanceof Error) {
+        return <div>{error.message}</div>;
+    }
+    return <div>Unknown error</div>;
+};

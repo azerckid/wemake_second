@@ -205,7 +205,7 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                             {menus.map((menu) =>
                                 menu.items && menu.items.length > 0 ? (
                                     <NavigationMenuItem key={menu.to}>
-                                        <Link to={menu.to}>
+                                        <Link to={menu.to} prefetch="intent">
                                             <NavigationMenuTrigger>{menu.name}</NavigationMenuTrigger>
                                         </Link>
                                         <NavigationMenuContent>

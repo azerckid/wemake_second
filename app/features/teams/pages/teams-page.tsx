@@ -5,6 +5,12 @@ import { Hero } from "~/common/components/hero";
 
 export const meta: Route.MetaFunction = () => [{ title: "Teams | wemake" }];
 
+export function loader({ request }: Route.LoaderArgs) {
+    return {
+        teams: [],
+    };
+}
+
 export default function TeamsPage() {
     return (
         <div className="space-y-20">

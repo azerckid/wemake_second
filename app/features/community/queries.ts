@@ -45,6 +45,7 @@
 import client from "~/supa-client";
 
 export const getTopics = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const { data, error } = await client.from("topics").select("*");
   if (error) throw new Error(error.message);
   return data;
@@ -71,6 +72,7 @@ export const getTopics = async () => {
 // };
 
 export const getPosts = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const { data, error } = await client
     .from("community_post_list_view")
     .select("*");

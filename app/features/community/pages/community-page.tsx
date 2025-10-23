@@ -107,13 +107,13 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                                 key={post.post_id}
                                 post_id={post.post_id}
                                 title={post.title}
-                                author={post.author.name}
-                                authorAvatarUrl={post.author.avatar}
-                                topic_id={post.topic_id}
-                                topic_name={post.topic.name}
+                                author={post.author}
+                                authorAvatarUrl={post.author_avatar}
+                                topic_id={0} // 뷰에는 topic_id가 없으므로 기본값 사용
+                                topic_name={post.topic}
                                 created_at={post.created_at}
                                 expanded
-                                votesCount={post.upvotes?.length || 0}
+                                votesCount={post.upvotes}
                             />
                         ))}
                     </div>

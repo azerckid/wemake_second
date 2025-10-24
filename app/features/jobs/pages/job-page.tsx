@@ -1,4 +1,5 @@
 import type { Route } from "./+types/job-page";
+import { Link } from "react-router";
 
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
@@ -114,8 +115,13 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
                     </div>
                     <Button className="w-full" asChild>
                         <a href={job.apply_url} target="_blank" rel="noopener noreferrer">
-                            Apply Now
+                            Company Website
                         </a>
+                    </Button>
+                    <Button className="w-full" asChild>
+                        <Link to="/jobs/submit">
+                            Apply Now
+                        </Link>
                     </Button>
                 </div>
             </div>

@@ -45,6 +45,7 @@ export function JobCard({
                                         src={companyLogoUrl}
                                         alt={`${company} Logo`}
                                         className="w-full h-full object-contain p-1"
+                                        loading="lazy"
                                         onLoad={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = 'block';

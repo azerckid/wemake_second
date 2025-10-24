@@ -5,7 +5,7 @@ import type { Route } from "./+types/jobs-page";
 import { Hero } from "~/common/components/hero";
 import { JobCard } from "../components/job-card";
 import { Button } from "~/common/components/ui/button";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "~/common/components/ui/pagination";
+import { JobsPagination } from "~/common/components/jobs-pagination";
 import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGE } from "../contants";
 import { cn } from "~/lib/utils";
 import { getJobs, getJobsCount } from "../queries";
@@ -173,70 +173,11 @@ export default function JobsPage({ loaderData }: Route.ComponentProps) {
             </div>
 
             {/* Pagination */}
-            {loaderData.totalPages > 1 && (
-                <div className="flex justify-center mt-8">
-                    <Pagination>
-                        <PaginationContent>
-                            {loaderData.currentPage > 1 && (
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        onClick={() => onPageChange(loaderData.currentPage - 1)}
-                                        className="cursor-pointer"
-                                    />
-                                </PaginationItem>
-                            )}
-
-                            {Array.from({ length: loaderData.totalPages }, (_, i) => i + 1).map((page) => {
-                                // Show first page, last page, current page, and pages around current page
-                                const shouldShow =
-                                    page === 1 ||
-                                    page === loaderData.totalPages ||
-                                    Math.abs(page - loaderData.currentPage) <= 1;
-
-                                if (!shouldShow) {
-                                    // Show ellipsis for gaps
-                                    if (page === 2 && loaderData.currentPage > 4) {
-                                        return (
-                                            <PaginationItem key={`ellipsis-${page}`}>
-                                                <span className="px-3 py-2">...</span>
-                                            </PaginationItem>
-                                        );
-                                    }
-                                    if (page === loaderData.totalPages - 1 && loaderData.currentPage < loaderData.totalPages - 3) {
-                                        return (
-                                            <PaginationItem key={`ellipsis-${page}`}>
-                                                <span className="px-3 py-2">...</span>
-                                            </PaginationItem>
-                                        );
-                                    }
-                                    return null;
-                                }
-
-                                return (
-                                    <PaginationItem key={page}>
-                                        <PaginationLink
-                                            onClick={() => onPageChange(page)}
-                                            isActive={page === loaderData.currentPage}
-                                            className="cursor-pointer"
-                                        >
-                                            {page}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                );
-                            })}
-
-                            {loaderData.currentPage < loaderData.totalPages && (
-                                <PaginationItem>
-                                    <PaginationNext
-                                        onClick={() => onPageChange(loaderData.currentPage + 1)}
-                                        className="cursor-pointer"
-                                    />
-                                </PaginationItem>
-                            )}
-                        </PaginationContent>
-                    </Pagination>
-                </div>
-            )}
+            <JobsPagination
+                currentPage={loaderData.currentPage}
+                totalPages={loaderData.totalPages}
+                onPageChange={onPageChange}
+            />
         </div>
     );
 }

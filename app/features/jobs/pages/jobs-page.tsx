@@ -6,7 +6,7 @@ import { Hero } from "~/common/components/hero";
 import { JobCard } from "../components/job-card";
 import { Button } from "~/common/components/ui/button";
 import { Pagination } from "~/common/components/pagination";
-import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGE } from "../contants";
+import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGE, type JobLocation, type JobType, type SalaryRange } from "../contants";
 import { cn } from "~/lib/utils";
 import { getJobs, getJobsCount } from "../queries";
 import { z } from "zod";
@@ -50,14 +50,14 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
         getJobs({
             limit,
             page,
-            location: parsedData.location as "remote" | "in-person" | "hybrid" | undefined,
-            type: parsedData.type as "full-time" | "part-time" | "freelance" | "internship" | undefined,
-            salary: parsedData.salary as "$0 - $50,000" | "$50,000 - $70,000" | "$70,000 - $100,000" | "$100,000 - $120,000" | "$120,000 - $150,000" | "$150,000 - $250,000" | "$250,000+" | undefined,
+            location: parsedData.location as JobLocation | undefined,
+            type: parsedData.type as JobType | undefined,
+            salary: parsedData.salary as SalaryRange | undefined,
         }),
         getJobsCount({
-            location: parsedData.location as "remote" | "in-person" | "hybrid" | undefined,
-            type: parsedData.type as "full-time" | "part-time" | "freelance" | "internship" | undefined,
-            salary: parsedData.salary as "$0 - $50,000" | "$50,000 - $70,000" | "$70,000 - $100,000" | "$100,000 - $120,000" | "$120,000 - $150,000" | "$150,000 - $250,000" | "$250,000+" | undefined,
+            location: parsedData.location as JobLocation | undefined,
+            type: parsedData.type as JobType | undefined,
+            salary: parsedData.salary as SalaryRange | undefined,
         })
     ]);
 
@@ -69,7 +69,13 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 export default function JobsPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const onFilterClick = (key: string, value: string) => {
-        searchParams.set(key, value);
+        if (value === "") {
+            // 빈 값이면 파라미터를 삭제
+            searchParams.delete(key);
+        } else {
+            // 값이 있으면 설정
+            searchParams.set(key, value);
+        }
         searchParams.delete("page"); // Reset to page 1 when filtering
         setSearchParams(searchParams);
     };
@@ -128,6 +134,25 @@ export default function JobsPage({ loaderData }: Route.ComponentProps) {
                                 </Button>
                             ))}
                         </div>
+                        {/* Selected Type with Clear Button */}
+                        {searchParams.get("type") && (
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-sm text-muted-foreground">Selected:</span>
+                                <div className="flex items-center gap-1 bg-accent px-2 py-1 rounded-md">
+                                    <span className="text-sm">
+                                        {JOB_TYPES.find(t => t.value === searchParams.get("type"))?.label}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onFilterClick("type", "")}
+                                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                    >
+                                        ×
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-col items-start gap-2.5">
                         <h4 className="text-sm text-muted-foreground font-bold">
@@ -149,6 +174,25 @@ export default function JobsPage({ loaderData }: Route.ComponentProps) {
                                 </Button>
                             ))}
                         </div>
+                        {/* Selected Location with Clear Button */}
+                        {searchParams.get("location") && (
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-sm text-muted-foreground">Selected:</span>
+                                <div className="flex items-center gap-1 bg-accent px-2 py-1 rounded-md">
+                                    <span className="text-sm">
+                                        {LOCATION_TYPES.find(t => t.value === searchParams.get("location"))?.label}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onFilterClick("location", "")}
+                                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                    >
+                                        ×
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-col items-start gap-2.5">
                         <h4 className="text-sm text-muted-foreground font-bold">
@@ -168,6 +212,25 @@ export default function JobsPage({ loaderData }: Route.ComponentProps) {
                                 </Button>
                             ))}
                         </div>
+                        {/* Selected Salary with Clear Button */}
+                        {searchParams.get("salary") && (
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-sm text-muted-foreground">Selected:</span>
+                                <div className="flex items-center gap-1 bg-accent px-2 py-1 rounded-md">
+                                    <span className="text-sm">
+                                        {searchParams.get("salary")}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onFilterClick("salary", "")}
+                                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                    >
+                                        ×
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

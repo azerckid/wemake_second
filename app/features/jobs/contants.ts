@@ -41,3 +41,8 @@ export const SALARY_RANGE = [
     "$150,000 - $250,000",
     "$250,000+",
 ] as const;
+
+// 타입 정의
+export type JobType = typeof JOB_TYPES[number]['value'];
+export type JobLocation = typeof LOCATION_TYPES[number]['value'];
+export type SalaryRange = typeof SALARY_RANGE[number];

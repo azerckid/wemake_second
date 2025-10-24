@@ -1,4 +1,5 @@
 import client from "~/supa-client";
+import { type JobType, type JobLocation, type SalaryRange } from "./contants";
 
 export const getJobs = async ({
     limit,
@@ -10,9 +11,9 @@ export const getJobs = async ({
 }: {
     limit: number;
     page?: number;
-    location?: "remote" | "in-person" | "hybrid";
-    type?: "full-time" | "part-time" | "freelance" | "internship";
-    salary?: "$0 - $50,000" | "$50,000 - $70,000" | "$70,000 - $100,000" | "$100,000 - $120,000" | "$120,000 - $150,000" | "$150,000 - $250,000" | "$250,000+";
+    location?: JobLocation;
+    type?: JobType;
+    salary?: SalaryRange;
     sorting?: "newest" | "oldest";
 }) => {
     const baseQuery = client
@@ -56,9 +57,9 @@ export const getJobsCount = async ({
     type,
     salary,
 }: {
-    location?: "remote" | "in-person" | "hybrid";
-    type?: "full-time" | "part-time" | "freelance" | "internship";
-    salary?: "$0 - $50,000" | "$50,000 - $70,000" | "$70,000 - $100,000" | "$100,000 - $120,000" | "$120,000 - $150,000" | "$150,000 - $250,000" | "$250,000+";
+    location?: JobLocation;
+    type?: JobType;
+    salary?: SalaryRange;
 }) => {
     const baseQuery = client
         .from("jobs")

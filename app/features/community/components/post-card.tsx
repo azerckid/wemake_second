@@ -39,8 +39,8 @@ export function PostCard({
     votesCount = 0,
 }: PostCardProps) {
     const postedAt = typeof created_at === 'string'
-        ? DateTime.fromISO(created_at).toLocaleString(DateTime.DATE_MED)
-        : DateTime.fromJSDate(created_at).toLocaleString(DateTime.DATE_MED);
+        ? DateTime.fromISO(created_at).toRelative()
+        : DateTime.fromJSDate(created_at).toRelative();
     return (
         <Link to={`/community/${post_id}`} className="block">
             <Card

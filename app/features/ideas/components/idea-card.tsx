@@ -9,6 +9,7 @@ import {
 import { Button } from "~/common/components/ui/button";
 import { DotIcon, EyeIcon, HeartIcon, LockIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { DateTime } from "luxon";
 
 interface IdeaCardProps {
     gpt_idea_id: number;
@@ -30,7 +31,6 @@ export function IdeaCard({
     claimed_by,
 }: IdeaCardProps) {
     const claimed = claimed_at !== null && claimed_by !== null;
-    const postedAt = new Date(created_at).toLocaleDateString();
     return (
         <Card className="bg-transparent hover:bg-card/50 transition-colors">
             <CardHeader>
@@ -54,7 +54,7 @@ export function IdeaCard({
                     <span>{views}</span>
                 </div>
                 <DotIcon className="w-4 h-4" />
-                <span>{postedAt}</span>
+                <span>{DateTime.fromJSDate(created_at).toRelative()}</span>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
                 <Button variant="outline">

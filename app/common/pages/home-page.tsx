@@ -11,6 +11,8 @@ import { TeamCard } from "~/features/teams/components/team-card";
 import { Button } from "../components/ui/button";
 import { getProductsByDateRange } from "~/features/products/queries";
 import { getPosts } from "~/features/community/queries";
+import { getGptIdeas } from "~/features/ideas/queries";
+import { getJobs } from "~/features/jobs/queries";
 
 export const loader = async () => {
     const products = await getProductsByDateRange({
@@ -23,7 +25,9 @@ export const loader = async () => {
         sorting: "newest",
         period: "all",
     });
-    return { products, posts };
+    const gptIdeas = await getGptIdeas({ limit: 5, page: 1 });
+    const jobs = await getJobs({ limit: 5, page: 1, sorting: "newest" });
+    return { products, posts, gptIdeas, jobs };
 };
 
 
@@ -100,21 +104,21 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         Find ideas for your next project.
                     </p>
                     <Button variant="link" className="text-lg p-0" asChild>
-                        <Link to="/community">
+                        <Link to="/ideas">
                             Explore All ideas &rarr;
                         </Link>
                     </Button>
                 </div>
-                {Array.from({ length: 5 }).map((_, index) => (
+                {loaderData.gptIdeas.map((gptIdea) => (
                     <IdeaCard
-                        key={`ideaId-${index}`}
-                        gpt_idea_id={index + 1}
-                        idea="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-                        views={123}
-                        created_at={new Date()}
-                        likesCount={12}
-                        claimed_at={index % 2 === 0 ? new Date() : null}
-                        claimed_by={index % 2 === 0 ? "user123" : null}
+                        key={gptIdea.gpt_idea_id}
+                        gpt_idea_id={gptIdea.gpt_idea_id ?? 0}
+                        idea={gptIdea.idea ?? ""}
+                        views={gptIdea.views ?? 0}
+                        created_at={gptIdea.created_at ? new Date(gptIdea.created_at) : new Date()}
+                        likesCount={gptIdea.likes ?? 0}
+                        claimed_at={gptIdea.is_claimed ? new Date(gptIdea.created_at ?? "") : null}
+                        claimed_by={gptIdea.is_claimed ? "user-123" : null}
                     />
                 ))}
             </div>
@@ -130,18 +134,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         <Link to="/jobs">Explore all jobs &rarr;</Link>
                     </Button>
                 </div>
-                {Array.from({ length: 11 }).map((_, index) => (
+                {loaderData.jobs.map((job) => (
                     <JobCard
-                        key={`jobId-${index}`}
-                        id={`jobId-${index}`}
-                        company="OpenAI"
-                        companyLogoUrl="https://github.com/openai.png"
-                        companyHq="San Francisco, CA"
-                        title="Senior Software Engineer"
-                        postedAt="12 hours ago"
-                        type="Full-time"
-                        positionLocation="Remote"
-                        salary="$100,000 - $120,000"
+                        key={job.job_id}
+                        id={job.job_id.toString()}
+                        company={job.company_name}
+                        companyLogoUrl={job.company_logo || null}
+                        companyHq={job.company_location}
+                        title={job.position}
+                        postedAt={DateTime.fromISO(job.created_at).toRelative() ?? "Unknown"}
+                        type={job.job_type}
+                        positionLocation={job.location}
+                        salary={job.salary_range}
                     />
                 ))}
             </div>

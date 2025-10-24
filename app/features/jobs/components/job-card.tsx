@@ -8,11 +8,12 @@ import {
 } from "~/common/components/ui/card";
 import { Button } from "~/common/components/ui/button";
 import { Badge } from "~/common/components/ui/badge";
+import { DateTime } from "luxon";
 
 interface JobCardProps {
     id: string;
     company: string;
-    companyLogoUrl: string;
+    companyLogoUrl?: string | null;
     companyHq: string;
     title: string;
     postedAt: string;
@@ -37,14 +38,39 @@ export function JobCard({
             <Card className="bg-transparent transition-colors hover:bg-card/50">
                 <CardHeader>
                     <div className="flex items-center gap-4 mb-4">
-                        <img
-                            src={companyLogoUrl}
-                            alt={`${company} Logo`}
-                            className="size-10 rounded-full"
-                        />
+                        <div className="size-10 rounded-full overflow-hidden bg-white flex items-center justify-center relative">
+                            {companyLogoUrl ? (
+                                <>
+                                    <img
+                                        src={companyLogoUrl}
+                                        alt={`${company} Logo`}
+                                        className="w-full h-full object-contain p-1"
+                                        onLoad={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'block';
+                                            const fallback = target.parentElement?.querySelector('.fallback') as HTMLElement;
+                                            if (fallback) fallback.style.display = 'none';
+                                        }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            const fallback = target.parentElement?.querySelector('.fallback') as HTMLElement;
+                                            if (fallback) fallback.style.display = 'flex';
+                                        }}
+                                    />
+                                    <div className="fallback absolute inset-0 bg-muted items-center justify-center text-sm font-medium flex">
+                                        {company.charAt(0).toUpperCase()}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-muted items-center justify-center text-sm font-medium flex">
+                                    {company.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                        </div>
                         <div className="space-x-2">
                             <span className="text-accent-foreground">{company}</span>
-                            <span className="text-xs text-muted-foreground">{postedAt}</span>
+                            <span className="text-xs text-muted-foreground">{DateTime.fromISO(postedAt).toRelative() ?? "Unknown"}</span>
                         </div>
                     </div>
                     <CardTitle>{title}</CardTitle>

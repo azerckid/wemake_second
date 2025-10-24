@@ -6,3 +6,4 @@ export const PERIOD_OPTIONS = [
     "month",
     "year",
 ] as const;
+export const POSTS_PER_PAGE = 5;

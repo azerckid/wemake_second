@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import client from "~/supa-client";
+import { PAGE_SIZE } from "./constants";
 
 // Product 타입 정의
 export interface Product {
@@ -23,11 +24,13 @@ export const getProductsByDateRange = async ({
     endDate,
     limit,
     ascending = false,
+    page = 1,
 }: {
     startDate: DateTime;
     endDate: DateTime;
     limit: number;
     ascending?: boolean;
+    page?: number;
 }): Promise<Product[]> => {
     const { data, error } = await client
         .from("products")
@@ -51,7 +54,7 @@ export const getProductsByDateRange = async ({
         .order("stats->>upvotes", { ascending })
         .gte("created_at", startDate.toISO())
         .lte("created_at", endDate.toISO())
-        .limit(limit);
+        .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
         console.error('Products query error:', error);
@@ -59,4 +62,21 @@ export const getProductsByDateRange = async ({
     }
 
     return data || [];
+};
+
+export const getProductPagesByDateRange = async ({
+    startDate,
+    endDate,
+}: {
+    startDate: DateTime;
+    endDate: DateTime;
+}) => {
+    const { count, error } = await client
+        .from("products")
+        .select(`product_id`, { count: "exact", head: true })
+        .gte("created_at", startDate.toISO())
+        .lte("created_at", endDate.toISO());
+    if (error) throw error;
+    if (!count) return 1;
+    return Math.ceil(count / PAGE_SIZE);
 };

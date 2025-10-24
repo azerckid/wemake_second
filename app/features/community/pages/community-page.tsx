@@ -1,10 +1,9 @@
-import { Await, Form, isRouteErrorResponse, Link, useSearchParams } from "react-router";
+import { Await, data, Form, isRouteErrorResponse, Link, useSearchParams } from "react-router";
 import { Suspense } from "react";
-import { Loader2Icon } from "lucide-react";
 
 import type { Route } from "./+types/community-page";
 
-import { PERIOD_OPTIONS, SORT_OPTIONS } from "../constants";
+import { PERIOD_OPTIONS, POSTS_PER_PAGE, SORT_OPTIONS } from "../constants";
 import { ChevronDownIcon } from "lucide-react";
 import {
     DropdownMenu,
@@ -17,23 +16,70 @@ import { Hero } from "~/common/components/hero";
 import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
 
-import { getPosts, getTopics } from "../queries";
+import { getPosts, getPostsCount, getTopics } from "../queries";
+import ProductPagination from "~/common/components/product-pagination";
+import { z } from "zod";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Community | wemake" }];
 };
 
-export function loader({ request }: Route.LoaderArgs) {
-    const topics = getTopics();
-    const posts = getPosts();
-    return { topics, posts };
-}
+const searchParamsSchema = z.object({
+    sorting: z.enum(["newest", "popular"]).optional().default("newest"),
+    period: z
+        .enum(["all", "today", "week", "month", "year"])
+        .optional()
+        .default("all"),
+    keyword: z.string().optional(),
+    topic: z.string().optional(),
+    page: z.string().optional().default("1"),
+});
 
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const url = new URL(request.url);
+    const { success, data: parsedData } = searchParamsSchema.safeParse(
+        Object.fromEntries(url.searchParams)
+    );
+    if (!success) {
+        throw data(
+            {
+                error_code: "invalid_search_params",
+                message: "Invalid search params",
+            },
+            { status: 400 }
+        );
+    }
+
+    const page = Number(parsedData.page);
+    const limit = POSTS_PER_PAGE;
+
+    const [topics, posts, totalCount] = await Promise.all([
+        getTopics(),
+        getPosts({
+            limit,
+            sorting: parsedData.sorting,
+            period: parsedData.period,
+            keyword: parsedData.keyword,
+            topic: parsedData.topic,
+            page,
+        }),
+        getPostsCount({
+            sorting: parsedData.sorting,
+            period: parsedData.period,
+            keyword: parsedData.keyword,
+            topic: parsedData.topic,
+        }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return { topics, posts, totalPages, currentPage: page };
+};
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const sorting = searchParams.get("sorting") || "newest";
     const period = searchParams.get("period") || "all";
-    const { topics, posts } = loaderData;
+    const { topics, posts, totalPages, currentPage } = loaderData;
     return (
         <div className="space-y-20">
             <Hero
@@ -95,8 +141,8 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                             <Form className="w-2/3">
                                 <Input
                                     type="text"
-                                    name="search"
-                                    placeholder="Search for discussions"
+                                    name="keyword"
+                                    placeholder="Search for discussions..."
                                 />
                             </Form>
                         </div>
@@ -124,6 +170,11 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                                             votesCount={post.upvotes}
                                         />
                                     ))}
+                                    {totalPages > 1 && (
+                                        <div className="flex justify-center mt-10">
+                                            <ProductPagination totalPages={totalPages} />
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </Await>

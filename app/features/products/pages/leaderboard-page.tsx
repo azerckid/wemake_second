@@ -66,7 +66,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         id={product.product_id.toString()}
                         name={product.name}
                         description={product.description}
-                        commentsCount={product.reviews ?? 0}
+                        reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
                     />
@@ -92,7 +92,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         id={product.product_id.toString()}
                         name={product.name}
                         description={product.description}
-                        commentsCount={product.reviews ?? 0}
+                        reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
                     />
@@ -118,7 +118,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         id={product.product_id.toString()}
                         name={product.name}
                         description={product.description}
-                        commentsCount={product.reviews ?? 0}
+                        reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
                     />
@@ -144,7 +144,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         id={product.product_id.toString()}
                         name={product.name}
                         description={product.description}
-                        commentsCount={product.reviews ?? 0}
+                        reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
                     />

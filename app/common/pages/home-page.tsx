@@ -10,6 +10,7 @@ import { TeamCard } from "~/features/teams/components/team-card";
 import { Button } from "../components/ui/button";
 import { getProductsByDateRange } from "~/features/products/queries";
 import { DateTime } from "luxon";
+import { getPosts } from "~/features/community/queries";
 
 export const loader = async () => {
     const products = await getProductsByDateRange({
@@ -17,7 +18,12 @@ export const loader = async () => {
         endDate: DateTime.now().endOf("day"),
         limit: 7,
     });
-    return { products };
+    const posts = await getPosts({
+        limit: 7,
+        sorting: "newest",
+        period: "all",
+    });
+    return { products, posts };
 };
 
 
@@ -29,7 +35,6 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
-    const { products } = loaderData;
     return (
         <div className="space-y-40">
             <div className="grid grid-cols-3 gap-4">
@@ -46,13 +51,13 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         </Link>
                     </Button>
                 </div>
-                {products.map((product) => (
+                {loaderData.products.map((product) => (
                     <ProductCard
                         key={product.product_id.toString()}
                         id={product.product_id.toString()}
                         name={product.name}
                         description={product.description}
-                        commentsCount={product.reviews ?? 0}
+                        reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
                     />
@@ -72,17 +77,17 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         </Link>
                     </Button>
                 </div>
-                {Array.from({ length: 11 }).map((_, index) => (
+                {loaderData.posts.map((post) => (
                     <PostCard
-                        key={`postId-${index}`}
-                        post_id={index}
-                        title="What is the best productivity tool?"
-                        author="Azer.C"
-                        authorAvatarUrl="https://github.com/apple.png"
-                        topic_id={1}
-                        topic_name="Productivity"
-                        created_at={new Date()}
-                        votesCount={Math.floor(Math.random() * 50)}
+                        key={post.post_id}
+                        post_id={post.post_id}
+                        title={post.title}
+                        author={post.author}
+                        authorAvatarUrl={post.author_avatar ?? null}
+                        topic_id={0}
+                        topic_name={post.topic}
+                        created_at={post.created_at}
+                        votesCount={post.upvotes}
                     />
                 ))}
             </div>

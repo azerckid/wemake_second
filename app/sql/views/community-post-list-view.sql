@@ -1,4 +1,4 @@
-CREATE VIEW community_post_list_view AS
+CREATE OR REPLACE VIEW community_post_list_view AS
 SELECT
   posts.post_id,
   posts.title,
@@ -7,7 +7,8 @@ SELECT
   profiles.name AS author,
   profiles.avatar AS author_avatar,
   profiles.username AS author_username,
-  posts.upvotes
+  posts.upvotes,
+  topics.slug AS topic_slug
 FROM posts
 INNER JOIN topics ON posts.topic_id = topics.topic_id
 INNER JOIN profiles ON posts.profile_id = profiles.profile_id;

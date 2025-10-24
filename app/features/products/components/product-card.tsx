@@ -13,7 +13,7 @@ interface ProductCardProps {
     id: string;
     name: string;
     description: string;
-    commentsCount: number;
+    reviewsCount: number;
     viewsCount: number;
     votesCount: number;
 }
@@ -22,7 +22,7 @@ export function ProductCard({
     id,
     name,
     description,
-    commentsCount,
+    reviewsCount,
     viewsCount,
     votesCount,
 }: ProductCardProps) {
@@ -39,7 +39,7 @@ export function ProductCard({
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-px text-xs text-muted-foreground">
                             <MessageCircleIcon className="w-4 h-4" />
-                            <span>{commentsCount}</span>
+                            <span>{reviewsCount}</span>
                         </div>
                         <div className="flex items-center gap-px text-xs text-muted-foreground">
                             <EyeIcon className="w-4 h-4" />

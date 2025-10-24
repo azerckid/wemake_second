@@ -75,6 +75,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
     return { topics, posts, totalPages, currentPage: page };
 };
+
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const sorting = searchParams.get("sorting") || "newest";
@@ -196,7 +197,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                                                 key={topic.topic_id}
                                                 className="pl-0"
                                             >
-                                                <Link to={`/community?topic=${topic.topic_id}`}>{topic.name}</Link>
+                                                <Link to={`/community?topic=${topic.slug}`}>{topic.name}</Link>
                                             </Button>
                                         ))}
                                     </div>

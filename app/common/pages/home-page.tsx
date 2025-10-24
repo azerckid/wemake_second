@@ -2,6 +2,7 @@ import { Link } from "react-router";
 
 import type { Route } from "./+types/home-page";
 
+import { DateTime } from "luxon";
 import { ProductCard } from "~/features/products/components/product-card";
 import { PostCard } from "~/features/community/components/post-card";
 import { IdeaCard } from "~/features/ideas/components/idea-card";
@@ -9,7 +10,6 @@ import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
 import { Button } from "../components/ui/button";
 import { getProductsByDateRange } from "~/features/products/queries";
-import { DateTime } from "luxon";
 import { getPosts } from "~/features/community/queries";
 
 export const loader = async () => {

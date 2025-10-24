@@ -5,7 +5,7 @@ import type { Route } from "./+types/jobs-page";
 import { Hero } from "~/common/components/hero";
 import { JobCard } from "../components/job-card";
 import { Button } from "~/common/components/ui/button";
-import { JobsPagination } from "~/common/components/jobs-pagination";
+import { Pagination } from "~/common/components/pagination";
 import { JOB_TYPES, LOCATION_TYPES, SALARY_RANGE } from "../contants";
 import { cn } from "~/lib/utils";
 import { getJobs, getJobsCount } from "../queries";
@@ -173,10 +173,11 @@ export default function JobsPage({ loaderData }: Route.ComponentProps) {
             </div>
 
             {/* Pagination */}
-            <JobsPagination
+            <Pagination
                 currentPage={loaderData.currentPage}
                 totalPages={loaderData.totalPages}
                 onPageChange={onPageChange}
+                variant="full"
             />
         </div>
     );

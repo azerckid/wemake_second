@@ -7,7 +7,8 @@ import { Hero } from "~/common/components/hero";
 import { Button } from "~/common/components/ui/button";
 import { Input } from "~/common/components/ui/input";
 import { ProductCard } from "../components/product-card";
-import ProductPagination from "~/common/components/product-pagination";
+import { Pagination } from "~/common/components/pagination";
+import { useSearchParams } from "react-router";
 
 const paramsSchema = z.object({
     query: z.string().optional().default(""),
@@ -32,6 +33,13 @@ export function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function SearchPage({ loaderData }: Route.ComponentProps) {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = Number(searchParams.get("page") || 1);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams, { preventScrollReset: true });
+    };
     return (
         <div className="space-y-10">
             <Hero
@@ -59,7 +67,12 @@ export default function SearchPage({ loaderData }: Route.ComponentProps) {
                     />
                 ))}
             </div>
-            <ProductPagination totalPages={10} />
+            <Pagination
+                currentPage={currentPage}
+                totalPages={10}
+                onPageChange={onPageChange}
+                variant="simple"
+            />
         </div>
     );
 }

@@ -3,7 +3,8 @@ import type { Route } from "./+types/ideas-page";
 import { Hero } from "~/common/components/hero";
 import { IdeaCard } from "../components/idea-card";
 import { getGptIdeas, getGptIdeasCount } from "../queries";
-import ProductPagination from "~/common/components/product-pagination";
+import { Pagination } from "~/common/components/pagination";
+import { useSearchParams } from "react-router";
 
 export const meta: Route.MetaFunction = () => {
     return [
@@ -28,6 +29,13 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 export default function IdeasPage({ loaderData }: Route.ComponentProps) {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = Number(searchParams.get("page") || 1);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams, { preventScrollReset: true });
+    };
     return (
         <div className="space-y-20">
             <Hero title="IdeasGPT" subtitle="Find ideas for your next project" />
@@ -47,7 +55,12 @@ export default function IdeasPage({ loaderData }: Route.ComponentProps) {
             </div>
             {loaderData.totalPages > 1 && (
                 <div className="flex justify-center mt-10">
-                    <ProductPagination totalPages={loaderData.totalPages} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={loaderData.totalPages}
+                        onPageChange={onPageChange}
+                        variant="simple"
+                    />
                 </div>
             )}
         </div>

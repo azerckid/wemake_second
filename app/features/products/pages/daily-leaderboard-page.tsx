@@ -5,7 +5,8 @@ import { z } from "zod";
 import type { Route } from "./+types/daily-leaderboard-page";
 
 import { Hero } from "~/common/components/hero";
-import ProductPagination from "~/common/components/product-pagination";
+import { Pagination } from "~/common/components/pagination";
+import { useSearchParams } from "react-router";
 import { ProductCard } from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import { PAGE_SIZE } from "../constants";
@@ -88,6 +89,14 @@ export const meta: Route.MetaFunction = ({ params }) => {
 };
 
 export default function DailyLeaderboardPage({ loaderData }: Route.ComponentProps) {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = Number(searchParams.get("page") || 1);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams, { preventScrollReset: true });
+    };
+
     const urlDate = DateTime.fromObject({
         year: loaderData.year,
         month: loaderData.month,
@@ -134,7 +143,12 @@ export default function DailyLeaderboardPage({ loaderData }: Route.ComponentProp
                     />
                 ))}
             </div>
-            <ProductPagination totalPages={loaderData.totalPages} />
+            <Pagination
+                currentPage={currentPage}
+                totalPages={loaderData.totalPages}
+                onPageChange={onPageChange}
+                variant="simple"
+            />
         </div>
     );
 }

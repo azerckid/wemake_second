@@ -17,7 +17,7 @@ import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
 
 import { getPosts, getPostsCount, getTopics } from "../queries";
-import ProductPagination from "~/common/components/product-pagination";
+import { Pagination } from "~/common/components/pagination";
 import { z } from "zod";
 
 export const meta: Route.MetaFunction = () => {
@@ -78,9 +78,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = Number(searchParams.get("page") || 1);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams, { preventScrollReset: true });
+    };
+
     const sorting = searchParams.get("sorting") || "newest";
     const period = searchParams.get("period") || "all";
-    const { topics, posts, totalPages, currentPage } = loaderData;
+    const { topics, posts, totalPages } = loaderData;
     return (
         <div className="space-y-20">
             <Hero
@@ -173,7 +180,12 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                                     ))}
                                     {totalPages > 1 && (
                                         <div className="flex justify-center mt-10">
-                                            <ProductPagination totalPages={totalPages} />
+                                            <Pagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={onPageChange}
+                                                variant="simple"
+                                            />
                                         </div>
                                     )}
                                 </div>

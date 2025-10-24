@@ -2,7 +2,8 @@ import type { Route } from "./+types/category-page";
 
 import { Hero } from "~/common/components/hero";
 import { ProductCard } from "../components/product-card";
-import ProductPagination from "~/common/components/product-pagination";
+import { Pagination } from "~/common/components/pagination";
+import { useSearchParams } from "react-router";
 
 export const meta = ({ params }: Route.MetaArgs) => {
     return [
@@ -11,6 +12,13 @@ export const meta = ({ params }: Route.MetaArgs) => {
     ];
 }
 export default function CategoryPage() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = Number(searchParams.get("page") || 1);
+
+    const onPageChange = (page: number) => {
+        searchParams.set("page", page.toString());
+        setSearchParams(searchParams, { preventScrollReset: true });
+    };
     return (
         <div className="space-y-10">
             <Hero
@@ -31,7 +39,12 @@ export default function CategoryPage() {
                     />
                 ))}
             </div>
-            <ProductPagination totalPages={10} />
+            <Pagination
+                currentPage={currentPage}
+                totalPages={10}
+                onPageChange={onPageChange}
+                variant="simple"
+            />
         </div>
     );
 }

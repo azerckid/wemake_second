@@ -41,8 +41,8 @@ export function TeamCard({
     const rolesArray = roles ? roles.split(',').map(role => role.trim()) : [];
 
     return (
-        <Link to={`/teams/${team_id}`}>
-            <Card className="bg-transparent hover:bg-card/50 transition-colors">
+        <Link to={`/teams/${team_id}`} className="block">
+            <Card className="bg-transparent hover:bg-card/50 flex flex-col justify-between transition-colors h-full w-full">
                 <CardHeader className="flex flex-row items-center">
                     <CardTitle className="text-base leading-loose">
                         <Badge
@@ -52,7 +52,7 @@ export function TeamCard({
                             <span>@{leaderUsername}</span>
                             <Avatar className="size-5">
                                 <AvatarFallback>{leaderUsername[0]}</AvatarFallback>
-                                <AvatarImage src={leaderAvatarUrl} />
+                                {leaderAvatarUrl ? <AvatarImage src={leaderAvatarUrl} /> : null}
                             </Avatar>
                         </Badge>
                         <span> is looking for </span>

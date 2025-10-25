@@ -1,37 +1,64 @@
 import type { Route } from "./+types/teams-page";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { TeamCard } from "../components/team-card";
 import { Hero } from "~/common/components/hero";
+import { Pagination } from "~/common/components/pagination";
+import { getTeams } from "../queries";
 
 export const meta: Route.MetaFunction = () => [{ title: "Teams | wemake" }];
 
-export function loader({ request }: Route.LoaderArgs) {
-    return {
-        teams: [],
-    };
-}
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = 6; // 한 페이지당 6개씩 표시
 
-export default function TeamsPage() {
+    const result = await getTeams({ limit, page });
+    return result;
+};
+
+export default function TeamsPage({ loaderData }: Route.ComponentProps) {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const currentPage = loaderData.currentPage;
+    const totalPages = loaderData.totalPages;
+
+    const handlePageChange = (page: number) => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("page", page.toString());
+        navigate(`?${newSearchParams.toString()}`);
+    };
+
     return (
-        <div className="space-y-20">
+        <div className="space-y-8">
             <Hero title="Teams" subtitle="Find a team looking for a new member." />
-            <div className="grid grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, index) => (
+            <div className="grid grid-cols-3 gap-4">
+                {loaderData.teams.map((team) => (
                     <TeamCard
-                        key={`team-${index}`}
-                        team_id={index + 1}
-                        product_name="Doggie Social"
-                        team_size={3}
-                        equity_split={50}
-                        product_stage="mvp"
-                        roles="React Developer, Backend Developer, Product Manager"
-                        product_description="a new social media platform for dogs to connect with each other"
-                        created_at={new Date()}
-                        leaderUsername="Azer.C"
-                        leaderAvatarUrl="https://github.com/azerckid.png"
+                        key={team.team_id}
+                        team_id={team.team_id}
+                        product_name={team.product_name ?? ""}
+                        team_size={team.team_size ?? 0}
+                        equity_split={team.equity_split ?? 0}
+                        product_stage={team.product_stage ?? ""}
+                        roles={team.roles ?? ""}
+                        product_description={team.product_description ?? ""}
+                        created_at={team.created_at ? new Date(team.created_at) : new Date()}
+                        leaderUsername={team.team_leader.username ?? ""}
+                        leaderAvatarUrl={team.team_leader.avatar ?? ""}
                     />
                 ))}
             </div>
+
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    variant="full"
+                />
+            )}
         </div>
     );
 }

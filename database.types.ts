@@ -677,41 +677,112 @@ export type Database = {
                     },
                 ]
             }
-            team: {
+            team_members: {
                 Row: {
+                    equity_percentage: number | null
+                    joined_at: string
+                    role: string
+                    status: string
+                    team_id: number
+                    team_member_id: number
+                    user_id: string
+                }
+                Insert: {
+                    equity_percentage?: number | null
+                    joined_at?: string
+                    role: string
+                    status?: string
+                    team_id: number
+                    team_member_id?: number
+                    user_id: string
+                }
+                Update: {
+                    equity_percentage?: number | null
+                    joined_at?: string
+                    role?: string
+                    status?: string
+                    team_id?: number
+                    team_member_id?: number
+                    user_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "team_members_team_id_teams_team_id_fk"
+                        columns: ["team_id"]
+                        isOneToOne: false
+                        referencedRelation: "teams"
+                        referencedColumns: ["team_id"]
+                    },
+                    {
+                        foreignKeyName: "team_members_user_id_profiles_profile_id_fk"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["profile_id"]
+                    },
+                ]
+            }
+            teams: {
+                Row: {
+                    application_deadline: string | null
                     created_at: string
                     equity_split: number
+                    location: Database["public"]["Enums"]["team_location"]
+                    max_team_size: number | null
                     product_description: string
                     product_name: string
                     product_stage: Database["public"]["Enums"]["product_stage"]
                     roles: string
                     team_id: number
+                    team_leader_id: string
                     team_size: number
+                    team_status: Database["public"]["Enums"]["team_status"]
+                    tech_stack: string[] | null
                     updated_at: string
                 }
                 Insert: {
+                    application_deadline?: string | null
                     created_at?: string
                     equity_split: number
+                    location?: Database["public"]["Enums"]["team_location"]
+                    max_team_size?: number | null
                     product_description: string
                     product_name: string
                     product_stage: Database["public"]["Enums"]["product_stage"]
                     roles: string
-                    team_id?: never
+                    team_id?: number
+                    team_leader_id: string
                     team_size: number
+                    team_status?: Database["public"]["Enums"]["team_status"]
+                    tech_stack?: string[] | null
                     updated_at?: string
                 }
                 Update: {
+                    application_deadline?: string | null
                     created_at?: string
                     equity_split?: number
+                    location?: Database["public"]["Enums"]["team_location"]
+                    max_team_size?: number | null
                     product_description?: string
                     product_name?: string
                     product_stage?: Database["public"]["Enums"]["product_stage"]
                     roles?: string
-                    team_id?: never
+                    team_id?: number
+                    team_leader_id?: string
                     team_size?: number
+                    team_status?: Database["public"]["Enums"]["team_status"]
+                    tech_stack?: string[] | null
                     updated_at?: string
                 }
-                Relationships: []
+                Relationships: [
+                    {
+                        foreignKeyName: "teams_team_leader_id_profiles_profile_id_fk"
+                        columns: ["team_leader_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["profile_id"]
+                    },
+                ]
             }
             topics: {
                 Row: {
@@ -787,6 +858,8 @@ export type Database = {
             | "$120,000 - $150,000"
             | "$150,000 - $250,000"
             | "$250,000+"
+            team_location: "remote" | "hybrid" | "onsite"
+            team_status: "recruiting" | "active" | "inactive" | "completed"
         }
         CompositeTypes: {
             [_ in never]: never
@@ -928,6 +1001,8 @@ export const Constants = {
                 "$150,000 - $250,000",
                 "$250,000+",
             ],
+            team_location: ["remote", "hybrid", "onsite"],
+            team_status: ["recruiting", "active", "inactive", "completed"],
         },
     },
 } as const

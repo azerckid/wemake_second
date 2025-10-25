@@ -13,6 +13,7 @@ import { getProductsByDateRange } from "~/features/products/queries";
 import { getPosts } from "~/features/community/queries";
 import { getGptIdeas } from "~/features/ideas/queries";
 import { getJobs } from "~/features/jobs/queries";
+import { getTeams } from "~/features/teams/queries";
 
 export const loader = async () => {
     const products = await getProductsByDateRange({
@@ -27,7 +28,9 @@ export const loader = async () => {
     });
     const gptIdeas = await getGptIdeas({ limit: 5, page: 1 });
     const jobs = await getJobs({ limit: 5, page: 1, sorting: "newest" });
-    return { products, posts, gptIdeas, jobs };
+    const teamsResult = await getTeams({ limit: 7, page: 1 });
+    const teams = teamsResult.teams;
+    return { products, posts, gptIdeas, jobs, teams };
 };
 
 
@@ -58,7 +61,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                 {loaderData.products.map((product) => (
                     <ProductCard
                         key={product.product_id.toString()}
-                        id={product.product_id.toString()}
+                        id={product.product_id}
                         name={product.name}
                         description={product.description}
                         reviewsCount={product.reviews ?? 0}
@@ -161,19 +164,19 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         <Link to="/teams">Explore all teams &rarr;</Link>
                     </Button>
                 </div>
-                {Array.from({ length: 7 }).map((_, index) => (
+                {loaderData.teams.map((team) => (
                     <TeamCard
-                        key={`teamId-${index}`}
-                        team_id={index + 1}
-                        product_name={`Product ${index + 1}`}
-                        team_size={3 + index}
-                        equity_split={20 + index * 5}
-                        product_stage="mvp"
-                        roles="React Developer, Backend Developer, Product Manager"
-                        product_description="a new social media platform"
-                        created_at={new Date()}
-                        leaderUsername="Azer.C"
-                        leaderAvatarUrl="https://github.com/azerckid.png"
+                        key={team.team_id}
+                        team_id={team.team_id}
+                        product_name={team.product_name ?? ""}
+                        team_size={team.team_size ?? 0}
+                        equity_split={team.equity_split ?? 0}
+                        product_stage={team.product_stage ?? ""}
+                        roles={team.roles ?? ""}
+                        product_description={team.product_description ?? ""}
+                        created_at={team.created_at ? new Date(team.created_at) : new Date()}
+                        leaderUsername={team.team_leader.username ?? ""}
+                        leaderAvatarUrl={team.team_leader.avatar ?? ""}
                     />
                 ))}
             </div>

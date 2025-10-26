@@ -153,3 +153,41 @@ export const getCategoryPages = async (categoryId: number): Promise<number> => {
     if (!count) return 1;
     return Math.ceil(count / PAGE_SIZE);
 };
+
+export const getProductsBySearch = async ({
+    query,
+    page,
+}: {
+    query: string;
+    page: number;
+}): Promise<Product[]> => {
+    const { data, error } = await client
+        .from("products")
+        .select(productListSelect)
+        .or(`name.ilike.%${query}%, tagline.ilike.%${query}%`)
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    if (error) {
+        console.error('Products search query error:', error);
+        throw new Error(`Failed to search products: ${error.message}`);
+    }
+
+    // Convert string values from JSON to numbers
+    const products: Product[] = (data || []).map(item => ({
+        ...item,
+        upvotes: parseInt(item.upvotes) || 0,
+        views: parseInt(item.views) || 0,
+        reviews: parseInt(item.reviews) || 0,
+    }));
+
+    return products;
+};
+
+export const getPagesBySearch = async ({ query }: { query: string }) => {
+    const { count, error } = await client
+        .from("products")
+        .select(`product_id`, { count: "exact", head: true })
+        .or(`name.ilike.%${query}%, tagline.ilike.%${query}%`);
+    if (error) throw error;
+    if (!count) return 1;
+    return Math.ceil(count / PAGE_SIZE);
+};

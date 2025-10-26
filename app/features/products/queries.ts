@@ -191,3 +191,32 @@ export const getPagesBySearch = async ({ query }: { query: string }) => {
     if (!count) return 1;
     return Math.ceil(count / PAGE_SIZE);
 };
+
+export const getProductById = async (productId: string) => {
+    const { data, error } = await client
+        .from("product_overview_view")
+        .select("*")
+        .eq("product_id", parseInt(productId))
+        .single();
+    if (error) throw error;
+    return data;
+};
+
+export const getReviews = async (productId: string) => {
+    const { data, error } = await client
+        .from("reviews")
+        .select(
+            `
+          review_id,
+          rating,
+          review,
+          created_at,
+          user:profiles!inner(
+            name,username,avatar
+          )
+        `
+        )
+        .eq("product_id", parseInt(productId));
+    if (error) throw error;
+    return data || [];
+};

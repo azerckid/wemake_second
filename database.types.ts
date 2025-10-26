@@ -337,6 +337,13 @@ export type Database = {
                         foreignKeyName: "notifications_product_id_products_product_id_fk"
                         columns: ["product_id"]
                         isOneToOne: false
+                        referencedRelation: "product_overview_view"
+                        referencedColumns: ["product_id"]
+                    },
+                    {
+                        foreignKeyName: "notifications_product_id_products_product_id_fk"
+                        columns: ["product_id"]
+                        isOneToOne: false
                         referencedRelation: "products"
                         referencedColumns: ["product_id"]
                     },
@@ -518,6 +525,13 @@ export type Database = {
                         foreignKeyName: "product_upvotes_product_id_products_product_id_fk"
                         columns: ["product_id"]
                         isOneToOne: false
+                        referencedRelation: "product_overview_view"
+                        referencedColumns: ["product_id"]
+                    },
+                    {
+                        foreignKeyName: "product_upvotes_product_id_products_product_id_fk"
+                        columns: ["product_id"]
+                        isOneToOne: false
                         referencedRelation: "products"
                         referencedColumns: ["product_id"]
                     },
@@ -661,6 +675,13 @@ export type Database = {
                     updated_at?: string
                 }
                 Relationships: [
+                    {
+                        foreignKeyName: "reviews_product_id_products_product_id_fk"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "product_overview_view"
+                        referencedColumns: ["product_id"]
+                    },
                     {
                         foreignKeyName: "reviews_product_id_products_product_id_fk"
                         columns: ["product_id"]
@@ -834,6 +855,41 @@ export type Database = {
                     views: number | null
                 }
                 Relationships: []
+            }
+            product_overview_view: {
+                Row: {
+                    average_rating: number | null
+                    category_id: number | null
+                    created_at: string | null
+                    description: string | null
+                    how_it_works: string | null
+                    icon: string | null
+                    name: string | null
+                    product_id: number | null
+                    profile_id: string | null
+                    reviews: number | null
+                    tagline: string | null
+                    updated_at: string | null
+                    upvotes: number | null
+                    url: string | null
+                    views: number | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "products_category_id_categories_category_id_fk"
+                        columns: ["category_id"]
+                        isOneToOne: false
+                        referencedRelation: "categories"
+                        referencedColumns: ["category_id"]
+                    },
+                    {
+                        foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+                        columns: ["profile_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["profile_id"]
+                    },
+                ]
             }
         }
         Functions: {

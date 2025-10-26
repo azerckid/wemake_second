@@ -68,9 +68,9 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                 {dailyProducts.map((product) => (
                     <ProductCard
                         key={product.product_id}
-                        id={product.product_id.toString()}
+                        id={product.product_id}
                         name={product.name}
-                        description={product.description}
+                        description={product.tagline}
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
@@ -95,9 +95,9 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                 {weeklyProducts.map((product) => (
                     <ProductCard
                         key={product.product_id}
-                        id={product.product_id.toString()}
+                        id={product.product_id}
                         name={product.name}
-                        description={product.description}
+                        description={product.tagline}
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
@@ -122,9 +122,9 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                 {monthlyProducts.map((product) => (
                     <ProductCard
                         key={product.product_id}
-                        id={product.product_id.toString()}
+                        id={product.product_id}
                         name={product.name}
-                        description={product.description}
+                        description={product.tagline}
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
@@ -148,9 +148,9 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                 {yearlyProducts.map((product) => (
                     <ProductCard
                         key={product.product_id}
-                        id={product.product_id.toString()}
+                        id={product.product_id}
                         name={product.name}
-                        description={product.description}
+                        description={product.tagline}
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}

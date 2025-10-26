@@ -61,14 +61,14 @@ export async function loader({ request }: Route.LoaderArgs) {
         );
     }
     if (parsedData.query === "") {
-        return { products: [], totalPages: 1, currentPage: 1 };
+        return { products: [], totalPages: 1, currentPage: 1, query: "" };
     }
     const products = await getProductsBySearch({
         query: parsedData.query,
         page: parsedData.page,
     });
     const totalPages = await getPagesBySearch({ query: parsedData.query });
-    return { products, totalPages, currentPage: parsedData.page };
+    return { products, totalPages, currentPage: parsedData.page, query: parsedData.query };
 }
 
 export default function SearchPage({ loaderData }: Route.ComponentProps) {
@@ -95,17 +95,28 @@ export default function SearchPage({ loaderData }: Route.ComponentProps) {
                 <Button type="submit">Search</Button>
             </Form>
             <div className="space-y-5 w-full max-w-screen-md mx-auto">
-                {loaderData.products.map((product) => (
-                    <ProductCard
-                        key={product.product_id}
-                        id={product.product_id}
-                        name={product.name}
-                        description={product.tagline}
-                        reviewsCount={product.reviews}
-                        viewsCount={product.views}
-                        votesCount={product.upvotes}
-                    />
-                ))}
+                {loaderData.products.length === 0 && loaderData.query ? (
+                    <div className="text-center py-20">
+                        <p className="text-lg text-muted-foreground mb-2">
+                            No products found for "{loaderData.query}"
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            Try searching with different keywords
+                        </p>
+                    </div>
+                ) : (
+                    loaderData.products.map((product) => (
+                        <ProductCard
+                            key={product.product_id}
+                            id={product.product_id}
+                            name={product.name}
+                            description={product.tagline}
+                            reviewsCount={product.reviews}
+                            viewsCount={product.views}
+                            votesCount={product.upvotes}
+                        />
+                    ))
+                )}
             </div>
             <Pagination
                 currentPage={currentPage}

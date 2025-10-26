@@ -32,7 +32,7 @@ export function ReviewCard({
                 </Avatar>
                 <div>
                     <h4 className="text-lg font-bold">{username}</h4>
-                    <p className="text-sm text-muted-foreground">{handle}</p>
+                    <p className="text-sm text-muted-foreground">@{handle}</p>
                 </div>
             </div>
             <div className="flex text-yellow-400">

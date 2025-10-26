@@ -49,12 +49,16 @@ export default function ProductOverviewLayout({
                         <p className=" text-2xl font-light text-muted-foreground">{loaderData.product.tagline ?? ""}</p>
                         <div className="mt-5 flex items-center gap-4">
                             <div className="flex text-yellow-400 gap-1">
-                                {Array.from({ length: loaderData.product.average_rating ?? 0 }).map((_, i) => (
-                                    <StarIcon className="size-4" fill={
-                                        i < Math.floor(loaderData.product.average_rating ?? 0)
-                                            ? "currentColor"
-                                            : "none"
-                                    } />
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <StarIcon
+                                        key={i}
+                                        className="size-4"
+                                        fill={
+                                            i < Math.floor(loaderData.product.average_rating ?? 0)
+                                                ? "currentColor"
+                                                : "none"
+                                        }
+                                    />
                                 ))}
                             </div>
                             <span className="text-muted-foreground ">{loaderData.product.reviews ?? 0} reviews</span>

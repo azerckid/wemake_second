@@ -2,6 +2,7 @@ import { Form } from "react-router";
 
 import type { Route } from "./+types/team-page";
 
+import { getTeamById } from "../queries";
 import { Hero } from "~/common/components/hero";
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
@@ -14,43 +15,38 @@ export const meta: Route.MetaFunction = () => [
     { title: "Team Details | wemake" },
 ];
 
-export default function TeamPage() {
-    // 실제로는 loader에서 데이터를 가져와야 함
-    const teamData = {
-        team_id: 1,
-        product_name: "Doggie Social",
-        team_size: 3,
-        equity_split: 50,
-        product_stage: "mvp",
-        roles: "React Developer, Backend Developer, Product Manager, UI/UX Designer",
-        product_description: "Doggie Social is a social media platform for dogs. It allows dogs to connect with each other and share their experiences.",
-        created_at: new Date(),
-        updated_at: new Date(),
-    };
+export const loader = async ({ params }: Route.LoaderArgs) => {
+    const team = await getTeamById(params.teamId);
+    return { team };
+};
 
-    const rolesArray = teamData.roles.split(',').map(role => role.trim());
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
+    // 실제로는 loader에서 데이터를 가져와야 함
+    const teamData = loaderData.team;
+
+    const rolesArray = teamData.roles?.split(',').map(role => role.trim()) || [];
 
     return (
         <div className="space-y-20">
-            <Hero title="Join Azer.C's team" />
+            <Hero title={`Join ${teamData.team_leader.name}'s team`} />
             <div className="grid grid-cols-6 gap-40 items-start">
                 <div className="col-span-4 grid grid-cols-4 gap-5">
                     {[
                         {
                             title: "Product name",
-                            value: teamData.product_name,
+                            value: teamData.product_name || "",
                         },
                         {
                             title: "Stage",
-                            value: teamData.product_stage.toUpperCase(),
+                            value: teamData.product_stage?.toUpperCase() || "",
                         },
                         {
                             title: "Team size",
-                            value: teamData.team_size,
+                            value: teamData.team_size || 0,
                         },
                         {
                             title: "Available equity",
-                            value: teamData.equity_split,
+                            value: teamData.equity_split || 0,
                         },
                     ].map((item, index) => (
                         <Card key={index}>
@@ -85,7 +81,7 @@ export default function TeamPage() {
                             </CardTitle>
                             <CardContent className="p-0 font-medium text-xl">
                                 <p>
-                                    {teamData.product_description}
+                                    {teamData.product_description || ""}
                                 </p>
                             </CardContent>
                         </CardHeader>
@@ -94,12 +90,12 @@ export default function TeamPage() {
                 <aside className="col-span-2 space-y-5 border rounded-lg p-6 shadow-sm">
                     <div className="flex gap-5">
                         <Avatar className="size-14">
-                            <AvatarFallback>A</AvatarFallback>
-                            <AvatarImage src="https://github.com/azerckid.png" />
+                            <AvatarFallback>{teamData.team_leader.name[0]}</AvatarFallback>
+                            {teamData.team_leader.avatar && <AvatarImage src={teamData.team_leader.avatar} />}
                         </Avatar>
                         <div className="flex flex-col">
-                            <h4 className="text-lg font-medium">Azer.C</h4>
-                            <Badge variant="secondary">Product Manager</Badge>
+                            <h4 className="text-lg font-medium">{teamData.team_leader.name}</h4>
+                            <Badge variant="secondary">{teamData.team_leader.role}</Badge>
                         </div>
                     </div>
                     <Form className="space-y-5">
@@ -111,7 +107,7 @@ export default function TeamPage() {
                             id="introduction"
                             required
                             textArea
-                            placeholder="i.e. I'm a React Developer with 3 years of experience"
+                            placeholder={`i.e. I'm a ${teamData.roles?.split(',').map(role => role.trim())[0]} with ${teamData.team_size} years of experience`}
                         />
                         <Button type="submit" className="w-full">
                             Get in touch

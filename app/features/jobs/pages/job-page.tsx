@@ -3,8 +3,7 @@ import { Link } from "react-router";
 
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
-import { DotIcon } from "lucide-react";
-import { getJob } from "../queries";
+import { getJobById } from "../queries";
 import { DateTime } from "luxon";
 
 export const meta: Route.MetaFunction = () => {
@@ -12,16 +11,7 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export const loader = async ({ params }: Route.LoaderArgs) => {
-    const jobId = parseInt(params.jobId as string);
-    if (isNaN(jobId)) {
-        throw new Response("Invalid job ID", { status: 400 });
-    }
-
-    const job = await getJob(jobId);
-    if (!job) {
-        throw new Response("Job not found", { status: 404 });
-    }
-
+    const job = await getJobById(params.jobId);
     return { job };
 };
 
@@ -37,8 +27,8 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
                             {job.company_logo ? (
                                 <>
                                     <img
-                                        src={job.company_logo}
-                                        alt={`${job.company_name} Logo`}
+                                        src={job.company_logo || ""}
+                                        alt={`${job.company_name} logo`}
                                         className="w-full h-full object-contain p-4"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
@@ -48,7 +38,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
                                         }}
                                     />
                                     <div className="fallback absolute inset-0 bg-muted items-center justify-center text-2xl font-bold hidden">
-                                        {job.company_name.charAt(0).toUpperCase()}
+                                        {job.company_name?.charAt(0).toUpperCase()}
                                     </div>
                                 </>
                             ) : (

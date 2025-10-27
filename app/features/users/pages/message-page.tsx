@@ -48,9 +48,9 @@ export default function MessagePage() {
                             avatarUrl={
                                 isCurrentUser
                                     ? "https://github.com/zizimoos.png"
-                                    : "https://github.com/azerckid.png"
+                                    : "https://github.com/sarah-kim.png"
                             }
-                            avatarFallback={isCurrentUser ? "Z" : "A"}
+                            avatarFallback={isCurrentUser ? "Z" : "SK"}
                             content="this is a message from steve jobs in iheaven, make sure to reply because if you don't, you will be punished."
                             isCurrentUser={isCurrentUser}
                         />

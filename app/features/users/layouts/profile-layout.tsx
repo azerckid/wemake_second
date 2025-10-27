@@ -1,4 +1,7 @@
 import { Form, Link, NavLink, Outlet } from "react-router";
+
+import type { Route } from "./+types/profile-layout";
+
 import {
     Avatar,
     AvatarFallback,
@@ -16,18 +19,32 @@ import {
 } from "~/common/components/ui/dialog";
 import { Textarea } from "~/common/components/ui/textarea";
 import { cn } from "~/lib/utils";
+import { getUserProfile } from "../queries";
 
-export default function ProfileLayout() {
+
+export const loader = async ({
+    params,
+}: Route.LoaderArgs & { params: { username: string } }) => {
+    const user = await getUserProfile(params.username);
+    return { user };
+};
+
+export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
     return (
         <div className="space-y-10">
             <div className="flex items-center gap-4">
                 <Avatar className="size-40">
-                    <AvatarImage src="https://github.com/azerckid.png" />
-                    <AvatarFallback>A</AvatarFallback>
+                    {loaderData.user.avatar ? (
+                        <AvatarImage src={loaderData.user.avatar} />
+                    ) : (
+                        <AvatarFallback className="text-2xl">
+                            {loaderData.user.name[0]}
+                        </AvatarFallback>
+                    )}
                 </Avatar>
                 <div className="space-y-2">
                     <div className="flex gap-2 items-center">
-                        <h1 className="text-2xl font-semibold">Azer.C</h1>
+                        <h1 className="text-2xl font-semibold">{loaderData.user.name}</h1>
                         <Button variant="outline" asChild>
                             <Link to="/my/settings">Edit profile</Link>
                         </Button>
@@ -42,7 +59,7 @@ export default function ProfileLayout() {
                                 </DialogHeader>
                                 <DialogDescription className="space-y-4">
                                     <span className="text-sm text-muted-foreground">
-                                        Send a message to Azer.C
+                                        Send a message to {loaderData.user.name}
                                     </span>
                                     <Form className="space-y-4">
                                         <Textarea
@@ -57,18 +74,21 @@ export default function ProfileLayout() {
                         </Dialog>
                     </div>
                     <div className="flex gap-2 items-center">
-                        <span className="text-sm text-muted-foreground">@azerckid</span>
-                        <Badge variant={"secondary"}>Product Designer</Badge>
-                        <Badge variant={"secondary"}>100 followers</Badge>
-                        <Badge variant={"secondary"}>100 following</Badge>
+                        <span className="text-sm text-muted-foreground">@{loaderData.user.username}</span>
+                        <Badge variant={"secondary"}>{loaderData.user.role}</Badge>
+                        <Badge variant={"secondary"}>{loaderData.user.stats?.followers ?? 0} followers</Badge>
+                        <Badge variant={"secondary"}>{loaderData.user.stats?.following ?? 0} following</Badge>
                     </div>
                 </div>
             </div>
             <div className="flex gap-5">
                 {[
-                    { label: "About", to: "/users/azerckid" },
-                    { label: "Products", to: "/users/azerckid/products" },
-                    { label: "Posts", to: "/users/azerckid/posts" },
+                    { label: "About", to: `/users/${loaderData.user.username}` },
+                    {
+                        label: "Products",
+                        to: `/users/${loaderData.user.username}/products`,
+                    },
+                    { label: "Posts", to: `/users/${loaderData.user.username}/posts` },
                 ].map((item) => (
                     <NavLink
                         end
@@ -86,7 +106,12 @@ export default function ProfileLayout() {
                 ))}
             </div>
             <div className="max-w-screen-md">
-                <Outlet />
+                <Outlet
+                    context={{
+                        headline: loaderData.user.headline ?? "",
+                        bio: loaderData.user.bio ?? "",
+                    }}
+                />
             </div>
         </div>
     );

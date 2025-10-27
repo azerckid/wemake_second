@@ -268,13 +268,13 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                         <DropdownMenuTrigger asChild className="ml-2">
                             <Avatar className="cursor-pointer">
                                 <AvatarImage src="https://github.com/zizimoos.png" alt="User avatar" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarFallback>SK</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end">
                             <DropdownMenuLabel className="flex flex-col gap-1">
-                                <span className="text-sm font-medium">Azerc kid</span>
-                                <span className="text-xs text-muted-foreground">azerckid@example.com</span>
+                                <span className="text-sm font-medium">Sarah Kim</span>
+                                <span className="text-xs text-muted-foreground">zizimoos@gmail.com</span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>

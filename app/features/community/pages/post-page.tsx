@@ -23,14 +23,15 @@ interface ReplyChild {
     children?: ReplyChild[];
 }
 
-function transformReply(reply: ReplyChild): any {
+function transformReply(reply: ReplyChild, depth: number = 0): any {
     return {
         username: reply.author_name,
         avatarUrl: reply.author_avatar || "",
         reply: reply.reply,
         created_at: new Date(reply.created_at),
-        children: reply.children?.map(transformReply),
+        children: reply.children?.map(child => transformReply(child, depth + 1)),
         post_reply_id: reply.post_reply_id,
+        depth,
     };
 }
 

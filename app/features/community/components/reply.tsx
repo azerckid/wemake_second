@@ -53,6 +53,7 @@ interface ReplyProps {
     children?: ReplyProps[];
     parentUsername?: string; // 부모 리플라이 작성자 이름
     post_reply_id?: number; // 리플라이 ID (중첩 리플라이 추적용)
+    depth?: number; // 중첩 깊이
 }
 
 export function Reply({
@@ -63,6 +64,7 @@ export function Reply({
     children,
     parentUsername,
     post_reply_id,
+    depth = 0,
 }: ReplyProps) {
     const [replying, setReplying] = useState(false);
     const toggleReplying = () => setReplying((prev) => !prev);
@@ -76,9 +78,12 @@ export function Reply({
         ? `@${parentUsername} ${reply}`
         : reply;
 
+    // depth가 1 이상이면 들여쓰기 (최대 2단계 제한)
+    const shouldIndent = depth >= 1;
+
     return (
         <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-5 w-2/3">
+            <div className={`flex items-start gap-5 ${shouldIndent ? 'w-2/3' : 'w-2/3'}`}>
                 <Avatar className="size-14">
                     <AvatarFallback>{username[0]}</AvatarFallback>
                     <AvatarImage src={avatarUrl} />
@@ -114,7 +119,7 @@ export function Reply({
                 </Form>
             )}
             {children && children.length > 0 && (
-                <div className="flex flex-col gap-5">
+                <div className={`flex flex-col gap-5 ${depth <= 1 ? 'ml-[76px]' : ''}`}>
                     {children.map((child) => (
                         <Reply
                             key={child.post_reply_id}
@@ -125,6 +130,7 @@ export function Reply({
                             parentUsername={username} // 현재 답글 작성자를 부모로 전달
                             children={child.children}
                             post_reply_id={child.post_reply_id}
+                            depth={depth + 1}
                         />
                     ))}
                 </div>

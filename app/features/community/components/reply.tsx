@@ -78,12 +78,9 @@ export function Reply({
         ? `@${parentUsername} ${reply}`
         : reply;
 
-    // depth가 1 이상이면 들여쓰기 (최대 2단계 제한)
-    const shouldIndent = depth >= 1;
-
     return (
         <div className="flex flex-col gap-2">
-            <div className={`flex items-start gap-5 ${shouldIndent ? 'w-2/3' : 'w-2/3'}`}>
+            <div className="flex items-start gap-5 w-2/3">
                 <Avatar className="size-14">
                     <AvatarFallback>{username[0]}</AvatarFallback>
                     <AvatarImage src={avatarUrl} />

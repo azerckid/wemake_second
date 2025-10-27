@@ -26,8 +26,14 @@ export function ProductCard({
     viewsCount,
     votesCount,
 }: ProductCardProps) {
+    // Ensure id is a valid number
+    const numericId = typeof id === 'number' ? id : Number(id);
+    if (isNaN(numericId)) {
+        console.error('ProductCard received invalid id:', id, 'for product:', name);
+    }
+    const productUrl = `/products/${numericId}`;
     return (
-        <Link to={`/products/${id}`} className="block">
+        <Link to={productUrl} className="block">
             <Card className="w-full flex flex-row items-center justify-between p-6 bg-transparent hover:bg-primary/10">
                 <CardHeader className="p-0 flex-1">
                     <CardTitle className="text-2xl font-semibold leading-none tracking-tight">

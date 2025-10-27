@@ -1,26 +1,38 @@
 import type { Route } from "./+types/profile-posts-page";
 
 import { PostCard } from "~/features/community/components/post-card";
+import { getUserPosts } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Posts | wemake" }];
 };
 
-export default function ProfilePostsPage({ params }: Route.ComponentProps) {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+    const posts = await getUserPosts(params.username);
+    return { posts };
+};
+
+export default function ProfilePostsPage({ loaderData }: Route.ComponentProps) {
     return (
         <div className="flex flex-col gap-5">
-            {Array.from({ length: 5 }).map((_, index) => (
-                <PostCard
-                    key={`postId-${index}`}
-                    id={`postId-${index}`}
-                    title="What is the best productivity tool?"
-                    author="Azer.C"
-                    authorAvatarUrl="https://github.com/apple.png"
-                    category="Productivity"
-                    postedAt="12 hours ago"
-                    expanded
-                />
-            ))}
+            {loaderData.posts.length === 0 ? (
+                <p className="text-muted-foreground">No posts yet.</p>
+            ) : (
+                loaderData.posts.map((post) => (
+                    <PostCard
+                        key={post.post_id}
+                        post_id={post.post_id}
+                        title={post.title}
+                        author={post.profiles?.username || "Unknown"}
+                        authorAvatarUrl={post.profiles?.avatar || null}
+                        topic_id={post.topic_id || 0}
+                        topic_name={post.topics?.name || "General"}
+                        created_at={post.created_at}
+                        expanded
+                        votesCount={post.upvotes || 0}
+                    />
+                ))
+            )}
         </div>
     );
 }

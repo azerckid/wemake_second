@@ -1,17 +1,38 @@
-import { Link } from "react-router";
-import { Form } from "react-router";
+import { Form, Link } from "react-router";
 
 import type { Route } from "./+types/post-page";
 
+import { getPostById, getRepliesByPostId } from "../queries";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
+import { DateTime } from "luxon";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "~/common/components/ui/breadcrumb";
 import { Button } from "~/common/components/ui/button";
 import { Avatar } from "~/common/components/ui/avatar";
 import { AvatarFallback } from "~/common/components/ui/avatar";
 import { AvatarImage } from "~/common/components/ui/avatar";
-import { Textarea } from "~/common/components/ui/textarea";
 import { Reply } from "../components/reply";
 import { Badge } from "~/common/components/ui/badge";
+import { Textarea } from "~/common/components/ui/textarea";
+
+interface ReplyChild {
+    post_reply_id: number;
+    author_name: string;
+    author_avatar: string | null;
+    reply: string;
+    created_at: string;
+    children?: ReplyChild[];
+}
+
+function transformReply(reply: ReplyChild): any {
+    return {
+        username: reply.author_name,
+        avatarUrl: reply.author_avatar || "",
+        reply: reply.reply,
+        created_at: new Date(reply.created_at),
+        children: reply.children?.map(transformReply),
+        post_reply_id: reply.post_reply_id,
+    };
+}
 
 export const meta: Route.MetaFunction = () => {
     return [
@@ -20,7 +41,15 @@ export const meta: Route.MetaFunction = () => {
     ];
 }
 
-export default function PostPage() {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+    const [post, replies] = await Promise.all([
+        getPostById(params.postId),
+        getRepliesByPostId(params.postId),
+    ]);
+    return { post, replies };
+};
+
+export default function PostPage({ loaderData }: Route.ComponentProps) {
     return (
 
         <div className="space-y-10">
@@ -34,14 +63,14 @@ export default function PostPage() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/community?topic=productivity">Productivity</Link>
+                            <Link to={`/community?topic=${loaderData.post.topic_slug}`}>{loaderData.post.topic_name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/community/postId">
-
+                            <Link to={`/community/${loaderData.post.post_id}`}>
+                                {loaderData.post.title}
                             </Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
@@ -52,33 +81,30 @@ export default function PostPage() {
                     <div className="flex w-full items-start gap-10">
                         <Button variant="outline" className="flex flex-col h-14">
                             <ChevronUpIcon className="size-4 shrink-0" />
-                            <span>10</span>
+                            <span>{loaderData.post.upvotes}</span>
                         </Button>
                         <div className="space-y-20">
                             <div className="space-y-2">
                                 <h2 className="text-3xl font-bold">
-                                    What is the best productivity tool?
+                                    {loaderData.post.title}
                                 </h2>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span>@nico</span>
+                                    <span>@{loaderData.post.author_name}</span>
                                     <DotIcon className="size-5" />
-                                    <span>12 hours ago</span>
+                                    <span>{DateTime.fromISO(loaderData.post.created_at).toRelative()}</span>
                                     <DotIcon className="size-5" />
-                                    <span>10 replies</span>
+                                    <span>{loaderData.post.replies} replies</span>
                                 </div>
                                 <p className="text-muted-foreground w-3/4">
-                                    Hello, I'm looking for a productivity tool that can help me
-                                    manage my tasks and projects. Any recommendations? I have
-                                    tried Notion, but it's not what I'm looking for. I dream of a
-                                    tool that can help me manage my tasks and projects. Any
-                                    recommendations?
+                                    {loaderData.post.content}
                                 </p>
                             </div>
 
+                            {/* TODO: Implement reply form submission */}
                             <Form className="flex items-start gap-5 w-3/4">
                                 <Avatar className="size-14">
-                                    <AvatarFallback>A</AvatarFallback>
-                                    <AvatarImage src="https://github.com/azerckid.png" />
+                                    <AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
+                                    {loaderData.post.author_avatar && <AvatarImage src={loaderData.post.author_avatar} />}
                                 </Avatar>
                                 <div className="flex flex-col gap-5 items-end w-full">
                                     <Textarea
@@ -90,15 +116,22 @@ export default function PostPage() {
                                 </div>
                             </Form>
                             <div className="space-y-10">
-                                <h4 className="font-semibold">10 Replies</h4>
+                                <h4 className="font-semibold">{loaderData.post.replies} Replies</h4>
                                 <div className="flex flex-col gap-5">
-                                    <Reply
-                                        username="zizimoos"
-                                        avatarUrl="https://github.com/zizimoos.png"
-                                        reply="I've been using Todoist for a while now, and it's really great. It's simple, easy to use, and has a lot of features."
-                                        created_at={new Date()}
-                                        topLevel
-                                    />
+                                    {loaderData.replies.length > 0 ? (
+                                        loaderData.replies.map((reply) => (
+                                            <Reply
+                                                key={reply.post_reply_id}
+                                                username={reply.author_name}
+                                                avatarUrl={reply.author_avatar || ""}
+                                                reply={reply.reply}
+                                                created_at={new Date(reply.created_at)}
+                                                children={reply.children?.map(transformReply)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className="text-muted-foreground">No replies yet. Be the first to reply!</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -107,17 +140,17 @@ export default function PostPage() {
                 <aside className="col-span-2 space-y-5 border rounded-lg p-6 shadow-sm">
                     <div className="flex gap-5">
                         <Avatar className="size-14">
-                            <AvatarFallback>N</AvatarFallback>
-                            <AvatarImage src="https://github.com/azerckid.png" />
+                            <AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
+                            {loaderData.post.author_avatar && <AvatarImage src={loaderData.post.author_avatar} />}
                         </Avatar>
                         <div className="flex flex-col">
-                            <h4 className="text-lg font-medium">Azer.C</h4>
-                            <Badge variant="secondary">Entrepreneur</Badge>
+                            <h4 className="text-lg font-medium">{loaderData.post.author_name}</h4>
+                            <Badge variant="secondary">{loaderData.post.author_role}</Badge>
                         </div>
                     </div>
                     <div className="gap-2 text-sm flex flex-col">
-                        <span>🎂 Joined 3 months ago</span>
-                        <span>🚀 Launched 10 products</span>
+                        <span>🎂 Joined {DateTime.fromISO(loaderData.post.author_created_at).toRelative()}</span>
+                        <span>🚀 Launched {loaderData.post.products} products</span>
                     </div>
                     <Button variant="outline" className="w-full">
                         Follow

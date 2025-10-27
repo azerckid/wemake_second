@@ -67,41 +67,30 @@ export const getUserProducts = async (username: string) => {
 };
 
 export const getUserPosts = async (username: string) => {
-    // First get the profile_id from username
-    const { data: profile, error: profileError } = await client
-        .from("profiles")
-        .select("profile_id")
-        .eq("username", username)
-        .single();
-
-    if (profileError || !profile) {
-        return [];
-    }
-
-    // Then get posts for that profile
+    // Use the existing view with username filter
     const { data, error } = await client
-        .from("posts")
-        .select(`
-            post_id,
-            title,
-            content,
-            upvotes,
-            created_at,
-            updated_at,
-            topic_id,
-            profile_id,
-            profiles!posts_profile_id_profiles_profile_id_fk (
-                username,
-                avatar
-            ),
-            topics (
-                name
-            )
-        `)
-        .eq("profile_id", profile.profile_id);
+        .from("community_post_list_view")
+        .select("*")
+        .eq("author_username", username)
+        .order("created_at", { ascending: false });
 
     if (error) {
         return [];
     }
-    return data || [];
+
+    // Map view columns to match PostCard interface
+    return (data || []).map((post: any) => ({
+        post_id: post.post_id,
+        title: post.title,
+        upvotes: post.upvotes,
+        created_at: post.created_at,
+        topic_id: 0, // View doesn't have topic_id, not used in PostCard
+        profiles: {
+            username: post.author_username,
+            avatar: post.author_avatar,
+        },
+        topics: {
+            name: post.topic,
+        },
+    }));
 };

@@ -1,15 +1,19 @@
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
-export const getTeams = async ({
-    limit,
-    page = 1
-}: {
-    limit: number;
-    page?: number;
-}) => {
+export const getTeams = async (
+    request: Request,
+    {
+        limit,
+        page = 1
+    }: {
+        limit: number;
+        page?: number;
+    }
+) => {
+    const { supabase } = createSupabaseServerClient(request);
     const offset = (page - 1) * limit;
 
-    const { data, error, count } = await client
+    const { data, error, count } = await supabase
         .from("teams")
         .select(
             `
@@ -43,8 +47,9 @@ export const getTeams = async ({
     };
 };
 
-export const getTeamById = async (teamId: string) => {
-    const { data, error } = await client
+export const getTeamById = async (request: Request, teamId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("teams")
         .select(
             `

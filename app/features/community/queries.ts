@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
-export const getTopics = async () => {
+export const getTopics = async (request: Request) => {
+  const { supabase } = createSupabaseServerClient(request);
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const { data, error } = await client.from("topics").select("*");
+  const { data, error } = await supabase.from("topics").select("*");
   if (error) throw new Error(error.message);
   return data;
 };
@@ -37,22 +38,26 @@ interface PostDetail {
   products: number;
 }
 
-export const getPosts = async ({
-  limit,
-  sorting,
-  period = "all",
-  keyword,
-  topic,
-  page = 1,
-}: {
-  limit: number;
-  sorting: "newest" | "popular";
-  period?: "all" | "today" | "week" | "month" | "year";
-  keyword?: string;
-  topic?: string;
-  page?: number;
-}): Promise<Post[]> => {
-  const baseQuery = client
+export const getPosts = async (
+  request: Request,
+  {
+    limit,
+    sorting,
+    period = "all",
+    keyword,
+    topic,
+    page = 1,
+  }: {
+    limit: number;
+    sorting: "newest" | "popular";
+    period?: "all" | "today" | "week" | "month" | "year";
+    keyword?: string;
+    topic?: string;
+    page?: number;
+  }
+): Promise<Post[]> => {
+  const { supabase } = createSupabaseServerClient(request);
+  const baseQuery = supabase
     .from("community_post_list_view")
     .select(`*`)
     .range((page - 1) * limit, page * limit - 1);
@@ -90,18 +95,22 @@ export const getPosts = async ({
   return (data || []) as Post[];
 };
 
-export const getPostsCount = async ({
-  sorting,
-  period = "all",
-  keyword,
-  topic,
-}: {
-  sorting: "newest" | "popular";
-  period?: "all" | "today" | "week" | "month" | "year";
-  keyword?: string;
-  topic?: string;
-}): Promise<number> => {
-  const baseQuery = client
+export const getPostsCount = async (
+  request: Request,
+  {
+    sorting,
+    period = "all",
+    keyword,
+    topic,
+  }: {
+    sorting: "newest" | "popular";
+    period?: "all" | "today" | "week" | "month" | "year";
+    keyword?: string;
+    topic?: string;
+  }
+): Promise<number> => {
+  const { supabase } = createSupabaseServerClient(request);
+  const baseQuery = supabase
     .from("community_post_list_view")
     .select(`*`, { count: "exact", head: true });
 
@@ -131,8 +140,9 @@ export const getPostsCount = async ({
   return count || 0;
 };
 
-export const getPostById = async (postId: string): Promise<PostDetail> => {
-  const { data, error } = await client
+export const getPostById = async (request: Request, postId: string): Promise<PostDetail> => {
+  const { supabase } = createSupabaseServerClient(request);
+  const { data, error } = await supabase
     .from("community_post_detail" as any)
     .select("*")
     .eq("post_id", Number(postId))
@@ -154,9 +164,11 @@ interface PostReply {
   children?: PostReply[];
 }
 
-export const getRepliesByPostId = async (postId: string): Promise<PostReply[]> => {
+export const getRepliesByPostId = async (request: Request, postId: string): Promise<PostReply[]> => {
+  const { supabase } = createSupabaseServerClient(request);
+
   // Get all replies for this post
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("post_replies")
     .select(`
       post_reply_id,

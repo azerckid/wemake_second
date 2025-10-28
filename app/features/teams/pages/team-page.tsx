@@ -15,8 +15,8 @@ export const meta: Route.MetaFunction = () => [
     { title: "Team Details | wemake" },
 ];
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    const team = await getTeamById(params.teamId);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const team = await getTeamById(request, params.teamId);
     return { team };
 };
 

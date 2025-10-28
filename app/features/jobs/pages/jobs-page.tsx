@@ -47,14 +47,14 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const page = parsedData.page;
 
     const [jobs, totalCount] = await Promise.all([
-        getJobs({
+        getJobs(request, {
             limit,
             page,
             location: parsedData.location as JobLocation | undefined,
             type: parsedData.type as JobType | undefined,
             salary: parsedData.salary as SalaryRange | undefined,
         }),
-        getJobsCount({
+        getJobsCount(request, {
             location: parsedData.location as JobLocation | undefined,
             type: parsedData.type as JobType | undefined,
             salary: parsedData.salary as SalaryRange | undefined,

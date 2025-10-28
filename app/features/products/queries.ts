@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { PAGE_SIZE } from "./constants";
 
 // Product 타입 정의
@@ -35,20 +35,24 @@ export const productListSelect = `
     created_at
 `;
 
-export const getProductsByDateRange = async ({
-    startDate,
-    endDate,
-    limit,
-    ascending = false,
-    page = 1,
-}: {
-    startDate: DateTime;
-    endDate: DateTime;
-    limit: number;
-    ascending?: boolean;
-    page?: number;
-}): Promise<Product[]> => {
-    const { data, error } = await client
+export const getProductsByDateRange = async (
+    request: Request,
+    {
+        startDate,
+        endDate,
+        limit,
+        ascending = false,
+        page = 1,
+    }: {
+        startDate: DateTime;
+        endDate: DateTime;
+        limit: number;
+        ascending?: boolean;
+        page?: number;
+    }
+): Promise<Product[]> => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("products")
         .select(productListSelect)
         .order("stats->>upvotes", { ascending })
@@ -72,14 +76,18 @@ export const getProductsByDateRange = async ({
     return products;
 };
 
-export const getProductPagesByDateRange = async ({
-    startDate,
-    endDate,
-}: {
-    startDate: DateTime;
-    endDate: DateTime;
-}) => {
-    const { count, error } = await client
+export const getProductPagesByDateRange = async (
+    request: Request,
+    {
+        startDate,
+        endDate,
+    }: {
+        startDate: DateTime;
+        endDate: DateTime;
+    }
+) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { count, error } = await supabase
         .from("products")
         .select(`product_id`, { count: "exact", head: true })
         .gte("created_at", startDate.toISO())
@@ -89,8 +97,9 @@ export const getProductPagesByDateRange = async ({
     return Math.ceil(count / PAGE_SIZE);
 };
 
-export const getCategories = async () => {
-    const { data, error } = await client
+export const getCategories = async (request: Request) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("categories")
         .select("category_id, name, description");
     if (error) {
@@ -100,8 +109,9 @@ export const getCategories = async () => {
     return data;
 };
 
-export const getCategory = async (categoryId: number) => {
-    const { data, error } = await client
+export const getCategory = async (request: Request, categoryId: number) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("categories")
         .select("category_id, name, description")
         .eq("category_id", categoryId)
@@ -113,14 +123,18 @@ export const getCategory = async (categoryId: number) => {
     return data;
 };
 
-export const getProductsByCategory = async ({
-    categoryId,
-    page,
-}: {
-    categoryId: number;
-    page: number;
-}): Promise<Product[]> => {
-    const { data, error } = await client
+export const getProductsByCategory = async (
+    request: Request,
+    {
+        categoryId,
+        page,
+    }: {
+        categoryId: number;
+        page: number;
+    }
+): Promise<Product[]> => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("products")
         .select(productListSelect)
         .eq("category_id", categoryId)
@@ -141,8 +155,9 @@ export const getProductsByCategory = async ({
     return products;
 };
 
-export const getCategoryPages = async (categoryId: number): Promise<number> => {
-    const { count, error } = await client
+export const getCategoryPages = async (request: Request, categoryId: number): Promise<number> => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { count, error } = await supabase
         .from("products")
         .select(`product_id`, { count: "exact", head: true })
         .eq("category_id", categoryId);
@@ -154,14 +169,18 @@ export const getCategoryPages = async (categoryId: number): Promise<number> => {
     return Math.ceil(count / PAGE_SIZE);
 };
 
-export const getProductsBySearch = async ({
-    query,
-    page,
-}: {
-    query: string;
-    page: number;
-}): Promise<Product[]> => {
-    const { data, error } = await client
+export const getProductsBySearch = async (
+    request: Request,
+    {
+        query,
+        page,
+    }: {
+        query: string;
+        page: number;
+    }
+): Promise<Product[]> => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("products")
         .select(productListSelect)
         .or(`name.ilike.%${query}%, tagline.ilike.%${query}%`)
@@ -182,8 +201,9 @@ export const getProductsBySearch = async ({
     return products;
 };
 
-export const getPagesBySearch = async ({ query }: { query: string }) => {
-    const { count, error } = await client
+export const getPagesBySearch = async (request: Request, { query }: { query: string }) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { count, error } = await supabase
         .from("products")
         .select(`product_id`, { count: "exact", head: true })
         .or(`name.ilike.%${query}%, tagline.ilike.%${query}%`);
@@ -192,8 +212,9 @@ export const getPagesBySearch = async ({ query }: { query: string }) => {
     return Math.ceil(count / PAGE_SIZE);
 };
 
-export const getProductById = async (productId: string) => {
-    const { data, error } = await client
+export const getProductById = async (request: Request, productId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("product_overview_view")
         .select("*")
         .eq("product_id", parseInt(productId))
@@ -202,8 +223,9 @@ export const getProductById = async (productId: string) => {
     return data;
 };
 
-export const getReviews = async (productId: string) => {
-    const { data, error } = await client
+export const getReviews = async (request: Request, productId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("reviews")
         .select(
             `

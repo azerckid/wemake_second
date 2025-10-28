@@ -14,7 +14,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = 6; // 한 페이지당 6개씩 표시
 
-    const result = await getTeams({ limit, page });
+    const result = await getTeams(request, { limit, page });
     return result;
 };
 

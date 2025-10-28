@@ -1,4 +1,4 @@
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { productListSelect } from "../products/queries";
 
 type UserProfile = {
@@ -15,8 +15,9 @@ type UserProfile = {
     } | null;
 };
 
-export const getUserProfile = async (username: string): Promise<UserProfile> => {
-    const { data, error } = await client
+export const getUserProfile = async (request: Request, username: string): Promise<UserProfile> => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("profiles")
         .select(
             `
@@ -42,9 +43,11 @@ export const getUserProfile = async (username: string): Promise<UserProfile> => 
     return data as UserProfile;
 };
 
-export const getUserProducts = async (username: string) => {
+export const getUserProducts = async (request: Request, username: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+
     // First get the profile_id from username
-    const { data: profile, error: profileError } = await client
+    const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("profile_id")
         .eq("username", username)
@@ -55,7 +58,7 @@ export const getUserProducts = async (username: string) => {
     }
 
     // Then get products for that profile
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("products")
         .select(productListSelect)
         .eq("profile_id", profile.profile_id);
@@ -66,9 +69,11 @@ export const getUserProducts = async (username: string) => {
     return data || [];
 };
 
-export const getUserPosts = async (username: string) => {
+export const getUserPosts = async (request: Request, username: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+
     // Use the existing view with username filter
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("community_post_list_view")
         .select("*")
         .eq("author_username", username)

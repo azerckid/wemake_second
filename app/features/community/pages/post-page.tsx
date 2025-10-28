@@ -42,10 +42,10 @@ export const meta: Route.MetaFunction = () => {
     ];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const [post, replies] = await Promise.all([
-        getPostById(params.postId),
-        getRepliesByPostId(params.postId),
+        getPostById(request, params.postId),
+        getRepliesByPostId(request, params.postId),
     ]);
     return { post, replies };
 };

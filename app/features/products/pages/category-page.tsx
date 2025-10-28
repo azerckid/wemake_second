@@ -26,12 +26,12 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     if (!success) {
         throw new Response("Invalid category", { status: 400 });
     }
-    const category = await getCategory(data.category);
-    const products = await getProductsByCategory({
+    const category = await getCategory(request, data.category);
+    const products = await getProductsByCategory(request, {
         categoryId: data.category,
         page: Number(page),
     });
-    const totalPages = await getCategoryPages(data.category);
+    const totalPages = await getCategoryPages(request, data.category);
     return { category, products, totalPages, currentPage: Number(page) };
 }
 

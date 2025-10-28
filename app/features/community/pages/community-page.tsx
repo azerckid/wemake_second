@@ -54,8 +54,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const limit = POSTS_PER_PAGE;
 
     const [topics, posts, totalCount] = await Promise.all([
-        getTopics(),
-        getPosts({
+        getTopics(request),
+        getPosts(request, {
             limit,
             sorting: parsedData.sorting,
             period: parsedData.period,
@@ -63,7 +63,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
             topic: parsedData.topic,
             page,
         }),
-        getPostsCount({
+        getPostsCount(request, {
             sorting: parsedData.sorting,
             period: parsedData.period,
             keyword: parsedData.keyword,

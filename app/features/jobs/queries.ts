@@ -1,22 +1,26 @@
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { type JobType, type JobLocation, type SalaryRange } from "./contants";
 
-export const getJobs = async ({
-    limit,
-    page = 1,
-    location,
-    type,
-    salary,
-    sorting = "newest",
-}: {
-    limit: number;
-    page?: number;
-    location?: JobLocation;
-    type?: JobType;
-    salary?: SalaryRange;
-    sorting?: "newest" | "oldest";
-}) => {
-    const baseQuery = client
+export const getJobs = async (
+    request: Request,
+    {
+        limit,
+        page = 1,
+        location,
+        type,
+        salary,
+        sorting = "newest",
+    }: {
+        limit: number;
+        page?: number;
+        location?: JobLocation;
+        type?: JobType;
+        salary?: SalaryRange;
+        sorting?: "newest" | "oldest";
+    }
+) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const baseQuery = supabase
         .from("jobs")
         .select(
             `
@@ -52,16 +56,20 @@ export const getJobs = async ({
     return data;
 };
 
-export const getJobsCount = async ({
-    location,
-    type,
-    salary,
-}: {
-    location?: JobLocation;
-    type?: JobType;
-    salary?: SalaryRange;
-}) => {
-    const baseQuery = client
+export const getJobsCount = async (
+    request: Request,
+    {
+        location,
+        type,
+        salary,
+    }: {
+        location?: JobLocation;
+        type?: JobType;
+        salary?: SalaryRange;
+    }
+) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const baseQuery = supabase
         .from("jobs")
         .select("*", { count: "exact", head: true });
 
@@ -82,8 +90,9 @@ export const getJobsCount = async ({
     return count || 0;
 };
 
-export const getJob = async (job_id: number) => {
-    const { data, error } = await client
+export const getJob = async (request: Request, job_id: number) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("jobs")
         .select("*")
         .eq("job_id", job_id)
@@ -95,8 +104,9 @@ export const getJob = async (job_id: number) => {
 };
 
 
-export const getJobById = async (jobId: string) => {
-    const { data, error } = await client
+export const getJobById = async (request: Request, jobId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("jobs")
         .select("*")
         .eq("job_id", parseInt(jobId))

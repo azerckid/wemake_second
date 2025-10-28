@@ -10,8 +10,8 @@ export const meta: Route.MetaFunction = () => [
     { name: "description", content: "Browse products by category" },
 ];
 
-export const loader = async () => {
-    const categories = await getCategories();
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const categories = await getCategories(request);
     return { categories };
 };
 

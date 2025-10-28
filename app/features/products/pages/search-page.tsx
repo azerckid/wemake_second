@@ -63,11 +63,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     if (parsedData.query === "") {
         return { products: [], totalPages: 1, currentPage: 1, query: "" };
     }
-    const products = await getProductsBySearch({
+    const products = await getProductsBySearch(request, {
         query: parsedData.query,
         page: parsedData.page,
     });
-    const totalPages = await getPagesBySearch({ query: parsedData.query });
+    const totalPages = await getPagesBySearch(request, { query: parsedData.query });
     return { products, totalPages, currentPage: parsedData.page, query: parsedData.query };
 }
 

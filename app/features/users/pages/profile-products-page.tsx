@@ -7,8 +7,8 @@ export const meta: Route.MetaFunction = () => {
     return [{ title: "Products | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    const products = await getUserProducts(params.username);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const products = await getUserProducts(request, params.username);
     return { products };
 };
 

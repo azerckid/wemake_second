@@ -2,14 +2,16 @@ import { useOutletContext } from "react-router";
 
 import type { Route } from "./+types/profile-page";
 
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Profile | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    await client.rpc("track_event", {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+
+    await supabase.rpc("track_event", {
         p_event_type: "profile_view",
         p_event_data: {
             username: params.username,

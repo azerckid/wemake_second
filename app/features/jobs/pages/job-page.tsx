@@ -10,8 +10,8 @@ export const meta: Route.MetaFunction = () => {
     return [{ title: "Job Details | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    const job = await getJobById(params.jobId);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const job = await getJobById(request, params.jobId);
     return { job };
 };
 

@@ -27,8 +27,8 @@ export async function action({ request }: Route.ActionArgs) {
     return { success: true };
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    const reviews = await getReviews(params.productId);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const reviews = await getReviews(request, params.productId);
     return { reviews };
 };
 

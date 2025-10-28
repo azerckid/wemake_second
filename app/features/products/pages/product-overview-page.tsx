@@ -2,10 +2,12 @@ import { useOutletContext } from "react-router";
 
 import type { Route } from "./+types/product-overview-page";
 
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-    await client.rpc("track_event", {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+
+    await supabase.rpc("track_event", {
         p_event_type: "product_view",
         p_event_data: {
             product_id: parseInt(params.productId),

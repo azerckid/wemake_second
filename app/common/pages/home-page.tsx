@@ -15,20 +15,20 @@ import { getGptIdeas } from "~/features/ideas/queries";
 import { getJobs } from "~/features/jobs/queries";
 import { getTeams } from "~/features/teams/queries";
 
-export const loader = async () => {
-    const products = await getProductsByDateRange({
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const products = await getProductsByDateRange(request, {
         startDate: DateTime.now().startOf("day"),
         endDate: DateTime.now().endOf("day"),
         limit: 7,
     });
-    const posts = await getPosts({
+    const posts = await getPosts(request, {
         limit: 7,
         sorting: "newest",
         period: "all",
     });
-    const gptIdeas = await getGptIdeas({ limit: 5, page: 1 });
-    const jobs = await getJobs({ limit: 5, page: 1, sorting: "newest" });
-    const teamsResult = await getTeams({ limit: 7, page: 1 });
+    const gptIdeas = await getGptIdeas(request, { limit: 5, page: 1 });
+    const jobs = await getJobs(request, { limit: 5, page: 1, sorting: "newest" });
+    const teamsResult = await getTeams(request, { limit: 7, page: 1 });
     const teams = teamsResult.teams;
     return { products, posts, gptIdeas, jobs, teams };
 };

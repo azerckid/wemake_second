@@ -6,13 +6,13 @@ export const meta: Route.MetaFunction = () => {
     return [{ title: "My Ideas | wemake" }];
 };
 
-export const loader = async () => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
     // TODO: Get current user from session
     // For now, using a hardcoded profile ID - replace with actual user session
     const currentUserProfileId = "67ac33ac-e49c-4c36-8d71-f12fdaea0e4f"; // alex.chen's profile_id
 
     try {
-        const claimedIdeas = await getUserClaimedIdeas(currentUserProfileId);
+        const claimedIdeas = await getUserClaimedIdeas(request, currentUserProfileId);
         return { claimedIdeas };
     } catch (error) {
         console.error("Failed to load claimed ideas:", error);

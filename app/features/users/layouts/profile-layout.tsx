@@ -23,9 +23,10 @@ import { getUserProfile } from "../queries";
 
 
 export const loader = async ({
+    request,
     params,
 }: Route.LoaderArgs & { params: { username: string } }) => {
-    const user = await getUserProfile(params.username);
+    const user = await getUserProfile(request, params.username);
     return { user };
 };
 

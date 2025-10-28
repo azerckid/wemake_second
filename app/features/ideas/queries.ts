@@ -1,13 +1,17 @@
-import client from "~/supa-client";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
-export const getGptIdeas = async ({
-    limit,
-    page = 1
-}: {
-    limit: number;
-    page?: number;
-}) => {
-    const { data, error } = await client
+export const getGptIdeas = async (
+    request: Request,
+    {
+        limit,
+        page = 1
+    }: {
+        limit: number;
+        page?: number;
+    }
+) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("gpt_ideas_view")
         .select("*")
         .order("created_at", { ascending: false })
@@ -18,8 +22,9 @@ export const getGptIdeas = async ({
     return data;
 };
 
-export const getGptIdeasCount = async () => {
-    const { count, error } = await client
+export const getGptIdeasCount = async (request: Request) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { count, error } = await supabase
         .from("gpt_ideas_view")
         .select("*", { count: "exact", head: true });
     if (error) {
@@ -28,8 +33,9 @@ export const getGptIdeasCount = async () => {
     return count || 0;
 };
 
-export const getGptIdea = async (gpt_idea_id: number) => {
-    const { data, error } = await client
+export const getGptIdea = async (request: Request, gpt_idea_id: number) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("gpt_ideas_view")
         .select("*")
         .eq("gpt_idea_id", gpt_idea_id)
@@ -40,8 +46,9 @@ export const getGptIdea = async (gpt_idea_id: number) => {
     return data;
 };
 
-export const getUserClaimedIdeas = async (profileId: string) => {
-    const { data, error } = await client
+export const getUserClaimedIdeas = async (request: Request, profileId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
         .from("gpt_ideas")
         .select(`
             gpt_idea_id,

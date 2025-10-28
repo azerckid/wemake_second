@@ -17,9 +17,10 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export const loader = async ({
+    request,
     params,
 }: Route.LoaderArgs & { params: { productId: string } }) => {
-    const product = await getProductById(params.productId);
+    const product = await getProductById(request, params.productId);
     return { product };
 };
 

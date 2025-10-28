@@ -18,8 +18,8 @@ export const meta = ({
     ];
 };
 
-export const loader = async ({ params }: Route.ComponentProps) => {
-    const idea = await getGptIdea(Number(params.ideaId));
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const idea = await getGptIdea(request, Number(params.ideaId));
     return { idea };
 };
 

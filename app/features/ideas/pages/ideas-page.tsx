@@ -19,8 +19,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const limit = 12;
 
     const [ideas, totalCount] = await Promise.all([
-        getGptIdeas({ limit, page }),
-        getGptIdeasCount(),
+        getGptIdeas(request, { limit, page }),
+        getGptIdeasCount(request),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);

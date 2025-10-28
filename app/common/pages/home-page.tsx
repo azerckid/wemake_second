@@ -3,17 +3,17 @@ import { Link } from "react-router";
 import type { Route } from "./+types/home-page";
 
 import { DateTime } from "luxon";
+import { Button } from "../components/ui/button";
+import { getProductsByDateRange } from "~/features/products/queries";
 import { ProductCard } from "~/features/products/components/product-card";
 import { PostCard } from "~/features/community/components/post-card";
 import { IdeaCard } from "~/features/ideas/components/idea-card";
-import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
-import { Button } from "../components/ui/button";
-import { getProductsByDateRange } from "~/features/products/queries";
+import { JobCard } from "~/features/jobs/components/job-card";
 import { getPosts } from "~/features/community/queries";
 import { getGptIdeas } from "~/features/ideas/queries";
-import { getJobs } from "~/features/jobs/queries";
 import { getTeams } from "~/features/teams/queries";
+import { getJobs } from "~/features/jobs/queries";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     const products = await getProductsByDateRange(request, {
@@ -32,7 +32,6 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const teams = teamsResult.teams;
     return { products, posts, gptIdeas, jobs, teams };
 };
-
 
 export function meta({ }: Route.MetaArgs) {
     return [

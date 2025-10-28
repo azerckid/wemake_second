@@ -103,7 +103,6 @@ export const getJob = async (request: Request, job_id: number) => {
     return data;
 };
 
-
 export const getJobById = async (request: Request, jobId: string) => {
     const { supabase } = createSupabaseServerClient(request);
     const { data, error } = await supabase

@@ -14,14 +14,17 @@ export function createSupabaseServerClient(request: Request) {
         {
             cookies: {
                 getAll() {
-                    // parseCookieHeader returns cookies with optional value
-                    // Filter out any cookies without values and ensure type compatibility
+                    // supabase에게 user의 쿠키를 전달하기 위해서는 쿠키를 파싱해야 함
                     const cookies = parseCookieHeader(request.headers.get("Cookie") ?? "");
                     return cookies.filter((cookie): cookie is { name: string; value: string } =>
                         cookie.value !== undefined
                     );
                 },
                 setAll(cookiesToSet) {
+                    // cookiesToSet is an array of objects with name, value, and options
+                    // supabase가 쿠키를 설정할 수 있도록 해줘야 함
+                    // supabase에게 쿠키를 전달하기 위해서는 쿠키를 직렬화해야 함
+                    // serializeCookieHeader는 쿠키를 직렬화하는 함수
                     cookiesToSet.forEach(({ name, value, options }) => {
                         headers.append(
                             "Set-Cookie",

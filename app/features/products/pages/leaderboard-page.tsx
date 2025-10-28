@@ -2,11 +2,11 @@ import { Link } from "react-router";
 
 import type { Route } from "./+types/leaderboard-page";
 
-import { Hero } from "~/common/components/hero";
-import { Button } from "~/common/components/ui/button";
-import { ProductCard } from "../components/product-card";
-import { getProductsByDateRange } from "../queries";
 import { DateTime } from "luxon";
+import { getProductsByDateRange } from "../queries";
+import { ProductCard } from "../components/product-card";
+import { Button } from "~/common/components/ui/button";
+import { Hero } from "~/common/components/hero";
 
 export function meta({ data }: Route.MetaArgs) {
     return [

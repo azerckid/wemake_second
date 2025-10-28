@@ -2,7 +2,7 @@ import { Link, NavLink, Outlet } from "react-router";
 
 import type { Route } from "./+types/product-overview-layout";
 
-import { StarIcon } from "lucide-react";
+import { ArrowUpRightIcon, StarIcon } from "lucide-react";
 import { ChevronUpIcon } from "lucide-react";
 import { PackageIcon } from "lucide-react";
 import { Button, buttonVariants } from "~/common/components/ui/button";
@@ -71,7 +71,10 @@ export default function ProductOverviewLayout({
                         size="lg"
                         className="text-sm"
                     >
-                        Visit Website
+                        <Link to={`/products/${loaderData.product.product_id}/visit`} className="flex items-center gap-2 hover:underline">
+                            <ArrowUpRightIcon className="size-4" />
+                            Visit Website
+                        </Link>
                     </Button>
                     <Button size="lg" className="text-sm">
                         <ChevronUpIcon className="size-4" />

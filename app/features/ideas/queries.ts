@@ -39,3 +39,29 @@ export const getGptIdea = async (gpt_idea_id: number) => {
     }
     return data;
 };
+
+export const getUserClaimedIdeas = async (profileId: string) => {
+    const { data, error } = await client
+        .from("gpt_ideas")
+        .select(`
+            gpt_idea_id,
+            idea,
+            views,
+            claimed_at,
+            claimed_by,
+            created_at,
+            gpt_ideas_likes!left(count)
+        `)
+        .eq("claimed_by", profileId)
+        .order("claimed_at", { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+
+    // Transform the data to include likes count
+    return (data || []).map((idea: any) => ({
+        ...idea,
+        likes: idea.gpt_ideas_likes?.length || 0
+    }));
+};

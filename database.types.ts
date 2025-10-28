@@ -38,6 +38,50 @@ export type Database = {
                 }
                 Relationships: []
             }
+            events: {
+                Row: {
+                    created_at: string
+                    event_data: Json | null
+                    event_id: string
+                    event_type: Database["public"]["Enums"]["event_type"]
+                    ip_address: string | null
+                    referrer: string | null
+                    session_id: string | null
+                    user_agent: string | null
+                    user_id: string | null
+                }
+                Insert: {
+                    created_at?: string
+                    event_data?: Json | null
+                    event_id?: string
+                    event_type: Database["public"]["Enums"]["event_type"]
+                    ip_address?: string | null
+                    referrer?: string | null
+                    session_id?: string | null
+                    user_agent?: string | null
+                    user_id?: string | null
+                }
+                Update: {
+                    created_at?: string
+                    event_data?: Json | null
+                    event_id?: string
+                    event_type?: Database["public"]["Enums"]["event_type"]
+                    ip_address?: string | null
+                    referrer?: string | null
+                    session_id?: string | null
+                    user_agent?: string | null
+                    user_id?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "events_user_id_profiles_profile_id_fk"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["profile_id"]
+                    },
+                ]
+            }
             follows: {
                 Row: {
                     created_at: string
@@ -323,6 +367,13 @@ export type Database = {
                         foreignKeyName: "notifications_post_id_posts_post_id_fk"
                         columns: ["post_id"]
                         isOneToOne: false
+                        referencedRelation: "community_post_detail"
+                        referencedColumns: ["post_id"]
+                    },
+                    {
+                        foreignKeyName: "notifications_post_id_posts_post_id_fk"
+                        columns: ["post_id"]
+                        isOneToOne: false
                         referencedRelation: "community_post_list_view"
                         referencedColumns: ["post_id"]
                     },
@@ -403,6 +454,13 @@ export type Database = {
                         foreignKeyName: "post_replies_post_id_posts_post_id_fk"
                         columns: ["post_id"]
                         isOneToOne: false
+                        referencedRelation: "community_post_detail"
+                        referencedColumns: ["post_id"]
+                    },
+                    {
+                        foreignKeyName: "post_replies_post_id_posts_post_id_fk"
+                        columns: ["post_id"]
+                        isOneToOne: false
                         referencedRelation: "community_post_list_view"
                         referencedColumns: ["post_id"]
                     },
@@ -436,6 +494,13 @@ export type Database = {
                     profile_id?: string
                 }
                 Relationships: [
+                    {
+                        foreignKeyName: "post_upvotes_post_id_posts_post_id_fk"
+                        columns: ["post_id"]
+                        isOneToOne: false
+                        referencedRelation: "community_post_detail"
+                        referencedColumns: ["post_id"]
+                    },
                     {
                         foreignKeyName: "post_upvotes_post_id_posts_post_id_fk"
                         columns: ["post_id"]
@@ -497,6 +562,13 @@ export type Database = {
                         isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["profile_id"]
+                    },
+                    {
+                        foreignKeyName: "posts_topic_id_topics_topic_id_fk"
+                        columns: ["topic_id"]
+                        isOneToOne: false
+                        referencedRelation: "community_post_detail"
+                        referencedColumns: ["topic_id"]
                     },
                     {
                         foreignKeyName: "posts_topic_id_topics_topic_id_fk"
@@ -831,6 +903,25 @@ export type Database = {
             }
         }
         Views: {
+            community_post_detail: {
+                Row: {
+                    author_avatar: string | null
+                    author_created_at: string | null
+                    author_name: string | null
+                    author_role: Database["public"]["Enums"]["role"] | null
+                    content: string | null
+                    created_at: string | null
+                    post_id: number | null
+                    products: number | null
+                    replies: number | null
+                    title: string | null
+                    topic_id: number | null
+                    topic_name: string | null
+                    topic_slug: string | null
+                    upvotes: number | null
+                }
+                Relationships: []
+            }
             community_post_list_view: {
                 Row: {
                     author: string | null
@@ -893,9 +984,44 @@ export type Database = {
             }
         }
         Functions: {
-            [_ in never]: never
+            track_event: {
+                Args: {
+                    p_event_data?: Json
+                    p_event_type: Database["public"]["Enums"]["event_type"]
+                    p_ip_address?: string
+                    p_referrer?: string
+                    p_session_id?: string
+                    p_user_agent?: string
+                    p_user_id?: string
+                }
+                Returns: string
+            }
+            track_simple_event: {
+                Args: {
+                    p_event_data?: Json
+                    p_event_type: Database["public"]["Enums"]["event_type"]
+                }
+                Returns: string
+            }
         }
         Enums: {
+            event_type:
+            | "product_view"
+            | "product_visit"
+            | "profile_view"
+            | "idea_view"
+            | "idea_claim"
+            | "post_view"
+            | "post_create"
+            | "post_like"
+            | "job_view"
+            | "job_apply"
+            | "team_view"
+            | "team_join"
+            | "page_view"
+            | "search"
+            | "click"
+            | "conversion"
             job_type: "full-time" | "part-time" | "freelance" | "internship"
             location: "remote" | "in-person" | "hybrid"
             notification_type: "follow" | "review" | "reply" | "mention"
@@ -1043,6 +1169,24 @@ export type CompositeTypes<
 export const Constants = {
     public: {
         Enums: {
+            event_type: [
+                "product_view",
+                "product_visit",
+                "profile_view",
+                "idea_view",
+                "idea_claim",
+                "post_view",
+                "post_create",
+                "post_like",
+                "job_view",
+                "job_apply",
+                "team_view",
+                "team_join",
+                "page_view",
+                "search",
+                "click",
+                "conversion",
+            ],
             job_type: ["full-time", "part-time", "freelance", "internship"],
             location: ["remote", "in-person", "hybrid"],
             notification_type: ["follow", "review", "reply", "mention"],

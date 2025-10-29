@@ -1,5 +1,7 @@
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { productListSelect } from "../products/queries";
+import type { Database } from "database.types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type UserProfile = {
     profile_id: string;
@@ -98,4 +100,26 @@ export const getUserPosts = async (request: Request, username: string) => {
             name: post.topic,
         },
     }));
+};
+
+export const getUserById = async (
+    client: SupabaseClient<Database>,
+    { id }: { id: string }
+) => {
+    const { data, error } = await client
+        .from("profiles")
+        .select(
+            `
+          profile_id,
+          name,
+          username,
+          avatar 
+          `
+        )
+        .eq("profile_id", id)
+        .single();
+    if (error) {
+        throw error;
+    }
+    return data;
 };

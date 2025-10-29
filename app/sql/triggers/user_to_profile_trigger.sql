@@ -1,34 +1,6 @@
-create function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-begin
-    if new.raw_app_meta_data is not null then
-        if new.raw_app_meta_data ? 'provider' AND new.raw_app_meta_data ->> 'provider' = 'email' then
-            insert into public.profiles (
-                profile_id, 
-                name, 
-                username, 
-                role,
-                created_at,
-                updated_at
-            )
-            values (
-                new.id, 
-                'Anonymous', 
-                'mr.' || substr(md5(random()::text), 1, 8), 
-                'developer',
-                now(),
-                now()
-            );
-        end if;
-    end if;
-    return new;
-end;
-$$;
-
-create trigger user_to_profile_trigger
-after insert on auth.users
-for each row execute function public.handle_new_user();
+-- 트리거가 제거되었습니다.
+-- 프로필 생성은 join-page.tsx에서 직접 처리됩니다.
+-- 
+-- 이전에는 트리거로 자동 프로필 생성을 시도했지만,
+-- Role enum 캐스팅 문제로 인해 제거하고
+-- join-page.tsx에서 직접 프로필을 생성하도록 변경했습니다.

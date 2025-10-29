@@ -120,7 +120,21 @@ const menus = [
     },
 ]
 
-export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }: { isLoggedIn: boolean, hasNotifications: boolean, hasMessages: boolean }) {
+export default function Navigation({
+    isLoggedIn,
+    hasNotifications,
+    hasMessages,
+    username,
+    avatar,
+    name
+}: {
+    isLoggedIn: boolean,
+    hasNotifications: boolean,
+    hasMessages: boolean,
+    username?: string,
+    avatar?: string,
+    name?: string
+}) {
     return (
         <nav className="flex justify-between items-center px-4 sm:px-8 lg:px-20 h-16 backdrop-blur fixed top-0 left-0 right-0 z-50 bg-background/50">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -267,14 +281,14 @@ export default function Navigation({ isLoggedIn, hasNotifications, hasMessages }
                     <DropdownMenu >
                         <DropdownMenuTrigger asChild className="ml-2">
                             <Avatar className="cursor-pointer">
-                                <AvatarImage src="https://github.com/zizimoos.png" alt="User avatar" />
-                                <AvatarFallback>SK</AvatarFallback>
+                                <AvatarImage src={avatar} alt="User avatar" />
+                                <AvatarFallback>{name ? name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end">
                             <DropdownMenuLabel className="flex flex-col gap-1">
-                                <span className="text-sm font-medium">Sarah Kim</span>
-                                <span className="text-xs text-muted-foreground">zizimoos@gmail.com</span>
+                                <span className="text-sm font-medium">{name || 'User'}</span>
+                                <span className="text-xs text-muted-foreground">@{username || 'No username'}</span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>

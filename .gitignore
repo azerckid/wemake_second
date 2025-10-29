@@ -116,3 +116,15 @@ Thumbs.db
 .cursor/
 .cursor/rules/
 .cursor/rules/wemake.mdc
+
+
+# Supabase
+.supabase/
+
+
+# Playwright MCP
+.playwright-mcp/
+
+# Documentation
+AUTH_SETUP.md
+MIGRATION_GUIDE.md

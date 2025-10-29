@@ -115,3 +115,12 @@ export async function requireProfile(request: Request) {
     return profile;
 }
 
+// export async function getUserByID(request: Request, id: string) {
+//     const { supabase } = createSupabaseServerClient(request);
+//     const { data: user, error } = await supabase.auth.getUser(id);
+//     if (error) {
+//         console.error("User error:", error);
+//         return null;
+//     }
+//     return user;
+// }

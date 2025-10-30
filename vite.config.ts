@@ -15,7 +15,7 @@ export default defineConfig({
         "**/.cache/**",
         "**/.playwright-mcp/**",
       ],
-      // macOS EMFILE 에러 해결을 위한 설정
+      // macOS EMFILE 에러 해결을 위한 설정 (기본값 유지)
       usePolling: false,
     },
     fs: {

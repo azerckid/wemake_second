@@ -12,6 +12,7 @@ import SelectPair from "~/common/components/select-pair";
 import AuthButtons from "../components/auth-buttons";
 import { Alert, AlertDescription } from "~/common/components/ui/alert";
 import { checkUsernameExists } from "../queries";
+import { ensureProfileForUser } from "../utils";
 
 const formSchema = z.object({
     name: z.string()
@@ -76,16 +77,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     const { supabase, headers } = createSupabaseServerClient(request);
 
-    // 기존 세션 완전 정리
+    // 기존 세션 정리
     await supabase.auth.signOut();
 
-    // 잠시 대기 (세션 정리 완료 대기)
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // 새로운 Supabase 클라이언트 생성 (세션 정리 후)
-    const { supabase: freshSupabase, headers: freshHeaders } = createSupabaseServerClient(request);
-
-    const { data: authData, error } = await freshSupabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -106,28 +101,15 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     // 사용자 생성 성공 시 프로필 생성
     if (authData?.user) {
-        // 프로필 생성
-        const { error: profileError } = await freshSupabase
-            .from('profiles')
-            .insert({
-                profile_id: authData.user.id,
-                name: name,
-                username: username,
-                role: role,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            });
-
-        if (profileError) {
-            return {
-                success: false,
-                message: `Profile creation failed: ${profileError.message}`,
-            };
-        }
+        await ensureProfileForUser(supabase as any, authData.user, {
+            name,
+            username,
+            role,
+        });
 
         // 이메일 확인이 필요한 경우 자동으로 로그인 시도
         if (!authData.user.email_confirmed_at) {
-            const { data: signInData, error: signInError } = await freshSupabase.auth.signInWithPassword({
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -143,7 +125,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         // 로그인 성공 후 홈페이지로 리다이렉트
         // 세션 동기화를 위해 강제 새로고침
         return redirect("/?refresh=" + Date.now(), {
-            headers: freshHeaders
+            headers: headers
         });
     }
 

@@ -20,6 +20,7 @@ import {
 import { Textarea } from "~/common/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { getUserProfile } from "../queries";
+import { getUser } from "~/lib/supabase.server";
 
 
 export const loader = async ({
@@ -27,7 +28,10 @@ export const loader = async ({
     params,
 }: Route.LoaderArgs & { params: { username: string } }) => {
     const user = await getUserProfile(request, params.username);
-    return { user };
+    const authUser = await getUser(request);
+    const isOwner = !!authUser && authUser.id === user.profile_id;
+    const email = isOwner ? authUser?.email ?? null : null;
+    return { user, email, isOwner };
 };
 
 export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
@@ -44,6 +48,9 @@ export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
                     )}
                 </Avatar>
                 <div className="space-y-2">
+                    <div>
+
+                    </div>
                     <div className="flex gap-2 items-center">
                         <h1 className="text-2xl font-semibold">{loaderData.user.name}</h1>
                         <Button variant="outline" asChild>
@@ -74,11 +81,16 @@ export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
                             </DialogContent>
                         </Dialog>
                     </div>
+
                     <div className="flex gap-2 items-center">
                         <span className="text-sm text-muted-foreground">@{loaderData.user.username}</span>
+                        {loaderData.email ? (
+                            <span className="text-sm text-muted-foreground">| {loaderData.email}</span>
+                        ) : null}
                         <Badge variant={"secondary"}>{loaderData.user.role}</Badge>
                         <Badge variant={"secondary"}>{loaderData.user.stats?.followers ?? 0} followers</Badge>
                         <Badge variant={"secondary"}>{loaderData.user.stats?.following ?? 0} following</Badge>
+
                     </div>
                 </div>
             </div>

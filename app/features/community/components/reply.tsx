@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Form, Link } from "react-router";
+import { DateTime } from "luxon";
 import { DotIcon, MessageCircleIcon } from "lucide-react";
 import {
     Avatar,
@@ -49,7 +50,7 @@ interface ReplyProps {
     username: string;
     avatarUrl: string;
     reply: string;
-    created_at: Date;
+    created_at: string | Date;
     children?: ReplyProps[];
     parentUsername?: string; // 부모 리플라이 작성자 이름
     post_reply_id?: number; // 리플라이 ID (중첩 리플라이 추적용)
@@ -75,15 +76,17 @@ export function Reply({
 }: ReplyProps) {
     const [replying, setReplying] = useState(false);
     const toggleReplying = () => setReplying((prev) => !prev);
-    
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         // 폼 제출 시 댓글 폼 닫기
         setReplying(false);
     };
 
-    // Format date consistently for SSR
-    const date = new Date(created_at);
-    const timestamp = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    // Format date consistently with post format (relative time with timezone)
+    // Convert Date object to ISO string to ensure UTC parsing
+    const timestamp = typeof created_at === 'string'
+        ? DateTime.fromISO(created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()
+        : DateTime.fromISO(created_at.toISOString(), { zone: "utc" }).setZone("Asia/Seoul").toRelative();
 
     // 부모 작성자 멘션을 포함한 리플라이 텍스트
     const replyWithMention = parentUsername && !reply.startsWith(`@${parentUsername}`)

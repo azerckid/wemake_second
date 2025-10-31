@@ -93,6 +93,7 @@ export default [
             ...prefix("/dashboard", [
                 index("features/users/pages/dashboard-page.tsx"),
                 route("/ideas", "features/users/pages/dashboard-ideas-page.tsx"),
+                route("/jobs", "features/users/pages/dashboard-jobs-page.tsx"),
                 route(
                     "/products/:productId",
                     "features/users/pages/dashboard-product-page.tsx"

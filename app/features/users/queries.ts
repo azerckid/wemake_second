@@ -135,6 +135,33 @@ export const getLoggedInUserId = async (client: SupabaseClient<Database>) => {
     return data.user.id;
 };
 
+export const getUserJobs = async (request: Request, userId: string) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
+        .from("jobs")
+        .select(
+            `
+            job_id,
+            position,
+            overview,
+            company_name,
+            company_logo,
+            company_location,
+            job_type,
+            location,
+            salary_range,
+            created_at
+            `
+        )
+        .eq("profile_id", userId)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+    return data || [];
+};
+
 type MessageRoom = {
     message_room_id: number;
     otherUser: {

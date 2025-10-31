@@ -1,4 +1,5 @@
-import { bigint, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { profiles } from "../users/schema";
 
 // 더 간단한 enum 정의 방식
 export const jobTypes = pgEnum("job_type", [
@@ -39,6 +40,9 @@ export const jobs = pgTable("jobs", {
     job_type: jobTypes().notNull(),
     location: locations().notNull(),
     salary_range: salaryRanges().notNull(),
+    profile_id: uuid().references(() => profiles.profile_id, {
+        onDelete: "cascade",
+    }),
     created_at: timestamp().notNull().defaultNow(),
     updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
 });

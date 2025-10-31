@@ -32,7 +32,7 @@ function transformReply(reply: ReplyChild, depth: number = 0): any {
         username: reply.author_name,
         avatarUrl: reply.author_avatar || "",
         reply: reply.reply,
-        created_at: new Date(reply.created_at),
+        created_at: reply.created_at, // Keep as string to preserve UTC from database
         children: reply.children?.map(child => transformReply(child, depth + 1)),
         post_reply_id: reply.post_reply_id,
         depth,
@@ -52,7 +52,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
         getPostById(request, params.postId),
         getRepliesByPostId(request, params.postId),
     ]);
-    
+
     // 현재 로그인한 사용자 프로필 정보 가져오기 (댓글 작성용)
     let currentUser = null;
     try {
@@ -73,7 +73,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     } catch {
         // 로그인하지 않은 경우 무시
     }
-    
+
     return { post, replies, currentUser };
 };
 
@@ -197,7 +197,7 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                                                 username={reply.author_name}
                                                 avatarUrl={reply.author_avatar || ""}
                                                 reply={reply.reply}
-                                                created_at={new Date(reply.created_at)}
+                                                created_at={reply.created_at}
                                                 children={reply.children?.map(transformReply)}
                                                 post_reply_id={reply.post_reply_id}
                                                 currentUser={loaderData.currentUser}

@@ -5,12 +5,16 @@ import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import { getJobById } from "../queries";
 import { DateTime } from "luxon";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { getLoggedInUserId } from "~/features/users/queries";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Job Details | wemake" }];
 };
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    await getLoggedInUserId(supabase);
     const job = await getJobById(request, params.jobId);
     return { job };
 };

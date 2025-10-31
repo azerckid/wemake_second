@@ -1,4 +1,4 @@
-import { HomeIcon, PackageIcon, RocketIcon, SparklesIcon } from "lucide-react";
+import { HomeIcon, PackageIcon, RocketIcon, SparklesIcon, BriefcaseIcon } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router";
 import {
     Sidebar,
@@ -38,6 +38,17 @@ export default function DashboardLayout() {
                                     <Link to="/my/dashboard/ideas">
                                         <SparklesIcon className="size-4" />
                                         <span>Ideas</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={location.pathname === "/my/dashboard/jobs"}
+                                >
+                                    <Link to="/my/dashboard/jobs">
+                                        <BriefcaseIcon className="size-4" />
+                                        <span>Jobs</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>

@@ -1,14 +1,20 @@
-import { Form } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 
 import type { Route } from "./+types/team-page";
 
+import { z } from "zod";
+import { CheckCircle2, LoaderCircle } from "lucide-react";
 import { getTeamById } from "../queries";
+import { applyToTeam } from "../mutations";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { Hero } from "~/common/components/hero";
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import InputPair from "~/common/components/input-pair";
 import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "~/common/components/ui/card";
+import { Alert, AlertDescription } from "~/common/components/ui/alert";
 
 
 export const meta: Route.MetaFunction = () => [
@@ -16,13 +22,55 @@ export const meta: Route.MetaFunction = () => [
 ];
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const url = new URL(request.url);
+    const success = url.searchParams.get("success") === "true";
     const team = await getTeamById(request, params.teamId);
-    return { team };
+    return { team, success };
 };
 
-export default function TeamPage({ loaderData }: Route.ComponentProps) {
+const applicationSchema = z.object({
+    introduction: z.string().min(1, "Introduction cannot be empty").max(500, "Introduction must be 500 characters or less"),
+    role: z.string().optional(),
+});
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const teamId = Number(params.teamId);
+
+    if (isNaN(teamId)) {
+        throw new Response("Invalid team ID", { status: 400 });
+    }
+
+    const formData = await request.formData();
+    const { success, error, data } = applicationSchema.safeParse(
+        Object.fromEntries(formData)
+    );
+
+    if (!success) {
+        return {
+            fieldErrors: error.flatten().fieldErrors,
+        };
+    }
+
+    await applyToTeam(supabase, {
+        team_id: teamId,
+        user_id: userId,
+        role: data.role || data.introduction.split(' ')[0] || "member", // Extract role from introduction if not provided
+        introduction: data.introduction,
+    });
+
+    // 최소 0.5초 대기
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return redirect(`/teams/${teamId}?success=true`);
+};
+
+export default function TeamPage({ loaderData, actionData }: Route.ComponentProps) {
     // 실제로는 loader에서 데이터를 가져와야 함
     const teamData = loaderData.team;
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state === "submitting";
 
     const rolesArray = teamData.roles?.split(',').map(role => role.trim()) || [];
 
@@ -98,7 +146,13 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
                             <Badge variant="secondary">{teamData.team_leader.role}</Badge>
                         </div>
                     </div>
-                    <Form className="space-y-5">
+                    {loaderData.success && (
+                        <Alert className="bg-green-50 border-green-200 text-green-800">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <AlertDescription>제출완료</AlertDescription>
+                        </Alert>
+                    )}
+                    <Form method="post" className="space-y-5">
                         <InputPair
                             label="Introduce yourself"
                             description="Tell us about yourself"
@@ -107,10 +161,22 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
                             id="introduction"
                             required
                             textArea
-                            placeholder={`i.e. I'm a ${teamData.roles?.split(',').map(role => role.trim())[0]} with ${teamData.team_size} years of experience`}
+                            placeholder={`i.e. I'm a ${teamData.roles?.split(',').map((role: string) => role.trim())[0] || 'developer'} with experience`}
                         />
-                        <Button type="submit" className="w-full">
-                            Get in touch
+                        {actionData && "fieldErrors" in actionData && actionData.fieldErrors?.introduction && (
+                            <div className="text-red-500 text-sm">
+                                {actionData.fieldErrors.introduction.join(", ")}
+                            </div>
+                        )}
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <>
+                                    <LoaderCircle className="animate-spin" />
+                                    Submitting...
+                                </>
+                            ) : (
+                                "Get in touch"
+                            )}
                         </Button>
                     </Form>
                 </aside>

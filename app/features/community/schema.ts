@@ -26,10 +26,10 @@ export const posts = pgTable("posts", {
     updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
     topic_id: bigint({ mode: "number" }).references(() => topics.topic_id, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     profile_id: uuid().references(() => profiles.profile_id, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
 });
 
 export const postUpvotes = pgTable(
@@ -37,10 +37,10 @@ export const postUpvotes = pgTable(
     {
         post_id: bigint({ mode: "number" }).references(() => posts.post_id, {
             onDelete: "cascade",
-        }),
+        }).notNull(),
         profile_id: uuid().references(() => profiles.profile_id, {
             onDelete: "cascade",
-        }),
+        }).notNull(),
     },
     (table) => [primaryKey({ columns: [table.post_id, table.profile_id] })]
 );

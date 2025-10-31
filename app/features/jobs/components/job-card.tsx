@@ -71,7 +71,7 @@ export function JobCard({
                         </div>
                         <div className="space-x-2">
                             <span className="text-accent-foreground">{company}</span>
-                            <span className="text-xs text-muted-foreground">{DateTime.fromISO(postedAt).toRelative() ?? "Unknown"}</span>
+                            <span className="text-xs text-muted-foreground">{DateTime.fromISO(postedAt, { zone: "utc" }).setZone("Asia/Seoul").toRelative() ?? "Unknown"}</span>
                         </div>
                     </div>
                     <CardTitle>{title}</CardTitle>

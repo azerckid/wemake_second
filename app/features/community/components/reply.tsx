@@ -54,6 +54,12 @@ interface ReplyProps {
     parentUsername?: string; // 부모 리플라이 작성자 이름
     post_reply_id?: number; // 리플라이 ID (중첩 리플라이 추적용)
     depth?: number; // 중첩 깊이
+    currentUser?: {
+        profile_id: string;
+        name: string;
+        username: string;
+        avatar: string | null;
+    } | null;
 }
 
 export function Reply({
@@ -65,9 +71,15 @@ export function Reply({
     parentUsername,
     post_reply_id,
     depth = 0,
+    currentUser,
 }: ReplyProps) {
     const [replying, setReplying] = useState(false);
     const toggleReplying = () => setReplying((prev) => !prev);
+    
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        // 폼 제출 시 댓글 폼 닫기
+        setReplying(false);
+    };
 
     // Format date consistently for SSR
     const date = new Date(created_at);
@@ -80,8 +92,8 @@ export function Reply({
 
     return (
         <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-5 w-2/3">
-                <Avatar className="size-14">
+            <div className="flex items-start gap-5 w-full">
+                <Avatar className="size-[37.33px]">
                     <AvatarFallback>{username[0]}</AvatarFallback>
                     <AvatarImage src={avatarUrl} />
                 </Avatar>
@@ -100,18 +112,29 @@ export function Reply({
                 </div>
             </div>
             {replying && (
-                <Form className="flex items-start gap-5 w-3/4">
-                    <Avatar className="size-14">
-                        <AvatarFallback>A</AvatarFallback>
-                        <AvatarImage src="https://github.com/zizimoos.png" />
-                    </Avatar>
+                <Form method="post" className="flex items-start gap-5 w-3/4" onSubmit={handleSubmit}>
+                    {currentUser ? (
+                        <Avatar className="size-[37.33px]">
+                            <AvatarFallback>{currentUser.name[0]?.toUpperCase() || "U"}</AvatarFallback>
+                            {currentUser.avatar && <AvatarImage src={currentUser.avatar} />}
+                        </Avatar>
+                    ) : (
+                        <Avatar className="size-[37.33px]">
+                            <AvatarFallback>U</AvatarFallback>
+                        </Avatar>
+                    )}
                     <div className="flex flex-col gap-5 items-end w-full">
                         <Textarea
+                            name="reply"
                             placeholder="Write a reply"
                             className="w-full resize-none"
                             rows={5}
+                            required
                         />
-                        <Button>Reply</Button>
+                        {post_reply_id && (
+                            <input type="hidden" name="parent_id" value={post_reply_id} />
+                        )}
+                        <Button type="submit">Reply</Button>
                     </div>
                 </Form>
             )}
@@ -128,6 +151,7 @@ export function Reply({
                             children={child.children}
                             post_reply_id={child.post_reply_id}
                             depth={depth + 1}
+                            currentUser={currentUser}
                         />
                     ))}
                 </div>

@@ -1,18 +1,22 @@
-import { Form, Link } from "react-router";
+import { Form, Link, redirect } from "react-router";
 
 import type { Route } from "./+types/post-page";
 
-import { getPostById, getRepliesByPostId } from "../queries";
-import { ChevronUpIcon, DotIcon } from "lucide-react";
+import { z } from "zod";
 import { DateTime } from "luxon";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "~/common/components/ui/breadcrumb";
-import { Button } from "~/common/components/ui/button";
-import { Avatar } from "~/common/components/ui/avatar";
-import { AvatarFallback } from "~/common/components/ui/avatar";
-import { AvatarImage } from "~/common/components/ui/avatar";
+import { ChevronUpIcon, DotIcon } from "lucide-react";
+import { createReply } from "../mutations";
+import { getPostById, getRepliesByPostId } from "../queries";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { Reply } from "../components/reply";
 import { Badge } from "~/common/components/ui/badge";
+import { Button } from "~/common/components/ui/button";
+import { Avatar } from "~/common/components/ui/avatar";
 import { Textarea } from "~/common/components/ui/textarea";
+import { AvatarImage } from "~/common/components/ui/avatar";
+import { AvatarFallback } from "~/common/components/ui/avatar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "~/common/components/ui/breadcrumb";
 
 interface ReplyChild {
     post_reply_id: number;
@@ -43,14 +47,75 @@ export const meta: Route.MetaFunction = () => {
 }
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
     const [post, replies] = await Promise.all([
         getPostById(request, params.postId),
         getRepliesByPostId(request, params.postId),
     ]);
-    return { post, replies };
+    
+    // 현재 로그인한 사용자 프로필 정보 가져오기 (댓글 작성용)
+    let currentUser = null;
+    try {
+        const userId = await getLoggedInUserId(supabase);
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("profile_id, name, username, avatar")
+            .eq("profile_id", userId)
+            .single();
+        if (profile) {
+            currentUser = {
+                profile_id: profile.profile_id,
+                name: profile.name,
+                username: profile.username,
+                avatar: profile.avatar,
+            };
+        }
+    } catch {
+        // 로그인하지 않은 경우 무시
+    }
+    
+    return { post, replies, currentUser };
 };
 
-export default function PostPage({ loaderData }: Route.ComponentProps) {
+const replySchema = z.object({
+    reply: z.string().min(1, "Reply cannot be empty").max(1000, "Reply must be 1000 characters or less"),
+    parent_id: z.string().optional(),
+});
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const postId = Number(params.postId);
+
+    if (isNaN(postId)) {
+        throw new Response("Invalid post ID", { status: 400 });
+    }
+
+    const formData = await request.formData();
+    const { success, error, data } = replySchema.safeParse(
+        Object.fromEntries(formData)
+    );
+
+    if (!success) {
+        return {
+            fieldErrors: error.flatten().fieldErrors,
+        };
+    }
+
+    const { reply, parent_id } = data;
+
+    await createReply(supabase, {
+        post_id: postId,
+        parent_id: parent_id ? Number(parent_id) : null,
+        reply,
+        userId,
+    });
+
+    // Redirect to the same page to refresh the replies
+    return redirect(`/community/${postId}`);
+};
+
+export default function PostPage({ loaderData, actionData }: Route.ComponentProps) {
     return (
 
         <div className="space-y-10">
@@ -92,7 +157,7 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <span>@{loaderData.post.author_name}</span>
                                     <DotIcon className="size-5" />
-                                    <span>{DateTime.fromISO(loaderData.post.created_at).toRelative()}</span>
+                                    <span>{DateTime.fromISO(loaderData.post.created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()}</span>
                                     <DotIcon className="size-5" />
                                     <span>{loaderData.post.replies} replies</span>
                                 </div>
@@ -101,19 +166,25 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                                 </p>
                             </div>
 
-                            {/* TODO: Implement reply form submission */}
-                            <Form className="flex items-start gap-5 w-3/4">
+                            <Form method="post" className="flex items-start gap-5 w-full">
                                 <Avatar className="size-14">
                                     <AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
                                     {loaderData.post.author_avatar && <AvatarImage src={loaderData.post.author_avatar} />}
                                 </Avatar>
                                 <div className="flex flex-col gap-5 items-end w-full">
                                     <Textarea
+                                        name="reply"
                                         placeholder="Write a reply"
                                         className="w-full resize-none"
                                         rows={5}
+                                        required
                                     />
-                                    <Button>Reply</Button>
+                                    {actionData && "fieldErrors" in actionData && actionData.fieldErrors?.reply && (
+                                        <div className="text-red-500 text-sm">
+                                            {actionData.fieldErrors.reply.join(", ")}
+                                        </div>
+                                    )}
+                                    <Button type="submit">Reply</Button>
                                 </div>
                             </Form>
                             <div className="space-y-10">
@@ -128,6 +199,8 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                                                 reply={reply.reply}
                                                 created_at={new Date(reply.created_at)}
                                                 children={reply.children?.map(transformReply)}
+                                                post_reply_id={reply.post_reply_id}
+                                                currentUser={loaderData.currentUser}
                                             />
                                         ))
                                     ) : (
@@ -150,7 +223,7 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
                         </div>
                     </div>
                     <div className="gap-2 text-sm flex flex-col">
-                        <span>🎂 Joined {DateTime.fromISO(loaderData.post.author_created_at).toRelative()}</span>
+                        <span>🎂 Joined {DateTime.fromISO(loaderData.post.author_created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()}</span>
                         <span>🚀 Launched {loaderData.post.products} products</span>
                     </div>
                     <Button variant="outline" className="w-full">

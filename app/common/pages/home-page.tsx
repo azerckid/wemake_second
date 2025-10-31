@@ -144,7 +144,7 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                         companyLogoUrl={job.company_logo || null}
                         companyHq={job.company_location}
                         title={job.position}
-                        postedAt={DateTime.fromISO(job.created_at).toRelative() ?? "Unknown"}
+                        postedAt={DateTime.fromISO(job.created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative() ?? "Unknown"}
                         type={job.job_type}
                         positionLocation={job.location}
                         salary={job.salary_range}

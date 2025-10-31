@@ -100,7 +100,7 @@ export default function JobPage({ loaderData }: Route.ComponentProps) {
                     </div>
                     <div className="flex">
                         <span className="text-sm text-muted-foreground">
-                            Posted {DateTime.fromISO(job.created_at).toRelative()}
+                            Posted {DateTime.fromISO(job.created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()}
                         </span>
                     </div>
                     <Button className="w-full" asChild>

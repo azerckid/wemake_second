@@ -69,12 +69,12 @@ export function IdeaCard({
                     <span>{views}</span>
                 </div>
                 <DotIcon className="w-4 h-4" />
-                <span>{DateTime.fromJSDate(created_at).toRelative()}</span>
+                <span>{DateTime.fromJSDate(created_at).setZone("Asia/Seoul").toRelative()}</span>
                 {claimed_at && (
                     <>
                         <DotIcon className="w-4 h-4" />
                         <span className="text-green-600 dark:text-green-400">
-                            Claimed {DateTime.fromJSDate(claimed_at).toRelative()}
+                            Claimed {DateTime.fromJSDate(claimed_at).setZone("Asia/Seoul").toRelative()}
                         </span>
                     </>
                 )}

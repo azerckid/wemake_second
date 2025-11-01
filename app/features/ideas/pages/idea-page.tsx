@@ -28,8 +28,26 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const url = new URL(request.url);
     const success = url.searchParams.get("success") === "true";
 
+    const idea = await getGptIdea(request, Number(params.ideaId)) as any;
+
+    // 이미 클레임된 아이디어인 경우, 현재 사용자가 클레임한 것인지 확인
+    if (idea.is_claimed) {
+        try {
+            const userId = await getLoggedInUserId(supabase);
+            // 다른 유저가 클레임한 경우 접근 차단
+            if (idea.claimed_by !== userId) {
+                throw redirect("/ideas");
+            }
+        } catch (error) {
+            // 로그인하지 않았거나 다른 유저가 클레임한 경우 아이디어 목록으로 리다이렉트
+            if (error instanceof Response && error.status === 302) {
+                throw error; // redirect는 그대로 throw
+            }
+            throw redirect("/ideas");
+        }
+    }
+
     // 로그인한 사용자인지 확인 (Claim 버튼 사용을 위해 필요)
-    // 하지만 인증 실패 시에도 페이지는 볼 수 있도록 try-catch 사용
     let isAuthenticated = false;
     try {
         await getLoggedInUserId(supabase);
@@ -38,8 +56,6 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
         // 로그인하지 않은 경우 무시 (페이지는 볼 수 있음)
     }
 
-    const idea = await getGptIdea(request, Number(params.ideaId));
-
     return { idea, success, isAuthenticated };
 };
 
@@ -47,7 +63,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const ideaId = Number(params.ideaId);
-    const idea = await getGptIdea(request, ideaId);
+    const idea = await getGptIdea(request, ideaId) as any;
 
     if (isNaN(ideaId)) {
         throw new Response("Invalid idea ID", { status: 400 });

@@ -45,7 +45,7 @@ export function IdeaCard({
                         <CardTitle className="text-xl">
                             <span
                                 className={cn(
-                                    claimed
+                                    claimed && !isClaimedByCurrentUser
                                         ? "bg-muted-foreground selection:bg-muted-foreground text-muted-foreground"
                                         : ""
                                 )}

@@ -74,6 +74,20 @@ export const getUserProducts = async (request: Request, username: string) => {
     return data || [];
 };
 
+export const getProductsByUserId = async (
+    client: SupabaseClient<Database>,
+    { userId }: { userId: string }
+) => {
+    const { data, error } = await client
+        .from("products")
+        .select(`name, product_id`)
+        .eq("profile_id", userId);
+    if (error) {
+        throw error;
+    }
+    return data;
+};
+
 export const getUserPosts = async (request: Request, username: string) => {
     const { supabase } = createSupabaseServerClient(request);
 

@@ -6,6 +6,8 @@ import { CardHeader } from "~/common/components/ui/card";
 import { CardTitle } from "~/common/components/ui/card";
 import { CardContent } from "~/common/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "~/common/components/ui/chart";
+import { getLoggedInUserId } from "../queries";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 // Custom Dot Component
 const CustomDot = ({ cx, cy }: { cx?: number; cy?: number }) => {
@@ -25,14 +27,19 @@ export const meta: Route.MetaFunction = () => {
     return [{ title: "Dashboard | wemake" }];
 };
 
-const chartData = [
-    { month: "January", views: 186 },
-    { month: "February", views: 305 },
-    { month: "March", views: 237 },
-    { month: "April", views: 73 },
-    { month: "May", views: 209 },
-    { month: "June", views: 214 },
-];
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const { data, error } = await supabase.rpc("get_dashboard_stats" as any, {
+        user_id: userId,
+    });
+    if (error) {
+        throw error;
+    }
+    return {
+        chartData: data || [],
+    };
+};
 const chartConfig = {
     views: {
         label: "views",
@@ -40,11 +47,11 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export default function DashboardPage() {
+export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     return (
         <div className="space-y-5">
             <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
-            <Card className="w-1/2">
+            <Card className="w-2/3">
                 <CardHeader>
                     <CardTitle>Profile views</CardTitle>
                 </CardHeader>
@@ -52,7 +59,7 @@ export default function DashboardPage() {
                     <ChartContainer config={chartConfig}>
                         <LineChart
                             accessibilityLayer
-                            data={chartData}
+                            data={loaderData.chartData}
                             margin={{
                                 left: 12,
                                 right: 12,
@@ -64,7 +71,7 @@ export default function DashboardPage() {
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={8}
-                                tickFormatter={(value) => value.slice(0, 3)}
+                                tickFormatter={(value) => value.split('-')[1]}
                             />
                             <Line
                                 dataKey="views"

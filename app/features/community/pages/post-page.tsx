@@ -1,4 +1,4 @@
-import { Form, Link, redirect, useOutletContext } from "react-router";
+import { Form, Link, redirect } from "react-router";
 
 import type { Route } from "./+types/post-page";
 
@@ -116,8 +116,6 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 };
 
 export default function PostPage({ loaderData, actionData }: Route.ComponentProps) {
-    const { isLoggedIn, currentUser } = useOutletContext<{ isLoggedIn: boolean, currentUser: any }>();
-    console.log(isLoggedIn, currentUser);
     return (
 
         <div className="space-y-10">
@@ -175,6 +173,7 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                                     </Avatar>
                                     <div className="flex flex-col gap-5 items-end w-full">
                                         <Textarea
+                                            key={`reply-${loaderData.post.replies}`}
                                             name="reply"
                                             placeholder="Write a reply"
                                             className="w-full resize-none"

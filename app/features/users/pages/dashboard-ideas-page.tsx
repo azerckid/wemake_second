@@ -32,16 +32,16 @@ export default function DashboardIdeasPage({ loaderData }: Route.ComponentProps)
                     <p className="text-muted-foreground">Visit the Ideas page to claim some ideas!</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 gap-6">
                     {claimedIdeas.map((idea: any) => (
                         <IdeaCard
                             key={idea.gpt_idea_id}
                             gpt_idea_id={idea.gpt_idea_id}
                             idea={idea.idea}
                             views={idea.views}
-                            created_at={new Date(idea.created_at)}
+                            created_at={idea.created_at}
                             likesCount={idea.likes || 0}
-                            claimed_at={idea.claimed_at ? new Date(idea.claimed_at) : null}
+                            claimed_at={idea.claimed_at}
                             claimed_by={idea.claimed_by}
                             isClaimedByCurrentUser={true} // 대시보드에서는 모두 현재 사용자가 클레임한 아이디어
                         />

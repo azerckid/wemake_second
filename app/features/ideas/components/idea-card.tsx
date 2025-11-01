@@ -16,9 +16,9 @@ interface IdeaCardProps {
     gpt_idea_id: number;
     idea: string;
     views: number;
-    created_at: Date;
+    created_at: Date | string;
     likesCount: number;
-    claimed_at: Date | null;
+    claimed_at: Date | string | null;
     claimed_by: string | null;
     isClaimedByCurrentUser?: boolean; // 현재 사용자가 클레임했는지 여부
 }
@@ -69,12 +69,12 @@ export function IdeaCard({
                     <span>{views}</span>
                 </div>
                 <DotIcon className="w-4 h-4" />
-                <span>{DateTime.fromJSDate(created_at).setZone("Asia/Seoul").toRelative()}</span>
+                <span>{DateTime.fromISO(typeof created_at === "string" ? created_at : created_at.toISOString(), { zone: "utc" }).setZone("Asia/Seoul").toRelative()}</span>
                 {claimed_at && (
                     <>
                         <DotIcon className="w-4 h-4" />
                         <span className="text-green-600 dark:text-green-400">
-                            Claimed {DateTime.fromJSDate(claimed_at).setZone("Asia/Seoul").toRelative()}
+                            Claimed {DateTime.fromISO(typeof claimed_at === "string" ? claimed_at : claimed_at.toISOString(), { zone: "utc" }).setZone("Asia/Seoul").toRelative()}
                         </span>
                     </>
                 )}
@@ -86,7 +86,7 @@ export function IdeaCard({
                 </Button>
                 {!claimed ? (
                     <Button asChild>
-                        <Link to={`/ideas/${gpt_idea_id}/claim`}>Claim idea now &rarr;</Link>
+                        <Link to={`/ideas/${gpt_idea_id}?autoClaim=true`}>Claim idea now &rarr;</Link>
                     </Button>
                 ) : isClaimedByCurrentUser ? (
                     <div className="flex gap-2">

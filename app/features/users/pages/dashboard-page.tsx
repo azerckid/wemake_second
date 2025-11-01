@@ -71,7 +71,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={8}
-                                tickFormatter={(value) => value.split('-')[1]}
+                                tickFormatter={(value) => new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(value + '-01'))}
                             />
                             <Line
                                 dataKey="views"

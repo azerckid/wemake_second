@@ -22,14 +22,11 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const url = new URL(request.url);
     const success = url.searchParams.get("success") === "true";
 
-    // 로그인한 사용자인지 확인 (Apply Now 버튼 사용을 위해 필요)
-    // 하지만 인증 실패 시에도 페이지는 볼 수 있도록 try-catch 사용
     let isAuthenticated = false;
     try {
         await getLoggedInUserId(supabase);
         isAuthenticated = true;
     } catch {
-        // 로그인하지 않은 경우 무시 (페이지는 볼 수 있음)
     }
 
     const job = await getJobById(request, params.jobId);
@@ -60,13 +57,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
         };
     }
 
-    // TODO: job_applications 테이블이 생성되면 실제 지원 저장 로직 추가
-    // 현재는 더미 처리
-    console.log("Job application:", { jobId, userId, introduction: data.introduction });
-
-    // 최소 0.5초 대기
     await new Promise(resolve => setTimeout(resolve, 500));
-
     return redirect(`/jobs/${jobId}?success=true`);
 };
 
@@ -165,7 +156,7 @@ export default function JobPage({ loaderData, actionData }: Route.ComponentProps
                             Company Website
                         </a>
                     </Button>
-                    {loaderData.success && (
+                    {success && (
                         <Alert className="bg-green-50 border-green-200 text-green-800">
                             <CheckCircle2 className="h-4 w-4" />
                             <AlertDescription>제출완료</AlertDescription>

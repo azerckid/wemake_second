@@ -86,7 +86,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
           />
         )
       }
-      <Outlet />
+      <Outlet context={{ isLoggedIn, currentUser: loaderData.profile }} />
     </div >
   )
 }

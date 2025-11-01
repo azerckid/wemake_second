@@ -94,14 +94,14 @@ export function Reply({
         : reply;
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-5 w-full">
+        <div className="flex flex-col gap-5">
+            <div className="flex items-start gap-4 w-full">
                 <Avatar className="size-[37.33px]">
                     <AvatarFallback>{username[0]}</AvatarFallback>
                     <AvatarImage src={avatarUrl} />
                 </Avatar>
-                <div className="flex flex-col gap-2 items-start flex-1">
-                    <div className="flex gap-2 items-center">
+                <div className="flex flex-col gap-1 items-start flex-1">
+                    <div className="flex gap-1 items-center">
                         <Link to={`/users/${username}`}>
                             <h4 className="font-medium">{username}</h4>
                         </Link>
@@ -109,9 +109,11 @@ export function Reply({
                         <span className="text-xs text-muted-foreground">{timestamp}</span>
                     </div>
                     <p className="text-muted-foreground">{renderWithMentions(replyWithMention)}</p>
-                    <Button variant="ghost" className="self-end" onClick={toggleReplying}>
-                        <MessageCircleIcon className="size-4" />
-                    </Button>
+                    {currentUser && (
+                        <Button variant="ghost" className="self-end -mt-[25px]" onClick={toggleReplying}>
+                            <MessageCircleIcon className="size-4" />
+                        </Button>
+                    )}
                 </div>
             </div>
             {replying && (

@@ -1,4 +1,4 @@
-import { Form, Link, redirect } from "react-router";
+import { Form, Link, redirect, useOutletContext } from "react-router";
 
 import type { Route } from "./+types/post-page";
 
@@ -86,12 +86,12 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const postId = Number(params.postId);
+    const formData = await request.formData();
 
     if (isNaN(postId)) {
         throw new Response("Invalid post ID", { status: 400 });
     }
 
-    const formData = await request.formData();
     const { success, error, data } = replySchema.safeParse(
         Object.fromEntries(formData)
     );
@@ -116,6 +116,8 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 };
 
 export default function PostPage({ loaderData, actionData }: Route.ComponentProps) {
+    const { isLoggedIn, currentUser } = useOutletContext<{ isLoggedIn: boolean, currentUser: any }>();
+    console.log(isLoggedIn, currentUser);
     return (
 
         <div className="space-y-10">
@@ -149,7 +151,7 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                             <ChevronUpIcon className="size-4 shrink-0" />
                             <span>{loaderData.post.upvotes}</span>
                         </Button>
-                        <div className="space-y-20">
+                        <div className="space-y-20 flex-1">
                             <div className="space-y-2">
                                 <h2 className="text-3xl font-bold">
                                     {loaderData.post.title}
@@ -161,32 +163,33 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                                     <DotIcon className="size-5" />
                                     <span>{loaderData.post.replies} replies</span>
                                 </div>
-                                <p className="text-muted-foreground w-3/4">
+                                <p className="text-muted-foreground w-full">
                                     {loaderData.post.content}
                                 </p>
                             </div>
-
-                            <Form method="post" className="flex items-start gap-5 w-full">
-                                <Avatar className="size-14">
-                                    <AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
-                                    {loaderData.post.author_avatar && <AvatarImage src={loaderData.post.author_avatar} />}
-                                </Avatar>
-                                <div className="flex flex-col gap-5 items-end w-full">
-                                    <Textarea
-                                        name="reply"
-                                        placeholder="Write a reply"
-                                        className="w-full resize-none"
-                                        rows={5}
-                                        required
-                                    />
-                                    {actionData && "fieldErrors" in actionData && actionData.fieldErrors?.reply && (
-                                        <div className="text-red-500 text-sm">
-                                            {actionData.fieldErrors.reply.join(", ")}
-                                        </div>
-                                    )}
-                                    <Button type="submit">Reply</Button>
-                                </div>
-                            </Form>
+                            {loaderData.currentUser && (
+                                <Form method="post" className="flex items-start gap-5 w-full">
+                                    <Avatar className="size-14">
+                                        <AvatarFallback>{loaderData.currentUser.name[0]?.toUpperCase() || "U"}</AvatarFallback>
+                                        {loaderData.currentUser.avatar && <AvatarImage src={loaderData.currentUser.avatar} />}
+                                    </Avatar>
+                                    <div className="flex flex-col gap-5 items-end w-full">
+                                        <Textarea
+                                            name="reply"
+                                            placeholder="Write a reply"
+                                            className="w-full resize-none"
+                                            rows={5}
+                                            required
+                                        />
+                                        {actionData && "fieldErrors" in actionData && actionData.fieldErrors?.reply && (
+                                            <div className="text-red-500 text-sm">
+                                                {actionData.fieldErrors.reply.join(", ")}
+                                            </div>
+                                        )}
+                                        <Button type="submit">Reply</Button>
+                                    </div>
+                                </Form>
+                            )}
                             <div className="space-y-10">
                                 <h4 className="font-semibold">{loaderData.post.replies} Replies</h4>
                                 <div className="flex flex-col gap-5">

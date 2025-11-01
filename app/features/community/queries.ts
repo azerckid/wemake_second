@@ -182,8 +182,7 @@ export const getRepliesByPostId = async (request: Request, postId: string): Prom
         avatar
       )
     `)
-    .eq("post_id", Number(postId))
-    .order("created_at", { ascending: true });
+    .eq("post_id", Number(postId));
 
   if (error) throw new Error(error.message);
 
@@ -204,6 +203,7 @@ export const getRepliesByPostId = async (request: Request, postId: string): Prom
   function buildReplyTree(replies: PostReply[], parentId: number | null): PostReply[] {
     return replies
       .filter(reply => reply.parent_id === parentId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // Sort by created_at descending (newest first)
       .map(reply => ({
         ...reply,
         children: buildReplyTree(replies, reply.post_reply_id),

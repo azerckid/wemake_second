@@ -51,7 +51,7 @@ export default function DashboardProductPage({
     return (
         <div className="space-y-5">
             <h1 className="text-2xl font-semibold mb-6">Analytics</h1>
-            <Card className="w-1/2">
+            <Card className="w-2/3">
                 <CardHeader>
                     <CardTitle>Performance</CardTitle>
                 </CardHeader>

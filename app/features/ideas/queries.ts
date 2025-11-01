@@ -1,3 +1,4 @@
+import type { Database } from "database.types";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 export const getGptIdeas = async (
@@ -71,4 +72,20 @@ export const getUserClaimedIdeas = async (request: Request, profileId: string) =
         ...idea,
         likes: idea.gpt_ideas_likes?.length || 0
     }));
+};
+
+export const getClaimedIdeas = async (
+    request: Request,
+    profileId: string
+) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const { data, error } = await supabase
+        .from("gpt_ideas")
+        .select("gpt_idea_id, claimed_at, idea")
+        .eq("claimed_by", profileId)
+        .order("claimed_at", { ascending: false });
+    if (error) {
+        throw error;
+    }
+    return data;
 };

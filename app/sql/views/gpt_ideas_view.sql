@@ -4,6 +4,8 @@ SELECT
   gpt_ideas.idea,
   gpt_ideas.views,
   CASE WHEN gpt_ideas.claimed_at IS NULL THEN FALSE ELSE TRUE END AS is_claimed,
+  gpt_ideas.claimed_at,
+  gpt_ideas.claimed_by,
   COUNT(gpt_ideas_likes.gpt_idea_id) AS likes,
   gpt_ideas.created_at
 FROM public.gpt_ideas

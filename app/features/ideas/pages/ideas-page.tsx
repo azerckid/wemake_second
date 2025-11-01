@@ -48,8 +48,8 @@ export default function IdeasPage({ loaderData }: Route.ComponentProps) {
                         views={idea.views ?? 0}
                         created_at={idea.created_at ? new Date(idea.created_at) : new Date()}
                         likesCount={idea.likes ?? 0}
-                        claimed_at={idea.is_claimed ? new Date(idea.created_at ?? "") : null}
-                        claimed_by={idea.is_claimed ? "user-123" : null}
+                        claimed_at={idea.claimed_at ? new Date(idea.claimed_at) : null}
+                        claimed_by={idea.claimed_by ?? null}
                     />
                 ))}
             </div>

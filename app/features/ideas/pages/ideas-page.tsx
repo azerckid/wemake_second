@@ -5,6 +5,8 @@ import { IdeaCard } from "../components/idea-card";
 import { getGptIdeas, getGptIdeasCount } from "../queries";
 import { Pagination } from "~/common/components/pagination";
 import { useSearchParams } from "react-router";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { getLoggedInUserId } from "~/features/users/queries";
 
 export const meta: Route.MetaFunction = () => {
     return [
@@ -18,6 +20,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const page = Number(url.searchParams.get("page") || 1);
     const limit = 12;
 
+    const { supabase } = createSupabaseServerClient(request);
+    
+    // 로그인한 사용자인지 확인
+    let userId: string | null = null;
+    try {
+        userId = await getLoggedInUserId(supabase);
+    } catch {
+        // 로그인하지 않은 경우 무시
+    }
+
     const [ideas, totalCount] = await Promise.all([
         getGptIdeas(request, { limit, page }),
         getGptIdeasCount(request),
@@ -25,7 +37,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    return { ideas, totalPages, currentPage: page };
+    return { ideas, totalPages, currentPage: page, userId };
 };
 
 export default function IdeasPage({ loaderData }: Route.ComponentProps) {
@@ -50,6 +62,7 @@ export default function IdeasPage({ loaderData }: Route.ComponentProps) {
                         likesCount={idea.likes ?? 0}
                         claimed_at={idea.claimed_at || null}
                         claimed_by={idea.claimed_by ?? null}
+                        isClaimedByCurrentUser={idea.claimed_by === loaderData.userId}
                     />
                 ))}
             </div>

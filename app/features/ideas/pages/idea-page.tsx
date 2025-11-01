@@ -27,28 +27,18 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const url = new URL(request.url);
     const success = url.searchParams.get("success") === "true";
-    const autoClaim = url.searchParams.get("autoClaim") === "true";
 
     // 로그인한 사용자인지 확인 (Claim 버튼 사용을 위해 필요)
     // 하지만 인증 실패 시에도 페이지는 볼 수 있도록 try-catch 사용
     let isAuthenticated = false;
-    let userId: string | null = null;
     try {
-        userId = await getLoggedInUserId(supabase);
+        await getLoggedInUserId(supabase);
         isAuthenticated = true;
     } catch {
         // 로그인하지 않은 경우 무시 (페이지는 볼 수 있음)
     }
 
     const idea = await getGptIdea(request, Number(params.ideaId));
-
-    // autoClaim이 true이고, 사용자가 로그인되어 있고, 아이디어가 아직 클레임되지 않은 경우
-    if (autoClaim && userId && !idea.is_claimed) {
-        // action을 직접 호출하여 claim 처리
-        await claimIdea(supabase, { ideaId: Number(params.ideaId), userId });
-        // 성공 페이지로 리다이렉트
-        return redirect(`/ideas/${params.ideaId}?success=true`);
-    }
 
     return { idea, success, isAuthenticated };
 };
@@ -57,17 +47,15 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const ideaId = Number(params.ideaId);
+    const idea = await getGptIdea(request, ideaId);
 
     if (isNaN(ideaId)) {
         throw new Response("Invalid idea ID", { status: 400 });
     }
-
     // 이미 클레임된 경우 체크
-    const idea = await getGptIdea(request, ideaId);
     if (idea.is_claimed) {
         return { ok: false };
     }
-
     // Claim the idea
     await claimIdea(supabase, { ideaId, userId });
 
@@ -77,7 +65,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     return redirect(`/ideas/${ideaId}?success=true`);
 };
 
-export default function IdeaPage({ loaderData, actionData }: Route.ComponentProps) {
+export default function IdeaPage({ loaderData }: Route.ComponentProps) {
     const { idea, success, isAuthenticated } = loaderData;
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
@@ -122,7 +110,7 @@ export default function IdeaPage({ loaderData, actionData }: Route.ComponentProp
                                     Claiming...
                                 </>
                             ) : (
-                                "Claim idea now &rarr;"
+                                "Claim idea now"
                             )}
                         </Button>
                     </Form>

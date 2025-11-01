@@ -1,15 +1,16 @@
 import { IdeaCard } from "~/features/ideas/components/idea-card";
 import { getUserClaimedIdeas } from "~/features/ideas/queries";
 import type { Route } from "./+types/dashboard-ideas-page";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { getLoggedInUserId } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "My Ideas | wemake" }];
 };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-    // TODO: Get current user from session
-    // For now, using a hardcoded profile ID - replace with actual user session
-    const currentUserProfileId = "67ac33ac-e49c-4c36-8d71-f12fdaea0e4f"; // alex.chen's profile_id
+    const { supabase } = createSupabaseServerClient(request);
+    const currentUserProfileId = await getLoggedInUserId(supabase);
 
     try {
         const claimedIdeas = await getUserClaimedIdeas(request, currentUserProfileId);

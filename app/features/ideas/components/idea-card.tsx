@@ -7,8 +7,7 @@ import {
     CardTitle,
 } from "~/common/components/ui/card";
 import { Button } from "~/common/components/ui/button";
-import { Badge } from "~/common/components/ui/badge";
-import { DotIcon, EyeIcon, HeartIcon, LockIcon, CheckCircleIcon, UserIcon } from "lucide-react";
+import { DotIcon, EyeIcon, HeartIcon, LockIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { DateTime } from "luxon";
 
@@ -38,7 +37,7 @@ export function IdeaCard({
     return (
         <Card className={cn(
             "bg-transparent hover:bg-card/50 transition-colors",
-            isClaimedByCurrentUser && "ring-2 ring-green-500/20 bg-green-50/50 dark:bg-green-950/20"
+            isClaimedByCurrentUser && "ring-2 ring-green-500/20"
         )}>
             <CardHeader>
                 <div className="flex items-start justify-between">
@@ -46,7 +45,7 @@ export function IdeaCard({
                         <CardTitle className="text-xl">
                             <span
                                 className={cn(
-                                    claimed && !isClaimedByCurrentUser
+                                    claimed
                                         ? "bg-muted-foreground selection:bg-muted-foreground text-muted-foreground"
                                         : ""
                                 )}
@@ -55,12 +54,6 @@ export function IdeaCard({
                             </span>
                         </CardTitle>
                     </Link>
-                    {isClaimedByCurrentUser && (
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                            <CheckCircleIcon className="w-3 h-3 mr-1" />
-                            Claimed by You
-                        </Badge>
-                    )}
                 </div>
             </CardHeader>
             <CardContent className="flex items-center text-sm">
@@ -86,22 +79,12 @@ export function IdeaCard({
                 </Button>
                 {!claimed ? (
                     <Button asChild>
-                        <Link to={`/ideas/${gpt_idea_id}?autoClaim=true`}>Claim idea now &rarr;</Link>
+                        <Link to={`/ideas/${gpt_idea_id}`}>Claim idea now &rarr;</Link>
                     </Button>
-                ) : isClaimedByCurrentUser ? (
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                            <UserIcon className="w-4 h-4 mr-1" />
-                            Manage
-                        </Button>
-                        <Button variant="outline" size="sm">
-                            View Details
-                        </Button>
-                    </div>
                 ) : (
                     <Button variant="outline" disabled className="cursor-not-allowed">
                         <LockIcon className="size-4" />
-                        Claimed by Others
+                        {isClaimedByCurrentUser ? "Claimed by You" : "Claimed by Others"}
                     </Button>
                 )}
             </CardFooter>

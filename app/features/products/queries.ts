@@ -238,7 +238,8 @@ export const getReviews = async (request: Request, productId: string) => {
           )
         `
         )
-        .eq("product_id", parseInt(productId));
+        .eq("product_id", parseInt(productId))
+        .order("created_at", { ascending: false });
     if (error) throw error;
     return data || [];
 };

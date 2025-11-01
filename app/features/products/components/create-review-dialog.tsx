@@ -1,8 +1,12 @@
 import { StarIcon } from "lucide-react";
 import { useState } from "react";
-import { Form } from "react-router";
+import { Form, useActionData } from "react-router";
+
+import type { action } from "../pages/product-reviews-page";
+
 import InputPair from "~/common/components/input-pair";
 import { Button } from "~/common/components/ui/button";
+import { Label } from "~/common/components/ui/label";
 import {
     DialogContent,
     DialogHeader,
@@ -10,11 +14,12 @@ import {
     DialogDescription,
     DialogFooter,
 } from "~/common/components/ui/dialog";
-import { Label } from "~/common/components/ui/label";
 
 export default function CreateReviewDialog() {
     const [rating, setRating] = useState<number>(0);
     const [hoveredStar, setHoveredStar] = useState<number>(0);
+    const actionData = useActionData<typeof action>();
+
     return (
         <DialogContent>
             <DialogHeader>
@@ -25,7 +30,7 @@ export default function CreateReviewDialog() {
                     Share your thoughts and experiences with this product.
                 </DialogDescription>
             </DialogHeader>
-            <Form className="space-y-4">
+            <Form method="post" className="space-y-4">
                 <div className="mt-4 mb-8">
                     <Label className="flex flex-col gap-1 items-center">
                         Rating
@@ -57,6 +62,11 @@ export default function CreateReviewDialog() {
                                     className="opacity-0 h-px w-px absolute"
                                     onChange={() => setRating(star)}
                                 />
+                                {actionData?.fieldErrors?.rating && (
+                                    <p className="text-red-500">
+                                        {actionData.fieldErrors.rating.join(", ")}
+                                    </p>
+                                )}
                             </label>
                         ))}
                     </div>
@@ -69,6 +79,11 @@ export default function CreateReviewDialog() {
                     name="review"
                     placeholder="Tell us more about your experience with this product"
                 />
+                {actionData?.fieldErrors?.review && (
+                    <p className="text-red-500">
+                        {actionData.fieldErrors.review.join(", ")}
+                    </p>
+                )}
                 <DialogFooter>
                     <Button type="submit">Submit review</Button>
                 </DialogFooter>

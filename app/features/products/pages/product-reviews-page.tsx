@@ -42,20 +42,6 @@ export async function action({ request, params }: Route.ActionArgs) {
         throw new Response("Product ID is required", { status: 400 });
     }
 
-    // Check if user has already reviewed this product
-    const { data: existingReview } = await supabase
-        .from("reviews")
-        .select("review_id")
-        .eq("product_id", Number(productId))
-        .eq("profile_id", userId)
-        .maybeSingle();
-
-    if (existingReview) {
-        return {
-            error: "You have already reviewed this product",
-        };
-    }
-
     const formData = await request.formData();
     const { success, error, data } = reviewSchema.safeParse(
         Object.fromEntries(formData)
@@ -81,6 +67,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function ProductReviewsPage({
     loaderData,
+    actionData,
 }: Route.ComponentProps) {
     const { review_count } = useOutletContext<{
         review_count: string;

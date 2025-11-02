@@ -30,6 +30,11 @@ export default function CreateReviewDialog() {
                     Share your thoughts and experiences with this product.
                 </DialogDescription>
             </DialogHeader>
+            {actionData && "error" in actionData && (
+                <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-md">
+                    {actionData.error}
+                </div>
+            )}
             <Form method="post" className="space-y-4">
                 <div className="mt-4 mb-8">
                     <Label className="flex flex-col gap-1 items-center">

@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Form } from "react-router";
 import {
     Card,
     CardFooter,
@@ -44,14 +44,14 @@ export function PostCard({
         ? DateTime.fromISO(created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()
         : DateTime.fromJSDate(created_at).setZone("Asia/Seoul").toRelative();
     return (
-        <Link to={`/community/${post_id}`} className="block">
-            <Card
-                className={cn(
-                    "bg-transparent hover:bg-card/50 transition-colors",
-                    expanded ? "flex flex-row items-center justify-between" : ""
-                )}
-            >
-                <CardHeader className="flex flex-row items-center gap-2 flex-1">
+        <Card
+            className={cn(
+                "bg-transparent hover:bg-card/50 transition-colors",
+                expanded ? "flex flex-row items-center justify-between" : ""
+            )}
+        >
+            <Link to={`/community/${post_id}`} className="flex-1">
+                <CardHeader className="flex flex-row items-center gap-2">
                     <Avatar className="size-14">
                         <AvatarFallback>{author[0]}</AvatarFallback>
                         {authorAvatarUrl && <AvatarImage src={authorAvatarUrl} />}
@@ -67,14 +67,21 @@ export function PostCard({
                         </div>
                     </div>
                 </CardHeader>
-                {!expanded && (
+            </Link>
+            {!expanded && (
+                <Link to={`/community/${post_id}`}>
                     <CardFooter className="flex justify-end">
                         <Button variant="link">Reply &rarr;</Button>
                     </CardFooter>
-                )}
-                {expanded && (
-                    <CardFooter className="flex justify-end  pb-0">
+                </Link>
+            )}
+            {expanded && (
+                <CardFooter className="flex justify-end pb-0">
+                    <Form method="post">
+                        <input type="hidden" name="intent" value="upvote" />
+                        <input type="hidden" name="post_id" value={post_id} />
                         <Button
+                            type="submit"
                             variant="outline"
                             className={cn(
                                 "flex flex-col h-14",
@@ -84,9 +91,9 @@ export function PostCard({
                             <ChevronUpIcon className="size-4 shrink-0" />
                             <span>{votesCount}</span>
                         </Button>
-                    </CardFooter>
-                )}
-            </Card>
-        </Link>
+                    </Form>
+                </CardFooter>
+            )}
+        </Card>
     );
 }

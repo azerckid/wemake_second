@@ -1,18 +1,21 @@
-import { Form, redirect, useNavigation } from "react-router";
+import { Form, useNavigation } from "react-router";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { Route } from "./+types/settings-page";
+
+
+import { Alert, AlertDescription, AlertTitle } from "~/common/components/ui/alert";
+import { getLoggedInUserId, getUserById } from "../queries";
+import { updateProfile, profileUpdateSchema } from "../mutations";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { Label } from "~/common/components/ui/label";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "~/common/components/ui/alert";
-import { getLoggedInUserId, getUserById } from "../queries";
-import { updateProfile, profileUpdateSchema } from "../mutations";
-import { createSupabaseServerClient } from "~/lib/supabase.server";
+
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Settings | wemake" }];
@@ -29,7 +32,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const formData = await request.formData();
-
+    
     const { success, error, data } = profileUpdateSchema.safeParse(
         Object.fromEntries(formData)
     );
@@ -42,9 +45,9 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     await updateProfile(supabase, userId, data);
 
-    // Get username for redirect
-    const user = await getUserById(supabase, { id: userId });
-    return redirect(`/users/${user.username}`);
+    return {
+        ok: true,
+    };
 };
 
 export default function SettingsPage({ loaderData, actionData }: Route.ComponentProps) {
@@ -63,6 +66,14 @@ export default function SettingsPage({ loaderData, actionData }: Route.Component
             <div className="grid grid-cols-6 gap-40">
                 <div className="col-span-4 flex flex-col gap-10">
                     <h2 className="text-2xl font-semibold">Edit profile</h2>
+                    {actionData?.ok ? (
+                        <Alert>
+                            <AlertTitle>Success</AlertTitle>
+                            <AlertDescription>
+                                Your profile has been updated.
+                            </AlertDescription>
+                        </Alert>
+                    ) : null}
                     <Form method="post" className="flex flex-col w-1/2 gap-5">
                         <InputPair
                             label="Name"

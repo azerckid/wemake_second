@@ -7,7 +7,7 @@ import type { Route } from "./+types/settings-page";
 
 import { Alert, AlertDescription, AlertTitle } from "~/common/components/ui/alert";
 import { getLoggedInUserId, getUserById } from "../queries";
-import { updateProfile, profileUpdateSchema, uploadAvatar } from "../mutations";
+import { updateProfile, profileUpdateSchema, uploadAndSaveAvatar } from "../mutations";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 import InputPair from "~/common/components/input-pair";
@@ -33,14 +33,18 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const userId = await getLoggedInUserId(supabase);
     const formData = await request.formData();
 
-    // Handle avatar upload if provided
+    const formErrors: Record<string, string[]> = {};
+
+    // Validate avatar upload if provided
     const avatarFile = formData.get("avatar") as File | null;
     if (avatarFile && avatarFile.size > 0) {
-        const avatarUrl = await uploadAvatar(supabase, userId, avatarFile);
-        await supabase
-            .from("profiles")
-            .update({ avatar: avatarUrl })
-            .eq("profile_id", userId);
+        if (avatarFile.size > 2097152) {
+            formErrors.avatar = ["File size must be 2MB or less"];
+        } else if (!avatarFile.type.startsWith("image/")) {
+            formErrors.avatar = ["File must be an image (PNG or JPEG)"];
+        } else {
+            await uploadAndSaveAvatar(supabase, userId, avatarFile);
+        }
     }
 
     // Extract only text fields for validation (exclude File objects)
@@ -54,8 +58,16 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const { success, error, data } = profileUpdateSchema.safeParse(profileData);
 
     if (!success) {
+        const validationErrors = error.flatten().fieldErrors;
         return {
-            formErrors: error.flatten().fieldErrors,
+            formErrors: { ...formErrors, ...validationErrors },
+        };
+    }
+
+    // If there are avatar errors, don't proceed with profile update
+    if (Object.keys(formErrors).length > 0) {
+        return {
+            formErrors,
         };
     }
 
@@ -176,14 +188,14 @@ export default function SettingsPage({ loaderData, actionData }: Route.Component
                         )}
                     </Button>
                 </div>
-                <aside className="col-span-2 p-6 rounded-lg border shadow-md">
-                    <Label className="flex flex-col gap-1">
+                <aside className="col-span-2 p-6 rounded-lg border shadow-md flex flex-col items-center gap-5">
+                    <Label className="flex flex-col gap-1 items-center">
                         Avatar
                         <small className="text-muted-foreground">
                             This is your public avatar.
                         </small>
                     </Label>
-                    <div className="space-y-5">
+                    <div className="flex flex-col items-center gap-5">
                         <div className="size-40 rounded-full shadow-xl overflow-hidden ">
                             {avatar || loaderData.user.avatar ? (
                                 <img src={avatar || loaderData.user.avatar!} className="object-cover w-full h-full" />
@@ -191,18 +203,26 @@ export default function SettingsPage({ loaderData, actionData }: Route.Component
                         </div>
                         <Input
                             type="file"
-                            className="w-1/2"
+                            accept="image/png,image/jpeg"
                             onChange={onChange}
                             name="avatar"
                         />
-                        <div className="flex flex-col text-xs">
+                        {actionData?.formErrors?.avatar ? (
+                            <Alert>
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {actionData.formErrors.avatar.join(", ")}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
+                        <div className="flex flex-col text-xs items-center gap-1">
                             <span className=" text-muted-foreground">
                                 Recommended size: 128x128px
                             </span>
                             <span className=" text-muted-foreground">
                                 Allowed formats: PNG, JPEG
                             </span>
-                            <span className=" text-muted-foreground">Max file size: 1MB</span>
+                            <span className=" text-muted-foreground">Max file size: 2MB</span>
                         </div>
                     </div>
                 </aside>

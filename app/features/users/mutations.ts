@@ -11,7 +11,7 @@ export const uploadAvatar = async (
     const fileExt = file.name.split(".").pop();
     const fileName = `avatar-${Date.now()}.${fileExt}`;
     const filePath = `${userId}/${fileName}`;
-    
+
     const { error: uploadError } = await client.storage
         .from("avatars")
         .upload(filePath, file);
@@ -25,6 +25,23 @@ export const uploadAvatar = async (
         .getPublicUrl(filePath);
 
     return data.publicUrl;
+};
+
+export const uploadAndSaveAvatar = async (
+    client: SupabaseClient<Database>,
+    userId: string,
+    file: File
+): Promise<void> => {
+    const avatarUrl = await uploadAvatar(client, userId, file);
+
+    const { error } = await client
+        .from("profiles")
+        .update({ avatar: avatarUrl })
+        .eq("profile_id", userId);
+
+    if (error) {
+        throw error;
+    }
 };
 
 export const profileUpdateSchema = z.object({

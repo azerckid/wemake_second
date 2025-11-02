@@ -191,9 +191,6 @@ export default function SubmitProductPage({ loaderData, actionData }: Route.Comp
                     {actionData && "formErrors" in actionData && actionData?.formErrors?.categoryId && (
                         <p className="text-red-500">{actionData.formErrors.categoryId}</p>
                     )}
-                    <Button type="submit" className="w-full" size="lg">
-                        Submit
-                    </Button>
                 </div>
                 <div className="flex flex-col space-y-4">
                     <div className="size-40 rounded-xl shadow-xl overflow-hidden">
@@ -227,6 +224,9 @@ export default function SubmitProductPage({ loaderData, actionData }: Route.Comp
                         </span>
                         <span className=" text-muted-foreground">Max file size: 2MB</span>
                     </div>
+                    <Button type="submit" className="w-full" size="lg">
+                        Submit
+                    </Button>
                 </div>
             </Form>
         </div>

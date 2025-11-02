@@ -14,7 +14,10 @@ export const uploadAvatar = async (
 
     const { error: uploadError } = await client.storage
         .from("avatars")
-        .upload(filePath, file);
+        .upload(filePath, file, {
+            contentType: file.type,
+            upsert: true,
+        });
 
     if (uploadError) {
         throw uploadError;

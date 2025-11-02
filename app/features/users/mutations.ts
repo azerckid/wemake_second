@@ -3,6 +3,30 @@ import type { Database } from "database.types";
 
 import { z } from "zod";
 
+export const uploadAvatar = async (
+    client: SupabaseClient<Database>,
+    userId: string,
+    file: File
+): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `avatar-${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
+    
+    const { error: uploadError } = await client.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    const { data } = client.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+    return data.publicUrl;
+};
+
 export const profileUpdateSchema = z.object({
     name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
     role: z.enum(["developer", "designer", "marketer", "product-manager", "founder"]),

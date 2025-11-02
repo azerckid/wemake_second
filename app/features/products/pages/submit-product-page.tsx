@@ -2,8 +2,9 @@ import { useState } from "react";
 
 import type { Route } from "./+types/submit-product-page";
 
+import { LoaderCircle } from "lucide-react";
 import { Hero } from "~/common/components/hero";
-import { Form, redirect } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { Input } from "~/common/components/ui/input";
@@ -104,6 +105,9 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function SubmitProductPage({ loaderData, actionData }: Route.ComponentProps) {
     const [icon, setIcon] = useState<string | null>(null);
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state === "submitting";
+
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const file = event.target.files[0];
@@ -224,8 +228,15 @@ export default function SubmitProductPage({ loaderData, actionData }: Route.Comp
                         </span>
                         <span className=" text-muted-foreground">Max file size: 2MB</span>
                     </div>
-                    <Button type="submit" className="w-full" size="lg">
-                        Submit
+                    <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                                <LoaderCircle className="animate-spin mr-2" />
+                                Submitting...
+                            </>
+                        ) : (
+                            "Submit"
+                        )}
                     </Button>
                 </div>
             </Form>

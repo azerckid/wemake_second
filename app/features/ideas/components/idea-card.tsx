@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Form } from "react-router";
 import {
     Card,
     CardContent,
@@ -20,6 +20,7 @@ interface IdeaCardProps {
     claimed_at: Date | string | null;
     claimed_by: string | null;
     isClaimedByCurrentUser?: boolean; // 현재 사용자가 클레임했는지 여부
+    isLiked?: boolean;
 }
 
 export function IdeaCard({
@@ -31,6 +32,7 @@ export function IdeaCard({
     claimed_at,
     claimed_by,
     isClaimedByCurrentUser = false,
+    isLiked = false,
 }: IdeaCardProps) {
     const claimed = claimed_at !== null && claimed_by !== null;
 
@@ -73,10 +75,14 @@ export function IdeaCard({
                 )}
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-                <Button variant="outline">
-                    <HeartIcon className="w-4 h-4" />
-                    <span>{likesCount}</span>
-                </Button>
+                <Form method="post">
+                    <input type="hidden" name="intent" value="like" />
+                    <input type="hidden" name="idea_id" value={gpt_idea_id} />
+                    <Button type="submit" variant="outline" className={cn(isLiked && "border-red-500 text-red-500")}>
+                        <HeartIcon className={cn("w-4 h-4", isLiked && "fill-current")} />
+                        <span>{likesCount}</span>
+                    </Button>
+                </Form>
                 {!claimed ? (
                     <Button asChild>
                         <Link to={`/ideas/${gpt_idea_id}`}>Claim idea now &rarr;</Link>

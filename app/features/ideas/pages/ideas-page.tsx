@@ -4,9 +4,10 @@ import { Hero } from "~/common/components/hero";
 import { IdeaCard } from "../components/idea-card";
 import { getGptIdeas, getGptIdeasCount } from "../queries";
 import { Pagination } from "~/common/components/pagination";
-import { useSearchParams } from "react-router";
+import { useSearchParams, redirect } from "react-router";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { getLoggedInUserId } from "~/features/users/queries";
+import { toggleIdeaLike } from "../mutations";
 
 export const meta: Route.MetaFunction = () => {
     return [
@@ -40,6 +41,26 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return { ideas, totalPages, currentPage: page, userId };
 };
 
+export const action = async ({ request }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const formData = await request.formData();
+
+    if (formData.get("intent") === "like") {
+        const ideaId = Number(formData.get("idea_id"));
+        if (!isNaN(ideaId)) {
+            await toggleIdeaLike(supabase, {
+                idea_id: ideaId,
+                userId,
+            });
+        }
+    }
+
+    // Redirect back to ideas page to refresh data
+    const url = new URL(request.url);
+    return redirect(url.pathname + url.search);
+};
+
 export default function IdeasPage({ loaderData }: Route.ComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const currentPage = Number(searchParams.get("page") || 1);
@@ -63,6 +84,7 @@ export default function IdeasPage({ loaderData }: Route.ComponentProps) {
                         claimed_at={idea.claimed_at || null}
                         claimed_by={idea.claimed_by ?? null}
                         isClaimedByCurrentUser={idea.claimed_by === loaderData.userId}
+                        isLiked={idea.is_liked ?? false}
                     />
                 ))}
             </div>

@@ -795,7 +795,7 @@ export type Database = {
           equity_percentage?: number | null
           joined_at?: string
           role: string
-          status?: string
+          status: string
           team_id: number
           team_member_id?: number
           user_id: string
@@ -852,7 +852,7 @@ export type Database = {
           max_team_size?: number | null
           product_description: string
           product_name: string
-          product_stage: Database["public"]["Enums"]["product_stage"]
+          product_stage?: Database["public"]["Enums"]["product_stage"]
           roles: string
           team_id?: number
           team_leader_id: string
@@ -957,6 +957,7 @@ export type Database = {
           gpt_idea_id: number | null
           idea: string | null
           is_claimed: boolean | null
+          is_liked: boolean | null
           likes: number | null
           views: number | null
         }
@@ -1252,4 +1253,3 @@ export const Constants = {
     },
   },
 } as const
-

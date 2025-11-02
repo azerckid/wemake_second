@@ -13,3 +13,47 @@ export const claimIdea = async (
         throw error;
     }
 };
+
+export const toggleIdeaLike = async (
+    client: SupabaseClient<Database>,
+    {
+        idea_id,
+        userId,
+    }: {
+        idea_id: number;
+        userId: string;
+    }
+) => {
+    // Check if user has already liked
+    const { data: existing } = await client
+        .from("gpt_ideas_likes")
+        .select("gpt_idea_id, profile_id")
+        .eq("gpt_idea_id", idea_id)
+        .eq("profile_id", userId)
+        .maybeSingle();
+
+    if (existing) {
+        // Remove like
+        const { error } = await client
+            .from("gpt_ideas_likes")
+            .delete()
+            .eq("gpt_idea_id", idea_id)
+            .eq("profile_id", userId);
+        if (error) {
+            throw error;
+        }
+        return false; // Like removed
+    } else {
+        // Add like
+        const { error } = await client
+            .from("gpt_ideas_likes")
+            .insert({
+                gpt_idea_id: idea_id,
+                profile_id: userId,
+            });
+        if (error) {
+            throw error;
+        }
+        return true; // Like added
+    }
+};

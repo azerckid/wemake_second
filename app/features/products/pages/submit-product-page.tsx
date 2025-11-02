@@ -1,20 +1,21 @@
 import { useState } from "react";
+import { Form, redirect, useNavigation } from "react-router";
 
 import type { Route } from "./+types/submit-product-page";
 
+import { z } from "zod";
 import { LoaderCircle } from "lucide-react";
+import { getCategories } from "../queries";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { createProduct, uploadProductIcon } from "../mutations";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
+
 import { Hero } from "~/common/components/hero";
-import { Form, redirect, useNavigation } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
 import { Input } from "~/common/components/ui/input";
 import { Label } from "~/common/components/ui/label";
 import { Button } from "~/common/components/ui/button";
-import { createSupabaseServerClient } from "~/lib/supabase.server";
-import { getLoggedInUserId } from "~/features/users/queries";
-import { getCategories } from "../queries";
-import { createProduct, uploadProductIcon } from "../mutations";
-import { z } from "zod";
 
 const productSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -23,6 +24,13 @@ const productSchema = z.object({
     howItWorks: z.string().min(1, "How it works is required"),
     url: z.string().url("Invalid URL"),
     categoryId: z.string().min(1, "Category is required"),
+    icon: z.instanceof(File).refine(
+        (file) => file.size <= 2097152,
+        "File size must be 2MB or less"
+    ).refine(
+        (file) => file.type.startsWith("image/"),
+        "File must be an image (PNG or JPEG)"
+    ),
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -37,28 +45,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const userId = await getLoggedInUserId(supabase);
     const formData = await request.formData();
 
-    const formErrors: Record<string, string[]> = {};
-
-    // Handle icon file upload
-    const iconFile = formData.get("icon") as File | null;
-    let iconUrl = "";
-
-    if (!iconFile || iconFile.size === 0) {
-        formErrors.icon = ["Icon is required"];
-    } else {
-        if (iconFile.size > 2097152) {
-            formErrors.icon = ["File size must be 2MB or less"];
-        } else if (!iconFile.type.startsWith("image/")) {
-            formErrors.icon = ["File must be an image (PNG or JPEG)"];
-        } else {
-            try {
-                iconUrl = await uploadProductIcon(supabase, userId, iconFile);
-            } catch (error) {
-                formErrors.icon = ["Failed to upload icon"];
-            }
-        }
-    }
-
     const productData = {
         name: formData.get("name") as string,
         tagline: formData.get("tagline") as string,
@@ -66,30 +52,40 @@ export const action = async ({ request }: Route.ActionArgs) => {
         howItWorks: formData.get("how_it_works") as string,
         url: formData.get("url") as string,
         categoryId: formData.get("category_id") as string,
+        icon: formData.get("icon") as File | null,
     };
 
     const validationResult = productSchema.safeParse(productData);
 
     if (!validationResult.success) {
+        const formErrors: Record<string, string[]> = {};
         validationResult.error.issues.forEach((err) => {
             if (err.path[0]) {
                 formErrors[err.path[0] as string] = [err.message];
             }
         });
+        return { formErrors };
     }
 
-    if (Object.keys(formErrors).length > 0) {
+    // Handle icon file upload
+    let iconUrl = "";
+    try {
+        iconUrl = await uploadProductIcon(supabase, userId, validationResult.data.icon);
+    } catch (error) {
+        const formErrors: Record<string, string[]> = {
+            icon: ["Failed to upload icon"],
+        };
         return { formErrors };
     }
 
     const product_id = await createProduct(supabase, {
-        name: productData.name,
-        tagline: productData.tagline,
-        description: productData.description,
-        howItWorks: productData.howItWorks,
-        url: productData.url,
+        name: validationResult.data.name,
+        tagline: validationResult.data.tagline,
+        description: validationResult.data.description,
+        howItWorks: validationResult.data.howItWorks,
+        url: validationResult.data.url,
         iconUrl,
-        categoryId: parseInt(productData.categoryId),
+        categoryId: parseInt(validationResult.data.categoryId),
         userId,
     });
 

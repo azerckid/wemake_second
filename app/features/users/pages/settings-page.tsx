@@ -29,7 +29,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const formData = await request.formData();
-    
+
     const { success, error, data } = profileUpdateSchema.safeParse(
         Object.fromEntries(formData)
     );
@@ -51,7 +51,7 @@ export default function SettingsPage({ loaderData, actionData }: Route.Component
     const [avatar, setAvatar] = useState<string | null>(null);
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
-    
+
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const file = event.target.files[0];

@@ -53,9 +53,11 @@ export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
                     </div>
                     <div className="flex gap-2 items-center">
                         <h1 className="text-2xl font-semibold">{loaderData.user.name}</h1>
-                        <Button variant="outline" asChild>
-                            <Link to="/my/settings">Edit profile</Link>
-                        </Button>
+                        {loaderData.isOwner ? (
+                            <Button variant="outline" asChild>
+                                <Link to="/my/settings">Edit profile</Link>
+                            </Button>
+                        ) : null}
                         <Button variant="secondary">Follow</Button>
                         <Dialog>
                             <DialogTrigger asChild>

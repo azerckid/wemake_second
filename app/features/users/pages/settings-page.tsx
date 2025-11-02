@@ -1,5 +1,6 @@
-import { Form, redirect } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 import type { Route } from "./+types/settings-page";
 
@@ -21,7 +22,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const user = await getUserById(supabase, { id: userId });
-    return { user };
+    return { user, username: user.username };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -41,11 +42,16 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     await updateProfile(supabase, userId, data);
 
-    return redirect("/my/settings?success=true");
+    // Get username for redirect
+    const user = await getUserById(supabase, { id: userId });
+    return redirect(`/users/${user.username}`);
 };
 
 export default function SettingsPage({ loaderData, actionData }: Route.ComponentProps) {
     const [avatar, setAvatar] = useState<string | null>(null);
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state === "submitting";
+    
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const file = event.target.files[0];
@@ -133,7 +139,16 @@ export default function SettingsPage({ loaderData, actionData }: Route.Component
                                 </AlertDescription>
                             </Alert>
                         ) : null}
-                        <Button className="w-full">Update profile</Button>
+                        <Button className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Updating...
+                                </>
+                            ) : (
+                                "Update profile"
+                            )}
+                        </Button>
                     </Form>
                 </div>
                 <aside className="col-span-2 p-6 rounded-lg border shadow-md">

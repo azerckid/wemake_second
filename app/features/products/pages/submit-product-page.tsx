@@ -113,7 +113,7 @@ export default function SubmitProductPage({ loaderData, actionData }: Route.Comp
     return (
         <div>
             <Hero title="Submit Product" subtitle="Submit your product to our community" />
-            <Form className="grid grid-cols-2 gap-10 max-w-screen-lg mx-auto" encType="multipart/form-data">
+            <Form method="post" className="grid grid-cols-2 gap-10 max-w-screen-lg mx-auto" encType="multipart/form-data">
                 <div className="space-y-5">
                     <InputPair
                         label="Name"

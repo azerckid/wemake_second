@@ -1,4 +1,4 @@
-import { Form } from "react-router";
+import { Form, redirect } from "react-router";
 import { useState } from "react";
 
 import type { Route } from "./+types/settings-page";
@@ -8,12 +8,43 @@ import SelectPair from "~/common/components/select-pair";
 import { Label } from "~/common/components/ui/label";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "~/common/components/ui/alert";
+import { getLoggedInUserId, getUserById } from "../queries";
+import { updateProfile, profileUpdateSchema } from "../mutations";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Settings | wemake" }];
 };
 
-export default function SettingsPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const user = await getUserById(supabase, { id: userId });
+    return { user };
+};
+
+export const action = async ({ request }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const formData = await request.formData();
+    
+    const { success, error, data } = profileUpdateSchema.safeParse(
+        Object.fromEntries(formData)
+    );
+
+    if (!success) {
+        return {
+            formErrors: error.flatten().fieldErrors,
+        };
+    }
+
+    await updateProfile(supabase, userId, data);
+
+    return redirect("/my/settings?success=true");
+};
+
+export default function SettingsPage({ loaderData, actionData }: Route.ComponentProps) {
     const [avatar, setAvatar] = useState<string | null>(null);
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -26,7 +57,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-6 gap-40">
                 <div className="col-span-4 flex flex-col gap-10">
                     <h2 className="text-2xl font-semibold">Edit profile</h2>
-                    <Form className="flex flex-col w-1/2 gap-5">
+                    <Form method="post" className="flex flex-col w-1/2 gap-5">
                         <InputPair
                             label="Name"
                             description="Your public name"
@@ -34,20 +65,22 @@ export default function SettingsPage() {
                             id="name"
                             name="name"
                             placeholder="John Doe"
+                            defaultValue={loaderData.user.name}
                         />
-                        <InputPair
-                            label="Username"
-                            description="Your unique username"
-                            required
-                            id="username"
-                            name="username"
-                            placeholder="johndoe"
-                        />
+                        {actionData?.formErrors?.name ? (
+                            <Alert>
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {actionData.formErrors.name.join(", ")}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
                         <SelectPair
                             label="Role"
                             description="What role do you do identify the most with"
                             name="role"
                             placeholder="Select a role"
+                            defaultValue={loaderData.user.role}
                             options={[
                                 { label: "Developer", value: "developer" },
                                 { label: "Designer", value: "designer" },
@@ -56,6 +89,14 @@ export default function SettingsPage() {
                                 { label: "Founder", value: "founder" },
                             ]}
                         />
+                        {actionData?.formErrors?.role ? (
+                            <Alert>
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {actionData.formErrors.role.join(", ")}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
                         <InputPair
                             label="Headline"
                             description="An introduction to your profile."
@@ -64,16 +105,34 @@ export default function SettingsPage() {
                             name="headline"
                             placeholder="A brief introduction to your profile."
                             textArea
+                            defaultValue={loaderData.user.headline ?? ""}
                         />
+                        {actionData?.formErrors?.headline ? (
+                            <Alert>
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {actionData.formErrors.headline.join(", ")}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
                         <InputPair
                             label="Bio"
                             description="Your public bio. It will be displayed on your profile page."
                             required
                             id="bio"
                             name="bio"
-                            placeholder="John Doe"
+                            placeholder="Your public bio"
                             textArea
+                            defaultValue={loaderData.user.bio ?? ""}
                         />
+                        {actionData?.formErrors?.bio ? (
+                            <Alert>
+                                <AlertTitle>Error</AlertTitle>
+                                <AlertDescription>
+                                    {actionData.formErrors.bio.join(", ")}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
                         <Button className="w-full">Update profile</Button>
                     </Form>
                 </div>

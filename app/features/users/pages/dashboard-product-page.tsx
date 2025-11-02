@@ -1,11 +1,12 @@
+import { redirect } from "react-router";
 import type { Route } from "./+types/dashboard-product-page";
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "~/common/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "~/common/components/ui/chart";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { getLoggedInUserId } from "../queries";
-import { redirect } from "react-router";
+
+import { Card, CardContent, CardHeader, CardTitle } from "~/common/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "~/common/components/ui/chart";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Product Dashboard | wemake" }];
@@ -15,6 +16,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
     const productId = Number(params.productId);
+
     const { error } = await supabase
         .from("products")
         .select("product_id")
@@ -98,7 +100,6 @@ export default function DashboardProductPage({
                     </ChartContainer>
                 </CardContent>
             </Card>
-
         </div>
     );
 }

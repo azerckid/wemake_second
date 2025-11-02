@@ -15,6 +15,7 @@ export default function SelectPair({
     description,
     placeholder,
     options,
+    defaultValue,
 }: {
     name: string;
     required?: boolean;
@@ -25,8 +26,10 @@ export default function SelectPair({
         label: string;
         value: string;
     }[];
+    defaultValue?: string;
 }) {
     const [open, setOpen] = useState(false);
+    const [value, setValue] = useState<string | undefined>(defaultValue);
     return (
         <div className="space-y-2 flex flex-col">
             <Label className="flex flex-col gap-1 items-start" onClick={() => setOpen(true)}>
@@ -36,8 +39,8 @@ export default function SelectPair({
             <Select
                 open={open}
                 onOpenChange={setOpen}
-                name={name}
-                required={required}
+                onValueChange={setValue}
+                value={value}
             >
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder} />
@@ -50,6 +53,7 @@ export default function SelectPair({
                     ))}
                 </SelectContent>
             </Select>
+            <input type="hidden" name={name} value={value || ""} required={required} />
         </div>
     );
 }

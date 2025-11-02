@@ -49,3 +49,18 @@ CREATE TRIGGER review_delete_trigger
 AFTER DELETE ON public.reviews
 FOR EACH ROW EXECUTE FUNCTION public.handle_review_delete();
 
+-- Sync existing review counts (one-time update for existing data)
+UPDATE products p
+SET stats = jsonb_set(
+    stats,
+    '{reviews}',
+    to_jsonb(COALESCE(subquery.review_count, 0))
+)
+FROM (
+    SELECT 
+        product_id,
+        COUNT(review_id) as review_count
+    FROM reviews
+    GROUP BY product_id
+) AS subquery
+WHERE p.product_id = subquery.product_id;

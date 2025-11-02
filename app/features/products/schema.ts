@@ -26,21 +26,17 @@ export const products = pgTable(
         icon: text().notNull(),
         url: text().notNull(),
         stats: jsonb().notNull().default({ views: 0, reviews: 0, upvotes: 0 }),
-        profile_id: uuid().notNull(),
-        category_id: bigint({ mode: "number" }).references(
-            () => categories.category_id,
-            { onDelete: "set null" }
-        ),
+        profile_id: uuid()
+            .notNull()
+            .references(() => profiles.profile_id, {
+                onDelete: "cascade",
+            }),
+        category_id: bigint({ mode: "number" })
+            .references(() => categories.category_id, { onDelete: "set null" })
+            .notNull(),
         created_at: timestamp().notNull().defaultNow(),
         updated_at: timestamp().notNull().defaultNow().$onUpdate(() => new Date()),
-    },
-    (table) => [
-        foreignKey({
-            columns: [table.profile_id],
-            foreignColumns: [profiles.profile_id],
-            name: "products_to_profiles",
-        }).onDelete("cascade"),
-    ]
+    }
 );
 
 export const categories = pgTable("categories", {

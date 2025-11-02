@@ -75,14 +75,21 @@ export function IdeaCard({
                 )}
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-                <Form method="post">
-                    <input type="hidden" name="intent" value="like" />
-                    <input type="hidden" name="idea_id" value={gpt_idea_id} />
-                    <Button type="submit" variant="outline" className={cn(isLiked && "border-red-500 text-red-500")}>
-                        <HeartIcon className={cn("w-4 h-4", isLiked && "fill-current")} />
+                {!claimed ? (
+                    <Form method="post">
+                        <input type="hidden" name="intent" value="like" />
+                        <input type="hidden" name="idea_id" value={gpt_idea_id} />
+                        <Button type="submit" variant="outline" className={cn(isLiked && "border-red-500 text-red-500")}>
+                            <HeartIcon className={cn("w-4 h-4", isLiked && "fill-current")} />
+                            <span>{likesCount}</span>
+                        </Button>
+                    </Form>
+                ) : (
+                    <Button variant="outline" disabled>
+                        <HeartIcon className="w-4 h-4" />
                         <span>{likesCount}</span>
                     </Button>
-                </Form>
+                )}
                 {!claimed ? (
                     <Button asChild>
                         <Link to={`/ideas/${gpt_idea_id}`}>Claim idea now &rarr;</Link>

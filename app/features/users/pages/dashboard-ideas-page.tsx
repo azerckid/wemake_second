@@ -1,8 +1,10 @@
 import { IdeaCard } from "~/features/ideas/components/idea-card";
 import { getUserClaimedIdeas } from "~/features/ideas/queries";
+import { toggleIdeaLike } from "~/features/ideas/mutations";
 import type { Route } from "./+types/dashboard-ideas-page";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { getLoggedInUserId } from "../queries";
+import { redirect } from "react-router";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "My Ideas | wemake" }];
@@ -19,6 +21,25 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
         console.error("Failed to load claimed ideas:", error);
         return { claimedIdeas: [] };
     }
+};
+
+export const action = async ({ request }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const formData = await request.formData();
+
+    if (formData.get("intent") === "like") {
+        const ideaId = Number(formData.get("idea_id"));
+        if (!isNaN(ideaId)) {
+            await toggleIdeaLike(supabase, {
+                idea_id: ideaId,
+                userId,
+            });
+        }
+    }
+
+    // Redirect back to dashboard ideas page to refresh data
+    return redirect("/my/dashboard/ideas");
 };
 
 export default function DashboardIdeasPage({ loaderData }: Route.ComponentProps) {
@@ -45,6 +66,7 @@ export default function DashboardIdeasPage({ loaderData }: Route.ComponentProps)
                             claimed_at={idea.claimed_at}
                             claimed_by={idea.claimed_by}
                             isClaimedByCurrentUser={true} // 대시보드에서는 모두 현재 사용자가 클레임한 아이디어
+                            isLiked={idea.is_liked ?? false}
                         />
                     ))}
                 </div>

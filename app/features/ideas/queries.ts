@@ -50,16 +50,8 @@ export const getGptIdea = async (request: Request, gpt_idea_id: number) => {
 export const getUserClaimedIdeas = async (request: Request, profileId: string) => {
     const { supabase } = createSupabaseServerClient(request);
     const { data, error } = await supabase
-        .from("gpt_ideas")
-        .select(`
-            gpt_idea_id,
-            idea,
-            views,
-            claimed_at,
-            claimed_by,
-            created_at,
-            gpt_ideas_likes!left(count)
-        `)
+        .from("gpt_ideas_view")
+        .select("*")
         .eq("claimed_by", profileId)
         .order("claimed_at", { ascending: false });
 
@@ -67,11 +59,7 @@ export const getUserClaimedIdeas = async (request: Request, profileId: string) =
         throw error;
     }
 
-    // Transform the data to include likes count
-    return (data || []).map((idea: any) => ({
-        ...idea,
-        likes: idea.gpt_ideas_likes?.length || 0
-    }));
+    return data;
 };
 
 export const getClaimedIdeas = async (

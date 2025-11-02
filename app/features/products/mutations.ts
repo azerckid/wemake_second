@@ -87,3 +87,47 @@ export const createProduct = async (
     if (error) throw error;
     return data.product_id;
 };
+
+export const toggleProductUpvote = async (
+    client: SupabaseClient<Database>,
+    {
+        product_id,
+        userId,
+    }: {
+        product_id: number;
+        userId: string;
+    }
+) => {
+    // Check if user has already upvoted
+    const { data: existing } = await client
+        .from("product_upvotes")
+        .select("product_id, profile_id")
+        .eq("product_id", product_id)
+        .eq("profile_id", userId)
+        .maybeSingle();
+
+    if (existing) {
+        // Remove upvote
+        const { error } = await client
+            .from("product_upvotes")
+            .delete()
+            .eq("product_id", product_id)
+            .eq("profile_id", userId);
+        if (error) {
+            throw error;
+        }
+        return false; // Upvote removed
+    } else {
+        // Add upvote
+        const { error } = await client
+            .from("product_upvotes")
+            .insert({
+                product_id,
+                profile_id: userId,
+            });
+        if (error) {
+            throw error;
+        }
+        return true; // Upvote added
+    }
+};

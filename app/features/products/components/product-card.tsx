@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Form } from "react-router";
 import {
     Card,
     CardDescription,
@@ -16,6 +16,7 @@ interface ProductCardProps {
     reviewsCount: number;
     viewsCount: number;
     votesCount: number;
+    showUpvoteButton?: boolean;
 }
 
 export function ProductCard({
@@ -25,6 +26,7 @@ export function ProductCard({
     reviewsCount,
     viewsCount,
     votesCount,
+    showUpvoteButton = false,
 }: ProductCardProps) {
     // Ensure id is a valid number
     const numericId = typeof id === 'number' ? id : Number(id);
@@ -33,9 +35,9 @@ export function ProductCard({
     }
     const productUrl = `/products/${numericId}`;
     return (
-        <Link to={productUrl} className="block">
-            <Card className="w-full flex flex-row items-center justify-between p-6 bg-transparent hover:bg-primary/10">
-                <CardHeader className="p-0 flex-1">
+        <Card className="w-full flex flex-row items-center justify-between p-6 bg-transparent hover:bg-primary/10">
+            <Link to={productUrl} className="flex-1">
+                <CardHeader className="p-0">
                     <CardTitle className="text-2xl font-semibold leading-none tracking-tight">
                         {name}
                     </CardTitle>
@@ -53,13 +55,28 @@ export function ProductCard({
                         </div>
                     </div>
                 </CardHeader>
-                <CardFooter className="py-0">
+            </Link>
+            <CardFooter className="py-0">
+                {showUpvoteButton ? (
+                    <Form method="post">
+                        <input type="hidden" name="intent" value="upvote" />
+                        <input type="hidden" name="product_id" value={numericId} />
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            className="flex flex-col h-14"
+                        >
+                            <ChevronUpIcon className="size-4 shrink-0" />
+                            <span>{votesCount}</span>
+                        </Button>
+                    </Form>
+                ) : (
                     <Button variant="outline" className="flex flex-col h-14">
                         <ChevronUpIcon className="size-4 shrink-0" />
                         <span>{votesCount}</span>
                     </Button>
-                </CardFooter>
-            </Card>
-        </Link>
+                )}
+            </CardFooter>
+        </Card>
     );
 }

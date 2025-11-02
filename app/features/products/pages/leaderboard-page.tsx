@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, redirect } from "react-router";
 
 import type { Route } from "./+types/leaderboard-page";
 
@@ -7,6 +7,9 @@ import { getProductsByDateRange } from "../queries";
 import { ProductCard } from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import { Hero } from "~/common/components/hero";
+import { toggleProductUpvote } from "../mutations";
+import { getLoggedInUserId } from "~/features/users/queries";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 export function meta({ data }: Route.MetaArgs) {
     return [
@@ -42,7 +45,26 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts };
 };
 
-export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
+export const action = async ({ request }: Route.ActionArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+    const formData = await request.formData();
+
+    if (formData.get("intent") === "upvote") {
+        const productId = Number(formData.get("product_id"));
+        if (!isNaN(productId)) {
+            await toggleProductUpvote(supabase, {
+                product_id: productId,
+                userId,
+            });
+        }
+    }
+
+    // Redirect back to leaderboard page to refresh data
+    return redirect("/products/leaderboards");
+};
+
+export default function LeaderboardPage({ loaderData, actionData }: Route.ComponentProps) {
     const { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts } = loaderData;
 
     return (
@@ -74,6 +96,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
+                        showUpvoteButton
                     />
                 ))}
 
@@ -101,6 +124,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
+                        showUpvoteButton
                     />
                 ))}
 
@@ -128,6 +152,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
+                        showUpvoteButton
                     />
                 ))}
             </div>
@@ -154,6 +179,7 @@ export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
                         reviewsCount={product.reviews ?? 0}
                         viewsCount={product.views ?? 0}
                         votesCount={product.upvotes ?? 0}
+                        showUpvoteButton
                     />
                 ))}
             </div>

@@ -79,7 +79,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function SettingsPage({ loaderData, actionData }: Route.ComponentProps) {
-    const [avatar, setAvatar] = useState<string | null>(null);
+    const [avatar, setAvatar] = useState<string | null>(loaderData.user.avatar);
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
 

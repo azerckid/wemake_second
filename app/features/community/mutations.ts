@@ -60,3 +60,47 @@ export const createReply = async (
     }
     return data;
 };
+
+export const togglePostUpvote = async (
+    supabase: SupabaseClient<Database>,
+    {
+        post_id,
+        userId,
+    }: {
+        post_id: number;
+        userId: string;
+    }
+) => {
+    // Check if user has already upvoted
+    const { data: existing } = await supabase
+        .from("post_upvotes")
+        .select("post_id, profile_id")
+        .eq("post_id", post_id)
+        .eq("profile_id", userId)
+        .maybeSingle();
+
+    if (existing) {
+        // Remove upvote
+        const { error } = await supabase
+            .from("post_upvotes")
+            .delete()
+            .eq("post_id", post_id)
+            .eq("profile_id", userId);
+        if (error) {
+            throw error;
+        }
+        return false; // Upvote removed
+    } else {
+        // Add upvote
+        const { error } = await supabase
+            .from("post_upvotes")
+            .insert({
+                post_id,
+                profile_id: userId,
+            });
+        if (error) {
+            throw error;
+        }
+        return true; // Upvote added
+    }
+};

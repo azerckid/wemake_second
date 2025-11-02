@@ -6,7 +6,7 @@ import { z } from "zod";
 import { DateTime } from "luxon";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { createReply } from "../mutations";
+import { createReply, togglePostUpvote } from "../mutations";
 import { getPostById, getRepliesByPostId } from "../queries";
 import { getLoggedInUserId } from "~/features/users/queries";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
@@ -93,6 +93,15 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
         throw new Response("Invalid post ID", { status: 400 });
     }
 
+    // Check if this is an upvote action
+    if (formData.get("intent") === "upvote") {
+        await togglePostUpvote(supabase, {
+            post_id: postId,
+            userId,
+        });
+        return redirect(`/community/${postId}`);
+    }
+
     const { success, error, data } = replySchema.safeParse(
         Object.fromEntries(formData)
     );
@@ -146,16 +155,20 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
             <div className="grid grid-cols-6 gap-40 items-start">
                 <div className="col-span-4 space-y-10">
                     <div className="flex w-full items-start gap-10">
-                        <Button
-                            variant="outline"
-                            className={cn(
-                                "flex flex-col h-14",
-                                loaderData.post.is_upvoted ? "border-primary text-primary" : ""
-                            )}
-                        >
-                            <ChevronUpIcon className="size-4 shrink-0" />
-                            <span>{loaderData.post.upvotes}</span>
-                        </Button>
+                        <Form method="post">
+                            <input type="hidden" name="intent" value="upvote" />
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className={cn(
+                                    "flex flex-col h-14",
+                                    loaderData.post.is_upvoted ? "border-primary text-primary" : ""
+                                )}
+                            >
+                                <ChevronUpIcon className="size-4 shrink-0" />
+                                <span>{loaderData.post.upvotes}</span>
+                            </Button>
+                        </Form>
                         <div className="space-y-20 flex-1">
                             <div className="space-y-2">
                                 <h2 className="text-3xl font-bold">

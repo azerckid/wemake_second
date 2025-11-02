@@ -57,31 +57,34 @@ export default function ProfileLayout({ loaderData }: Route.ComponentProps) {
                             <Button variant="outline" asChild>
                                 <Link to="/my/settings">Edit profile</Link>
                             </Button>
-                        ) : null}
-                        <Button variant="secondary">Follow</Button>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="secondary">Message</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Message</DialogTitle>
-                                </DialogHeader>
-                                <DialogDescription className="space-y-4">
-                                    <span className="text-sm text-muted-foreground">
-                                        Send a message to {loaderData.user.name}
-                                    </span>
-                                    <Form className="space-y-4">
-                                        <Textarea
-                                            placeholder="Message"
-                                            className="resize-none"
-                                            rows={4}
-                                        />
-                                        <Button type="submit">Send</Button>
-                                    </Form>
-                                </DialogDescription>
-                            </DialogContent>
-                        </Dialog>
+                        ) : (
+                            <>
+                                <Button variant="secondary">Follow</Button>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="secondary">Message</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Message</DialogTitle>
+                                        </DialogHeader>
+                                        <DialogDescription className="space-y-4">
+                                            <span className="text-sm text-muted-foreground">
+                                                Send a message to {loaderData.user.name}
+                                            </span>
+                                            <Form className="space-y-4">
+                                                <Textarea
+                                                    placeholder="Message"
+                                                    className="resize-none"
+                                                    rows={4}
+                                                />
+                                                <Button type="submit">Send</Button>
+                                            </Form>
+                                        </DialogDescription>
+                                    </DialogContent>
+                                </Dialog>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex gap-2 items-center">

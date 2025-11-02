@@ -176,6 +176,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
                                             created_at={post.created_at}
                                             expanded
                                             votesCount={post.upvotes}
+                                            isUpvoted={post.is_upvoted}
                                         />
                                     ))}
                                     {totalPages > 1 && (

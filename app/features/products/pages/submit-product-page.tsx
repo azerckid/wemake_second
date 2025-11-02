@@ -17,6 +17,13 @@ import { Input } from "~/common/components/ui/input";
 import { Label } from "~/common/components/ui/label";
 import { Button } from "~/common/components/ui/button";
 
+export function meta({ data }: Route.MetaArgs) {
+    return [
+        { title: "Submit Product | wemake" },
+        { name: "description", content: "Submit your product to our community" },
+    ];
+}
+
 const productSchema = z.object({
     name: z.string().min(1, "Name is required"),
     tagline: z.string().min(1, "Tagline is required").max(60, "Tagline must be 60 characters or less"),
@@ -91,13 +98,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     return redirect(`/products/${product_id}`);
 };
-
-export function meta({ data }: Route.MetaArgs) {
-    return [
-        { title: "Submit Product | wemake" },
-        { name: "description", content: "Submit your product to our community" },
-    ];
-}
 
 export default function SubmitProductPage({ loaderData, actionData }: Route.ComponentProps) {
     const [icon, setIcon] = useState<string | null>(null);

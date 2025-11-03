@@ -121,6 +121,16 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
     const fetcher = useFetcher();
     const revalidator = useRevalidator();
 
+    // Optimistic UI: 서버 응답 전에 즉시 UI 업데이트
+    const optimisticVotesCount =
+        fetcher.state === "idle"
+            ? loaderData.post.upvotes
+            : loaderData.post.is_upvoted
+                ? loaderData.post.upvotes - 1  // 클릭 시 downvote 예상
+                : loaderData.post.upvotes + 1; // 클릭 시 upvote 예상
+
+    const optimisticIsUpvoted = fetcher.state === "idle" ? loaderData.post.is_upvoted : !loaderData.post.is_upvoted;
+
     // Fetch가 완료되면 데이터를 다시 로드
     useEffect(() => {
         if (fetcher.state === "idle" && fetcher.data?.ok) {
@@ -158,18 +168,17 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                 <div className="col-span-4 space-y-10">
                     <div className="flex w-full items-start gap-10">
                         <fetcher.Form method="post" action={`/community/${loaderData.post.post_id}/upvote`}>
-                            <input type="hidden" name="post_id" value={loaderData.post.post_id} />
                             <Button
                                 type="submit"
                                 variant="outline"
                                 disabled={fetcher.state !== "idle"}
                                 className={cn(
                                     "flex flex-col h-14",
-                                    loaderData.post.is_upvoted ? "border-primary text-primary" : ""
+                                    optimisticIsUpvoted ? "border-primary text-primary" : ""
                                 )}
                             >
                                 <ChevronUpIcon className="size-4 shrink-0" />
-                                <span>{loaderData.post.upvotes}</span>
+                                <span>{optimisticVotesCount}</span>
                             </Button>
                         </fetcher.Form>
                         <div className="space-y-20 flex-1">

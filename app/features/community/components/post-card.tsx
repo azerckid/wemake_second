@@ -47,6 +47,16 @@ export function PostCard({
         ? DateTime.fromISO(created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()
         : DateTime.fromJSDate(created_at).setZone("Asia/Seoul").toRelative();
 
+    // Optimistic UI: 서버 응답 전에 즉시 UI 업데이트
+    const optimisticVotesCount =
+        fetcher.state === "idle"
+            ? votesCount
+            : isUpvoted
+                ? votesCount - 1  // 클릭 시 downvote 예상
+                : votesCount + 1; // 클릭 시 upvote 예상
+    
+    const optimisticIsUpvoted = fetcher.state === "idle" ? isUpvoted : !isUpvoted;
+
     // Fetch가 완료되면 데이터를 다시 로드
     useEffect(() => {
         if (fetcher.state === "idle" && fetcher.data?.ok) {
@@ -89,18 +99,17 @@ export function PostCard({
             {expanded && (
                 <CardFooter className="flex justify-end pb-0">
                     <fetcher.Form method="post" action={`/community/${post_id}/upvote`}>
-                        <input type="hidden" name="post_id" value={post_id} />
                         <Button
                             type="submit"
                             variant="outline"
                             disabled={fetcher.state !== "idle"}
                             className={cn(
                                 "flex flex-col h-14",
-                                isUpvoted ? "border-primary text-primary" : ""
+                                optimisticIsUpvoted ? "border-primary text-primary" : ""
                             )}
                         >
                             <ChevronUpIcon className="size-4 shrink-0" />
-                            <span>{votesCount}</span>
+                            <span>{optimisticVotesCount}</span>
                         </Button>
                     </fetcher.Form>
                 </CardFooter>

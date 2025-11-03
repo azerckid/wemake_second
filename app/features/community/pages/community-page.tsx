@@ -3,8 +3,13 @@ import { Suspense } from "react";
 
 import type { Route } from "./+types/community-page";
 
-import { PERIOD_OPTIONS, POSTS_PER_PAGE, SORT_OPTIONS } from "../constants";
+import { z } from "zod";
 import { ChevronDownIcon } from "lucide-react";
+import { getPosts, getPostsCount, getTopics } from "../queries";
+import { PERIOD_OPTIONS, POSTS_PER_PAGE, SORT_OPTIONS } from "../constants";
+import { Hero } from "~/common/components/hero";
+import { PostCard } from "../components/post-card";
+import { Pagination } from "~/common/components/pagination";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -12,13 +17,8 @@ import {
     DropdownMenuTrigger,
 } from "~/common/components/ui/dropdown-menu";
 import { Button } from "~/common/components/ui/button";
-import { Hero } from "~/common/components/hero";
 import { Input } from "~/common/components/ui/input";
-import { PostCard } from "../components/post-card";
 
-import { getPosts, getPostsCount, getTopics } from "../queries";
-import { Pagination } from "~/common/components/pagination";
-import { z } from "zod";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Community | wemake" }];

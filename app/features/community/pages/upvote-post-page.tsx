@@ -5,10 +5,13 @@ import { getLoggedInUserId } from "~/features/users/queries";
 import { togglePostUpvote } from "../mutations";
 
 export const action = async ({ request, params }: Route.ActionArgs) => {
+    if (request.method !== "POST") {
+        throw new Response("Method not allowed", { status: 405 });
+    }
+
     const { supabase } = createSupabaseServerClient(request);
     const userId = await getLoggedInUserId(supabase);
-    const formData = await request.formData();
-    const postId = Number(formData.get("post_id") || params.postId);
+    const postId = Number(params.postId);
 
     if (!isNaN(postId)) {
         await togglePostUpvote(supabase, {

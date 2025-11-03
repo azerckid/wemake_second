@@ -419,3 +419,147 @@ export const getMessageRoom = async (
         },
     };
 };
+
+type Notification = {
+    notification_id: number;
+    type: "follow" | "review" | "reply";
+    source_id: string | null;
+    target_id: string;
+    product_id: number | null;
+    post_id: number | null;
+    seen: boolean;
+    created_at: string;
+    source_profile: {
+        name: string;
+        username: string;
+        avatar: string | null;
+    } | null;
+    product_name: string | null;
+    post_title: string | null;
+};
+
+export const getNotifications = async (request: Request): Promise<Notification[]> => {
+    const { supabase } = createSupabaseServerClient(request);
+
+    // 현재 로그인한 사용자의 ID 가져오기
+    const userId = await getLoggedInUserId(supabase);
+
+    // 알림 가져오기 (제품명과 포스트 제목도 함께 조회)
+    const { data: notifications, error } = await supabase
+        .from("notifications")
+        .select(
+            `
+            notification_id,
+            type,
+            source_id,
+            target_id,
+            product_id,
+            post_id,
+            seen,
+            created_at,
+            products(name),
+            posts(title)
+            `
+        )
+        .eq("target_id", userId)
+        .order("created_at", { ascending: false });
+
+    if (error || !notifications) {
+        return [];
+    }
+
+    // 발신자 프로필 정보 가져오기
+    const sourceIds = notifications
+        .map((n) => n.source_id)
+        .filter((id): id is string => id !== null);
+
+    if (sourceIds.length === 0) {
+        return notifications.map((n: any) => {
+            const product = Array.isArray(n.products) ? n.products[0] : n.products;
+            const post = Array.isArray(n.posts) ? n.posts[0] : n.posts;
+
+            return {
+                notification_id: n.notification_id,
+                type: n.type,
+                source_id: n.source_id,
+                target_id: n.target_id,
+                product_id: n.product_id,
+                post_id: n.post_id,
+                seen: n.seen,
+                created_at: n.created_at,
+                source_profile: null,
+                product_name: product?.name || null,
+                post_title: post?.title || null,
+            };
+        });
+    }
+
+    const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("profile_id, name, username, avatar")
+        .in("profile_id", sourceIds);
+
+    if (profilesError || !profiles) {
+        return notifications.map((n: any) => {
+            const product = Array.isArray(n.products) ? n.products[0] : n.products;
+            const post = Array.isArray(n.posts) ? n.posts[0] : n.posts;
+
+            return {
+                notification_id: n.notification_id,
+                type: n.type,
+                source_id: n.source_id,
+                target_id: n.target_id,
+                product_id: n.product_id,
+                post_id: n.post_id,
+                seen: n.seen,
+                created_at: n.created_at,
+                source_profile: null,
+                product_name: product?.name || null,
+                post_title: post?.title || null,
+            };
+        });
+    }
+
+    const profileMap = new Map(profiles.map((p) => [p.profile_id, p]));
+
+    return notifications.map((notification: any) => {
+        // Supabase nested select는 배열 또는 객체로 반환될 수 있음
+        const product = Array.isArray(notification.products)
+            ? notification.products[0]
+            : notification.products;
+        const post = Array.isArray(notification.posts)
+            ? notification.posts[0]
+            : notification.posts;
+
+        return {
+            notification_id: notification.notification_id,
+            type: notification.type,
+            source_id: notification.source_id,
+            target_id: notification.target_id,
+            product_id: notification.product_id,
+            post_id: notification.post_id,
+            seen: notification.seen,
+            created_at: notification.created_at,
+            source_profile: notification.source_id
+                ? profileMap.get(notification.source_id) || null
+                : null,
+            product_name: product?.name || null,
+            post_title: post?.title || null,
+        };
+    });
+};
+
+export const countNotifications = async (
+    client: SupabaseClient<Database>,
+    { userId }: { userId: string }
+) => {
+    const { count, error } = await client
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("seen", false)
+        .eq("target_id", userId);
+    if (error) {
+        throw error;
+    }
+    return count ?? 0;
+};

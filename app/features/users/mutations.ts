@@ -76,3 +76,24 @@ export const updateProfile = async (
     }
 };
 
+export const seeNotification = async (
+    client: SupabaseClient<Database>,
+    {
+        userId,
+        notificationId,
+    }: {
+        userId: string;
+        notificationId: number;
+    }
+) => {
+    const { error } = await client
+        .from("notifications")
+        .update({ seen: true })
+        .eq("notification_id", notificationId)
+        .eq("target_id", userId);
+
+    if (error) {
+        throw error;
+    }
+};
+

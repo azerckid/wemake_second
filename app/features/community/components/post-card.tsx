@@ -1,4 +1,9 @@
+import { useEffect } from "react";
 import { Link, useFetcher, useRevalidator } from "react-router";
+import { ChevronUpIcon, DotIcon } from "lucide-react";
+import { DateTime } from "luxon";
+import { cn } from "~/lib/utils";
+
 import {
     Card,
     CardFooter,
@@ -11,10 +16,6 @@ import {
     AvatarFallback,
 } from "~/common/components/ui/avatar";
 import { Button } from "~/common/components/ui/button";
-import { ChevronUpIcon, DotIcon } from "lucide-react";
-import { cn } from "~/lib/utils";
-import { DateTime } from "luxon";
-import { useEffect } from "react";
 
 interface PostCardProps {
     post_id: number;
@@ -54,7 +55,7 @@ export function PostCard({
             : isUpvoted
                 ? votesCount - 1  // 클릭 시 downvote 예상
                 : votesCount + 1; // 클릭 시 upvote 예상
-    
+
     const optimisticIsUpvoted = fetcher.state === "idle" ? isUpvoted : !isUpvoted;
 
     // Fetch가 완료되면 데이터를 다시 로드

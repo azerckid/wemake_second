@@ -14,7 +14,7 @@ import "./app.css";
 import Navigation from "./common/components/navigation";
 import { Settings } from "luxon";
 import { createSupabaseServerClient } from "./lib/supabase.server";
-import { getUserById } from "./features/users/queries";
+import { countNotifications, getUserById } from "./features/users/queries";
 import { cn } from "./lib/utils";
 
 export const links: Route.LinksFunction = () => [
@@ -53,15 +53,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { supabase } = createSupabaseServerClient(request);
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (user) {
+  if (user && user.id) {
     try {
       const profile = await getUserById(supabase, { id: user.id });
-      return { user: user, profile: profile };
+      const count = await countNotifications(supabase, { userId: user.id });
+      return { user: user, profile: profile, notificationsCount: count };
     } catch (error) {
-      return { user: user, profile: null };
+      return { user: user, profile: null, notificationsCount: 0 };
     }
   }
-  return { user: null, profile: null };
+  return { user: null, profile: null, notificationsCount: 0 };
 };
 
 export default function App({ loaderData }: Route.ComponentProps) {
@@ -78,7 +79,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
         pathname.includes("/auth") ? null : (
           <Navigation
             isLoggedIn={isLoggedIn}
-            hasNotifications={false}
+            hasNotifications={loaderData.notificationsCount > 0}
             hasMessages={false}
             username={loaderData.profile?.username || undefined}
             avatar={loaderData.profile?.avatar || undefined}

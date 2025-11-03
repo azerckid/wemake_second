@@ -1,14 +1,18 @@
 import type { Route } from "./+types/notifications-page";
+
 import { DateTime } from "luxon";
+import { getLoggedInUserId, getNotifications } from "../queries";
+import { createSupabaseServerClient } from "~/lib/supabase.server";
 
 import { NotificationCard } from "~/features/users/components/notification-card";
-import { getNotifications } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: "Notifications | wemake" }];
 };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
+    const { supabase } = createSupabaseServerClient(request);
+    await getLoggedInUserId(supabase);
     const notifications = await getNotifications(request);
     return { notifications };
 };

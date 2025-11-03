@@ -4,10 +4,9 @@ import { Hero } from "~/common/components/hero";
 import { IdeaCard } from "../components/idea-card";
 import { getGptIdeas, getGptIdeasCount } from "../queries";
 import { Pagination } from "~/common/components/pagination";
-import { useSearchParams, redirect } from "react-router";
+import { useSearchParams } from "react-router";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { getLoggedInUserId } from "~/features/users/queries";
-import { toggleIdeaLike } from "../mutations";
 
 export const meta: Route.MetaFunction = () => {
     return [
@@ -42,23 +41,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
-    const { supabase } = createSupabaseServerClient(request);
-    const userId = await getLoggedInUserId(supabase);
-    const formData = await request.formData();
-
-    if (formData.get("intent") === "like") {
-        const ideaId = Number(formData.get("idea_id"));
-        if (!isNaN(ideaId)) {
-            await toggleIdeaLike(supabase, {
-                idea_id: ideaId,
-                userId,
-            });
-        }
-    }
-
-    // Redirect back to ideas page to refresh data
-    const url = new URL(request.url);
-    return redirect(url.pathname + url.search);
+    // like는 이제 별도 라우트로 처리되므로 여기서는 아무것도 하지 않음
+    return {};
 };
 
 export default function IdeasPage({ loaderData }: Route.ComponentProps) {

@@ -37,6 +37,7 @@ export default [
         route("/search", "features/products/pages/search-page.tsx"),
         route("/submit", "features/products/pages/submit-product-page.tsx"),
         route("/promote", "features/products/pages/promote-page.tsx"),
+        route("/:productId/upvote", "features/products/pages/upvote-product-page.tsx"),
         ...prefix("/:productId", [
             index("features/products/pages/product-redirect-page.tsx"),
             layout("features/products/layouts/product-overview-layout.tsx", [
@@ -52,6 +53,7 @@ export default [
     ...prefix("ideas", [
         index("features/ideas/pages/ideas-page.tsx"),
         route("/:ideaId", "features/ideas/pages/idea-page.tsx"),
+        route("/:ideaId/like", "features/ideas/pages/like-idea-page.tsx"),
     ]),
 
     ...prefix("jobs", [
@@ -79,6 +81,7 @@ export default [
     ...prefix("/community", [
         index("features/community/pages/community-page.tsx"),
         route("/:postId", "features/community/pages/post-page.tsx"),
+        route("/:postId/upvote", "features/community/pages/upvote-post-page.tsx"),
         route("/submit", "features/community/pages/submit-post-page.tsx"),
     ]),
 

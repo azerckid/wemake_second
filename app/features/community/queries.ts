@@ -36,6 +36,7 @@ interface PostDetail {
   author_role: string | null;
   author_created_at: string;
   products: number;
+  is_upvoted?: boolean;
 }
 
 export const getPosts = async (

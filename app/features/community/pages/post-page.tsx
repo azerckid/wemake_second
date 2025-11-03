@@ -1,4 +1,5 @@
-import { Form, Link, redirect } from "react-router";
+import { Form, Link, useFetcher, useRevalidator, redirect } from "react-router";
+import { useEffect } from "react";
 
 import type { Route } from "./+types/post-page";
 
@@ -6,7 +7,7 @@ import { z } from "zod";
 import { DateTime } from "luxon";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { createReply, togglePostUpvote } from "../mutations";
+import { createReply } from "../mutations";
 import { getPostById, getRepliesByPostId } from "../queries";
 import { getLoggedInUserId } from "~/features/users/queries";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
@@ -93,15 +94,6 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
         throw new Response("Invalid post ID", { status: 400 });
     }
 
-    // Check if this is an upvote action
-    if (formData.get("intent") === "upvote") {
-        await togglePostUpvote(supabase, {
-            post_id: postId,
-            userId,
-        });
-        return redirect(`/community/${postId}`);
-    }
-
     const { success, error, data } = replySchema.safeParse(
         Object.fromEntries(formData)
     );
@@ -126,6 +118,16 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 };
 
 export default function PostPage({ loaderData, actionData }: Route.ComponentProps) {
+    const fetcher = useFetcher();
+    const revalidator = useRevalidator();
+
+    // Fetch가 완료되면 데이터를 다시 로드
+    useEffect(() => {
+        if (fetcher.state === "idle" && fetcher.data?.ok) {
+            revalidator.revalidate();
+        }
+    }, [fetcher.state, fetcher.data, revalidator]);
+
     return (
 
         <div className="space-y-10">
@@ -155,11 +157,12 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
             <div className="grid grid-cols-6 gap-40 items-start">
                 <div className="col-span-4 space-y-10">
                     <div className="flex w-full items-start gap-10">
-                        <Form method="post">
-                            <input type="hidden" name="intent" value="upvote" />
+                        <fetcher.Form method="post" action={`/community/${loaderData.post.post_id}/upvote`}>
+                            <input type="hidden" name="post_id" value={loaderData.post.post_id} />
                             <Button
                                 type="submit"
                                 variant="outline"
+                                disabled={fetcher.state !== "idle"}
                                 className={cn(
                                     "flex flex-col h-14",
                                     loaderData.post.is_upvoted ? "border-primary text-primary" : ""
@@ -168,7 +171,7 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                                 <ChevronUpIcon className="size-4 shrink-0" />
                                 <span>{loaderData.post.upvotes}</span>
                             </Button>
-                        </Form>
+                        </fetcher.Form>
                         <div className="space-y-20 flex-1">
                             <div className="space-y-2">
                                 <h2 className="text-3xl font-bold">
@@ -200,7 +203,7 @@ export default function PostPage({ loaderData, actionData }: Route.ComponentProp
                                             rows={5}
                                             required
                                         />
-                                        {actionData && "fieldErrors" in actionData && actionData.fieldErrors?.reply && (
+                                        {actionData && "fieldErrors" in actionData && actionData.fieldErrors && actionData.fieldErrors.reply && (
                                             <div className="text-red-500 text-sm">
                                                 {actionData.fieldErrors.reply.join(", ")}
                                             </div>

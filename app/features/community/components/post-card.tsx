@@ -1,4 +1,4 @@
-import { Link, Form } from "react-router";
+import { Link, useFetcher, useRevalidator } from "react-router";
 import {
     Card,
     CardFooter,
@@ -14,6 +14,7 @@ import { Button } from "~/common/components/ui/button";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { DateTime } from "luxon";
+import { useEffect } from "react";
 
 interface PostCardProps {
     post_id: number;
@@ -40,9 +41,19 @@ export function PostCard({
     votesCount = 0,
     isUpvoted = false,
 }: PostCardProps) {
+    const fetcher = useFetcher();
+    const revalidator = useRevalidator();
     const postedAt = typeof created_at === 'string'
         ? DateTime.fromISO(created_at, { zone: "utc" }).setZone("Asia/Seoul").toRelative()
         : DateTime.fromJSDate(created_at).setZone("Asia/Seoul").toRelative();
+
+    // Fetch가 완료되면 데이터를 다시 로드
+    useEffect(() => {
+        if (fetcher.state === "idle" && fetcher.data?.ok) {
+            revalidator.revalidate();
+        }
+    }, [fetcher.state, fetcher.data, revalidator]);
+
     return (
         <Card
             className={cn(
@@ -77,12 +88,12 @@ export function PostCard({
             )}
             {expanded && (
                 <CardFooter className="flex justify-end pb-0">
-                    <Form method="post">
-                        <input type="hidden" name="intent" value="upvote" />
+                    <fetcher.Form method="post" action={`/community/${post_id}/upvote`}>
                         <input type="hidden" name="post_id" value={post_id} />
                         <Button
                             type="submit"
                             variant="outline"
+                            disabled={fetcher.state !== "idle"}
                             className={cn(
                                 "flex flex-col h-14",
                                 isUpvoted ? "border-primary text-primary" : ""
@@ -91,7 +102,7 @@ export function PostCard({
                             <ChevronUpIcon className="size-4 shrink-0" />
                             <span>{votesCount}</span>
                         </Button>
-                    </Form>
+                    </fetcher.Form>
                 </CardFooter>
             )}
         </Card>

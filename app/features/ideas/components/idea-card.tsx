@@ -1,4 +1,5 @@
-import { Link, Form } from "react-router";
+import { Link, useFetcher, useRevalidator } from "react-router";
+import { useEffect } from "react";
 import {
     Card,
     CardContent,
@@ -35,6 +36,15 @@ export function IdeaCard({
     isLiked = false,
 }: IdeaCardProps) {
     const claimed = claimed_at !== null && claimed_by !== null;
+    const fetcher = useFetcher();
+    const revalidator = useRevalidator();
+
+    // Fetch가 완료되면 데이터를 다시 로드
+    useEffect(() => {
+        if (fetcher.state === "idle" && fetcher.data?.ok) {
+            revalidator.revalidate();
+        }
+    }, [fetcher.state, fetcher.data, revalidator]);
 
     return (
         <Card className={cn(
@@ -76,14 +86,18 @@ export function IdeaCard({
             </CardContent>
             <CardFooter className="flex justify-between items-center">
                 {!claimed ? (
-                    <Form method="post">
-                        <input type="hidden" name="intent" value="like" />
+                    <fetcher.Form method="post" action={`/ideas/${gpt_idea_id}/like`}>
                         <input type="hidden" name="idea_id" value={gpt_idea_id} />
-                        <Button type="submit" variant="outline" className={cn(isLiked && "border-red-500 text-red-500")}>
+                        <Button 
+                            type="submit" 
+                            variant="outline" 
+                            disabled={fetcher.state !== "idle"}
+                            className={cn(isLiked && "border-red-500 text-red-500")}
+                        >
                             <HeartIcon className={cn("w-4 h-4", isLiked && "fill-current")} />
                             <span>{likesCount}</span>
                         </Button>
-                    </Form>
+                    </fetcher.Form>
                 ) : (
                     <Button variant="outline" disabled>
                         <HeartIcon className="w-4 h-4" />

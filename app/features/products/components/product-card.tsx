@@ -1,4 +1,5 @@
-import { Link, Form } from "react-router";
+import { Link, useFetcher, useRevalidator } from "react-router";
+import { useEffect } from "react";
 import {
     Card,
     CardDescription,
@@ -34,6 +35,16 @@ export function ProductCard({
         console.error('ProductCard received invalid id:', id, 'for product:', name);
     }
     const productUrl = `/products/${numericId}`;
+    const fetcher = useFetcher();
+    const revalidator = useRevalidator();
+
+    // Fetch가 완료되면 데이터를 다시 로드
+    useEffect(() => {
+        if (fetcher.state === "idle" && fetcher.data?.ok) {
+            revalidator.revalidate();
+        }
+    }, [fetcher.state, fetcher.data, revalidator]);
+
     return (
         <Card className="w-full flex flex-row items-center justify-between p-6 bg-transparent hover:bg-primary/10">
             <Link to={productUrl} className="flex-1">
@@ -58,18 +69,18 @@ export function ProductCard({
             </Link>
             <CardFooter className="py-0">
                 {showUpvoteButton ? (
-                    <Form method="post">
-                        <input type="hidden" name="intent" value="upvote" />
+                    <fetcher.Form method="post" action={`/products/${numericId}/upvote`}>
                         <input type="hidden" name="product_id" value={numericId} />
                         <Button
                             type="submit"
                             variant="outline"
+                            disabled={fetcher.state !== "idle"}
                             className="flex flex-col h-14"
                         >
                             <ChevronUpIcon className="size-4 shrink-0" />
                             <span>{votesCount}</span>
                         </Button>
-                    </Form>
+                    </fetcher.Form>
                 ) : (
                     <Button variant="outline" className="flex flex-col h-14">
                         <ChevronUpIcon className="size-4 shrink-0" />

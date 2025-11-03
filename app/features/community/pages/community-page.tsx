@@ -1,4 +1,4 @@
-import { Await, data, Form, isRouteErrorResponse, Link, useSearchParams, redirect } from "react-router";
+import { Await, data, Form, isRouteErrorResponse, Link, useSearchParams } from "react-router";
 import { Suspense } from "react";
 
 import type { Route } from "./+types/community-page";
@@ -17,9 +17,6 @@ import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
 
 import { getPosts, getPostsCount, getTopics } from "../queries";
-import { togglePostUpvote } from "../mutations";
-import { getLoggedInUserId } from "~/features/users/queries";
-import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { Pagination } from "~/common/components/pagination";
 import { z } from "zod";
 
@@ -80,23 +77,8 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
-    const { supabase } = createSupabaseServerClient(request);
-    const userId = await getLoggedInUserId(supabase);
-    const formData = await request.formData();
-
-    if (formData.get("intent") === "upvote") {
-        const postId = Number(formData.get("post_id"));
-        if (!isNaN(postId)) {
-            await togglePostUpvote(supabase, {
-                post_id: postId,
-                userId,
-            });
-        }
-    }
-
-    // Redirect back to community page to refresh data
-    const url = new URL(request.url);
-    return redirect(url.pathname + url.search);
+    // upvote는 이제 별도 라우트로 처리되므로 여기서는 아무것도 하지 않음
+    return {};
 };
 
 export default function CommunityPage({ loaderData, actionData }: Route.ComponentProps) {

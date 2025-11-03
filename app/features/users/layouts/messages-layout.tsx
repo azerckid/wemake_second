@@ -10,15 +10,17 @@ import {
 import { MessageRoomCard } from "~/features/users/components/message-room-card";
 import { getMessageRooms } from "../queries";
 
-export function loader({ request }: Route.LoaderArgs) {
-    return getMessageRooms(request);
+export async function loader({ request }: Route.LoaderArgs) {
+    return {
+        messageRooms: await getMessageRooms(request),
+    };
 }
 
 export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
-    const messageRooms = loaderData || [];
+    const messageRooms = loaderData.messageRooms || [];
 
     return (
-        <SidebarProvider className="flex max-h-[calc(100vh-14rem)] overflow-hidden h-[calc(100vh-14rem)] min-h-full">
+        <SidebarProvider className="flex h-[calc(100vh-14rem)] overflow-hidden">
             <Sidebar className="pt-16" variant="floating">
                 <SidebarContent>
                     <SidebarGroup>
@@ -44,7 +46,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                     </SidebarGroup>
                 </SidebarContent>
             </Sidebar>
-            <div className=" h-full flex-1">
+            <div className="flex-1 h-full overflow-hidden">
                 <Outlet />
             </div>
         </SidebarProvider>

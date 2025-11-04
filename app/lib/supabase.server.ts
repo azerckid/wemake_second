@@ -1,4 +1,5 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import { redirect } from "react-router";
 import type { Database } from "database.types";
 
 export function createSupabaseServerClient(request: Request) {
@@ -39,6 +40,10 @@ export function createSupabaseServerClient(request: Request) {
     return { supabase, headers };
 }
 
+/**
+ * 세션을 가져옵니다.
+ * Refresh Token이 없는 경우(만료된 세션)는 정상적인 상황으로 처리합니다.
+ */
 export async function getSession(request: Request) {
     const { supabase } = createSupabaseServerClient(request);
 
@@ -48,13 +53,26 @@ export async function getSession(request: Request) {
     } = await supabase.auth.getSession();
 
     if (error) {
-        console.error("Session error:", error);
+        // Refresh Token이 없는 경우는 정상적인 만료 상황으로 처리
+        const isRefreshTokenNotFound = 
+            error.code === 'refresh_token_not_found' ||
+            error.message?.includes('Refresh Token Not Found');
+
+        // 개발 환경에서만 상세 로그 출력
+        if (process.env.NODE_ENV === 'development' && !isRefreshTokenNotFound) {
+            console.error("Session error:", error);
+        }
+
         return null;
     }
 
     return session;
 }
 
+/**
+ * 현재 로그인한 사용자를 가져옵니다.
+ * Refresh Token이 없는 경우(만료된 세션)는 정상적인 상황으로 처리합니다.
+ */
 export async function getUser(request: Request) {
     const { supabase } = createSupabaseServerClient(request);
 
@@ -64,13 +82,25 @@ export async function getUser(request: Request) {
     } = await supabase.auth.getUser();
 
     if (error) {
-        console.error("User error:", error);
+        // Refresh Token이 없는 경우는 정상적인 만료 상황으로 처리
+        const isRefreshTokenNotFound = 
+            error.code === 'refresh_token_not_found' ||
+            error.message?.includes('Refresh Token Not Found');
+
+        // 개발 환경에서만 상세 로그 출력
+        if (process.env.NODE_ENV === 'development' && !isRefreshTokenNotFound) {
+            console.error("User error:", error);
+        }
+
         return null;
     }
 
     return user;
 }
 
+/**
+ * 현재 로그인한 사용자의 프로필을 가져옵니다.
+ */
 export async function getUserProfile(request: Request) {
     const user = await getUser(request);
 
@@ -88,28 +118,43 @@ export async function getUserProfile(request: Request) {
         .single();
 
     if (error) {
-        console.error("Profile error:", error);
+        // 개발 환경에서만 상세 로그 출력
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Profile error:", error);
+        }
         return null;
     }
 
     return profile;
 }
 
+/**
+ * 인증이 필요한 페이지에서 사용합니다.
+ * 사용자가 로그인하지 않았거나 세션이 만료된 경우 로그인 페이지로 리다이렉트합니다.
+ */
 export async function requireAuth(request: Request) {
     const user = await getUser(request);
 
     if (!user) {
-        throw new Response("Unauthorized", { status: 401 });
+        const url = new URL(request.url);
+        const loginUrl = `/auth/login?redirect=${encodeURIComponent(url.pathname + url.search)}`;
+        throw redirect(loginUrl);
     }
 
     return user;
 }
 
+/**
+ * 프로필이 필요한 페이지에서 사용합니다.
+ * 사용자가 로그인하지 않았거나 세션이 만료된 경우 로그인 페이지로 리다이렉트합니다.
+ */
 export async function requireProfile(request: Request) {
     const profile = await getUserProfile(request);
 
     if (!profile) {
-        throw new Response("Unauthorized", { status: 401 });
+        const url = new URL(request.url);
+        const loginUrl = `/auth/login?redirect=${encodeURIComponent(url.pathname + url.search)}`;
+        throw redirect(loginUrl);
     }
 
     return profile;

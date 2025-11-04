@@ -12,7 +12,7 @@ export const meta: Route.MetaFunction = () => {
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     const { supabase } = createSupabaseServerClient(request);
-    await getLoggedInUserId(supabase);
+    await getLoggedInUserId(supabase); // 로그인 여부 확인
     const notifications = await getNotifications(request);
     return { notifications };
 };

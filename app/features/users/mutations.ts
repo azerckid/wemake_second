@@ -97,3 +97,77 @@ export const seeNotification = async (
     }
 };
 
+export const sendMessage = async (
+    client: SupabaseClient<Database>,
+    {
+        fromUserId,
+        toUserId,
+        content,
+    }: {
+        fromUserId: string;
+        toUserId: string;
+        content: string;
+    }
+): Promise<number> => {
+    // 기존 룸이 있는지 확인
+    const { data: existingRoom, error: rpcError } = await client.rpc("get_room", {
+        from_user_id: fromUserId,
+        to_user_id: toUserId,
+    });
+
+    if (rpcError) {
+        console.error("RPC error in get_room:", rpcError);
+        throw rpcError;
+    }
+
+    let messageRoomId: number;
+
+    if (existingRoom && Array.isArray(existingRoom) && existingRoom.length > 0 && existingRoom[0]?.message_room_id) {
+        // 기존 룸이 있으면 사용
+        messageRoomId = existingRoom[0].message_room_id;
+    } else {
+        // 새 룸 생성
+        const { data: newRoom, error: roomError } = await client
+            .from("message_rooms")
+            .insert({})
+            .select("message_room_id")
+            .single();
+
+        if (roomError || !newRoom) {
+            console.error("Error creating message room:", roomError);
+            throw roomError || new Error("Failed to create message room");
+        }
+
+        messageRoomId = newRoom.message_room_id;
+
+        // 룸 멤버 추가
+        const { error: memberError } = await client
+            .from("message_room_members")
+            .insert([
+                { message_room_id: messageRoomId, profile_id: fromUserId },
+                { message_room_id: messageRoomId, profile_id: toUserId },
+            ]);
+
+        if (memberError) {
+            console.error("Error adding room members:", memberError);
+            throw memberError;
+        }
+    }
+
+    // 메시지 전송
+    const { error: messageError } = await client
+        .from("messages")
+        .insert({
+            message_room_id: messageRoomId,
+            sender_id: fromUserId,
+            content,
+        });
+
+    if (messageError) {
+        console.error("Error sending message:", messageError);
+        throw messageError;
+    }
+
+    return messageRoomId;
+};
+

@@ -1,11 +1,15 @@
-import { Form } from "react-router";
+import { Form, useOutletContext } from "react-router";
 import { redirect } from "react-router";
 
 import type { Route } from "./+types/message-page";
 
 import { SendIcon } from "lucide-react";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
-import { getMessages, getMessageRoom, getLoggedInUserId } from "../queries";
+import {
+    getLoggedInUserId,
+    getMessagesByMessagesRoomId,
+    getRoomsParticipant,
+} from "../queries";
 import { MessageBubble } from "../components/message-bubble";
 
 import { Badge } from "~/common/components/ui/badge";
@@ -19,23 +23,27 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-    const messageRoomId = Number(params.messageId);
+    const messageRoomIdParam = params.messageRoomId;
+    if (!messageRoomIdParam) {
+        throw new Response("Invalid message room ID", { status: 400 });
+    }
+
+    const messageRoomId = Number(messageRoomIdParam);
     if (isNaN(messageRoomId)) {
         throw new Response("Invalid message room ID", { status: 400 });
     }
 
-    const [messageRoom, messages] = await Promise.all([
-        getMessageRoom(request, messageRoomId),
-        getMessages(request, messageRoomId),
+    const { supabase } = createSupabaseServerClient(request);
+    const userId = await getLoggedInUserId(supabase);
+
+    const [messages, participant] = await Promise.all([
+        getMessagesByMessagesRoomId(supabase, { messageRoomId, userId }),
+        getRoomsParticipant(supabase, { messageRoomId, userId }),
     ]);
 
-    const { supabase } = createSupabaseServerClient(request);
-    const currentUserId = await getLoggedInUserId(supabase);
-
     return {
-        messageRoom,
         messages,
-        currentUserId,
+        participant,
     };
 }
 
@@ -44,8 +52,8 @@ export async function action({ request, params }: Route.ActionArgs) {
         return Response.json({ error: "Method not allowed" }, { status: 405 });
     }
 
-    const messageRoomId = Number(params.messageId);
-    if (isNaN(messageRoomId)) {
+    const messageRoomId = params.messageRoomId;
+    if (!messageRoomId) {
         return Response.json({ error: "Invalid message room ID" }, { status: 400 });
     }
 
@@ -60,13 +68,9 @@ export async function action({ request, params }: Route.ActionArgs) {
         const { supabase } = createSupabaseServerClient(request);
         const currentUserId = await getLoggedInUserId(supabase);
 
-        // 메시지 룸에서 상대방 찾기
-        const messageRoom = await getMessageRoom(request, messageRoomId);
-        const otherUserId = messageRoom.otherUser.profile_id;
-
         // 메시지 전송 (기존 룸 사용)
         const { error: messageError } = await supabase.from("messages").insert({
-            message_room_id: messageRoomId,
+            message_room_id: Number(messageRoomId),
             sender_id: currentUserId,
             content,
         });
@@ -87,8 +91,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function MessagePage({ loaderData }: Route.ComponentProps) {
-    const { messageRoom, messages, currentUserId } = loaderData;
-    const otherUser = messageRoom.otherUser;
+    const { messages, participant } = loaderData;
+    const { userId } = useOutletContext<{ userId: string }>();
 
     return (
         <div className="h-full flex flex-col">
@@ -96,9 +100,9 @@ export default function MessagePage({ loaderData }: Route.ComponentProps) {
                 <CardHeader className="flex flex-row items-center gap-4 py-4">
                     <div className="relative">
                         <Avatar className="size-14">
-                            <AvatarImage src={otherUser.avatar || undefined} />
+                            <AvatarImage src={participant.profile?.avatar || undefined} />
                             <AvatarFallback>
-                                {otherUser.name[0]?.toUpperCase() || "U"}
+                                {participant.profile?.name?.charAt(0) ?? ""}
                             </AvatarFallback>
                         </Avatar>
                         <Badge
@@ -107,12 +111,11 @@ export default function MessagePage({ loaderData }: Route.ComponentProps) {
                     </div>
                     <div className="flex flex-col gap-0">
                         <div className="flex items-center gap-2">
-                            <CardTitle className="text-xl">{otherUser.name}</CardTitle>
+                            <CardTitle className="text-xl">{participant.profile?.name}</CardTitle>
                             <Badge variant="outline" className="text-xs">
                                 Online
                             </Badge>
                         </div>
-                        <CardDescription>@{otherUser.username}</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
@@ -122,22 +125,19 @@ export default function MessagePage({ loaderData }: Route.ComponentProps) {
                         No messages yet. Start the conversation!
                     </div>
                 ) : (
-                    messages.map((message) => {
-                        const isCurrentUser = message.sender_id === currentUserId;
-                        return (
-                            <MessageBubble
-                                key={message.message_id}
-                                avatarUrl={message.sender.avatar || undefined}
-                                avatarFallback={message.sender.name[0]?.toUpperCase() || "U"}
-                                content={message.content}
-                                isCurrentUser={isCurrentUser}
-                            />
-                        );
-                    })
+                    messages.map((message) => (
+                        <MessageBubble
+                            key={message.message_id}
+                            avatarUrl={message.sender?.avatar || undefined}
+                            avatarFallback={message.sender?.name?.charAt(0) ?? ""}
+                            content={message.content}
+                            isCurrentUser={message.sender?.profile_id === userId}
+                        />
+                    ))
                 )}
             </div>
-            <Card className="rounded-none border-x-0 border-b-0">
-                <CardHeader className="py-4">
+            <Card>
+                <CardHeader>
                     <Form method="post" className="relative flex items-center gap-2">
                         <Textarea
                             name="content"

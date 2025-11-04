@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet, useOutletContext } from "react-router";
 import type { Route } from "./+types/messages-layout";
 import {
     Sidebar,
@@ -18,9 +18,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
     const messageRooms = loaderData.messageRooms || [];
+    const { userId } = useOutletContext<{ userId: string }>();
 
     return (
-        <SidebarProvider className="flex h-[calc(100vh-14rem)] overflow-hidden">
+        <SidebarProvider className="flex max-h-[calc(100vh-14rem)] overflow-hidden h-[calc(100vh-14rem)] min-h-full">
             <Sidebar className="pt-16" variant="floating">
                 <SidebarContent>
                     <SidebarGroup>
@@ -46,8 +47,8 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                     </SidebarGroup>
                 </SidebarContent>
             </Sidebar>
-            <div className="flex-1 h-full overflow-hidden">
-                <Outlet />
+            <div className=" h-full flex-1">
+                <Outlet context={{ userId }} />
             </div>
         </SidebarProvider>
     );

@@ -1009,6 +1009,19 @@ export type Database = {
           },
         ]
       }
+      messages_view: {
+        Row: {
+          message_room_id: number | null
+          name: string | null
+          username: string | null
+          last_message: string | null
+          last_message_created_at: string | null
+          profile_id: string | null
+          other_profile_id: string | null
+          avatar: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_dashboard_stats: {
@@ -1024,6 +1037,15 @@ export type Database = {
           month: string
           product_views: number
           product_visits: number
+        }[]
+      }
+      get_room: {
+        Args: {
+          from_user_id: string
+          to_user_id: string
+        }
+        Returns: {
+          message_room_id: number
         }[]
       }
       track_event: {

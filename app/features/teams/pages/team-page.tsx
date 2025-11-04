@@ -141,7 +141,7 @@ export default function TeamPage({ loaderData, actionData }: Route.ComponentProp
                             <AvatarFallback>{teamData.team_leader.name[0]}</AvatarFallback>
                             {teamData.team_leader.avatar && <AvatarImage src={teamData.team_leader.avatar} />}
                         </Avatar>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col items-start">
                             <h4 className="text-lg font-medium">{teamData.team_leader.name}</h4>
                             <Badge variant="secondary">{teamData.team_leader.role}</Badge>
                         </div>
@@ -152,11 +152,15 @@ export default function TeamPage({ loaderData, actionData }: Route.ComponentProp
                             <AlertDescription>제출완료</AlertDescription>
                         </Alert>
                     )}
-                    <Form method="post" className="space-y-5">
+                    <Form
+                        className="space-y-5"
+                        method="post"
+                        action={`/users/${teamData.team_leader.username}/messages`}
+                    >
                         <InputPair
                             label="Introduce yourself"
                             description="Tell us about yourself"
-                            name="introduction"
+                            name="content"
                             type="text"
                             id="introduction"
                             required

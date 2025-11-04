@@ -48,6 +48,27 @@ export const getUserProfile = async (request: Request, username: string): Promis
     return data as UserProfile;
 };
 
+export const getUserProfileByClient = async (
+    client: SupabaseClient<Database>,
+    { username }: { username: string }
+): Promise<{ profile_id: string }> => {
+    const { data, error } = await client
+        .from("profiles")
+        .select("profile_id")
+        .eq("username", username)
+        .single();
+    if (error) {
+        if (error.code === 'PGRST116') {
+            throw new Response("User not found", { status: 404 });
+        }
+        throw error;
+    }
+    if (!data) {
+        throw new Response("User not found", { status: 404 });
+    }
+    return data as { profile_id: string };
+};
+
 export const getUserProducts = async (request: Request, username: string) => {
     const { supabase } = createSupabaseServerClient(request);
 
@@ -199,68 +220,35 @@ export const getMessageRooms = async (request: Request): Promise<MessageRoom[]> 
     // 현재 로그인한 사용자의 ID 가져오기
     const userId = await getLoggedInUserId(supabase);
 
-    // 현재 사용자가 속한 메시지 룸들 가져오기
-    const { data: roomMembers, error: membersError } = await supabase
-        .from("message_room_members")
-        .select("message_room_id")
-        .eq("profile_id", userId);
+    // 뷰를 사용하여 메시지 룸 목록 가져오기
+    const { data: roomsData, error } = await supabase
+        .from("messages_view")
+        .select("*")
+        .eq("profile_id", userId)
+        .neq("other_profile_id", userId);
 
-    if (membersError || !roomMembers || roomMembers.length === 0) {
+    if (error || !roomsData) {
         return [];
     }
 
-    const roomIds = roomMembers.map((rm) => rm.message_room_id);
-
-    // 각 룸의 상대방과 마지막 메시지 정보 가져오기
-    const rooms: MessageRoom[] = [];
-
-    for (const roomId of roomIds) {
-        // 해당 룸의 멤버들 가져오기
-        const { data: members, error: membersError2 } = await supabase
-            .from("message_room_members")
-            .select("profile_id")
-            .eq("message_room_id", roomId);
-
-        if (membersError2 || !members) continue;
-
-        // 상대방 찾기 (현재 사용자가 아닌 멤버)
-        const otherMember = members.find((m) => m.profile_id !== userId);
-        if (!otherMember) continue;
-
-        // 상대방 프로필 정보 가져오기
-        const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("profile_id, name, username, avatar")
-            .eq("profile_id", otherMember.profile_id)
-            .single();
-
-        if (profileError || !profile) continue;
-
-        // 마지막 메시지 가져오기
-        const { data: lastMessage, error: messageError } = await supabase
-            .from("messages")
-            .select("content, created_at")
-            .eq("message_room_id", roomId)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single();
-
-        rooms.push({
-            message_room_id: roomId,
+    // 뷰 데이터를 MessageRoom 형식으로 변환
+    const rooms: MessageRoom[] = roomsData
+        .filter((room) => room.message_room_id && room.other_profile_id)
+        .map((room) => ({
+            message_room_id: room.message_room_id!,
             otherUser: {
-                profile_id: profile.profile_id,
-                name: profile.name,
-                username: profile.username,
-                avatar: profile.avatar,
+                profile_id: room.other_profile_id!,
+                name: room.name || "",
+                username: room.username || "",
+                avatar: room.avatar,
             },
-            lastMessage: lastMessage
+            lastMessage: room.last_message && room.last_message_created_at
                 ? {
-                    content: lastMessage.content,
-                    created_at: lastMessage.created_at,
+                    content: room.last_message,
+                    created_at: room.last_message_created_at,
                 }
                 : null,
-        });
-    }
+        }));
 
     // 마지막 메시지 시간 기준으로 정렬
     rooms.sort((a, b) => {
@@ -355,6 +343,79 @@ export const getMessages = async (
     }
 
     return messagesWithSenders;
+};
+
+export const getMessagesByMessagesRoomId = async (
+    client: SupabaseClient<Database>,
+    { messageRoomId, userId }: { messageRoomId: number; userId: string }
+) => {
+    const { count, error: countError } = await client
+        .from("message_room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("message_room_id", messageRoomId)
+        .eq("profile_id", userId);
+
+    if (countError) {
+        throw countError;
+    }
+    if (count === 0) {
+        throw new Error("Message room not found");
+    }
+
+    const { data, error } = await client
+        .from("messages")
+        .select(
+            `*,
+            sender:profiles!sender_id!inner(
+                name,
+                profile_id,
+                avatar
+            )`
+        )
+        .eq("message_room_id", messageRoomId)
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+    return data;
+};
+
+export const getRoomsParticipant = async (
+    client: SupabaseClient<Database>,
+    { messageRoomId, userId }: { messageRoomId: number; userId: string }
+) => {
+    const { count, error: countError } = await client
+        .from("message_room_members")
+        .select("*", { count: "exact", head: true })
+        .eq("message_room_id", messageRoomId)
+        .eq("profile_id", userId);
+
+    if (countError) {
+        throw countError;
+    }
+    if (count === 0) {
+        throw new Error("Message room not found");
+    }
+
+    const { data, error } = await client
+        .from("message_room_members")
+        .select(
+            `
+            profile:profiles!profile_id!inner(
+                name,
+                avatar
+            )
+            `
+        )
+        .eq("message_room_id", messageRoomId)
+        .neq("profile_id", userId)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+    return data;
 };
 
 type MessageRoomDetail = {

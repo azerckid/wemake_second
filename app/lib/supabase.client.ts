@@ -14,26 +14,19 @@ export function createSupabaseBrowserClient() {
         throw new Error("createSupabaseBrowserClient can only be called in the browser");
     }
 
-    // ENV 변수 체크
-    if (!window.ENV?.SUPABASE_URL || !window.ENV?.SUPABASE_ANON_KEY) {
-        throw new Error("Missing Supabase environment variables");
+    // 환경 변수 가져오기 (Vite의 import.meta.env 사용)
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file");
     }
 
     client = createBrowserClient<Database>(
-        window.ENV.SUPABASE_URL,
-        window.ENV.SUPABASE_ANON_KEY
+        supabaseUrl,
+        supabaseAnonKey
     );
 
     return client;
-}
-
-// 전역 타입 선언
-declare global {
-    interface Window {
-        ENV: {
-            SUPABASE_URL: string;
-            SUPABASE_ANON_KEY: string;
-        };
-    }
 }
 

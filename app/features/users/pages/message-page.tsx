@@ -1,7 +1,9 @@
-import { Form, useOutletContext } from "react-router";
+import { Form, useOutletContext, useParams } from "react-router";
 import { SendIcon } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
+import { createSupabaseBrowserClient } from "~/lib/supabase.client";
+import type { Database } from "database.types";
 import {
     getLoggedInUserId,
     getMessagesByMessagesRoomId,
@@ -59,17 +61,83 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     };
 };
 
+export const shouldRevalidate = () => false;
+
+type Message = Database["public"]["Tables"]["messages"]["Row"];
+
 export default function MessagePage({
     loaderData,
     actionData,
 }: Route.ComponentProps) {
-    const { userId } = useOutletContext<{ userId: string }>();
+    const params = useParams();
+    const { userId, name, avatar } = useOutletContext<{
+        userId: string;
+        name: string;
+        avatar: string;
+    }>();
     const formRef = useRef<HTMLFormElement>(null);
+    const [messages, setMessages] = useState<Message[]>(
+        loaderData.messages || []
+    );
+
     useEffect(() => {
         if (actionData?.ok) {
             formRef.current?.reset();
         }
     }, [actionData]);
+
+    useEffect(() => {
+        const messageRoomId = Number(params.messageRoomId);
+        if (!messageRoomId) return;
+
+        const supabase = createSupabaseBrowserClient();
+        const channel = supabase
+            .channel(`messages:${messageRoomId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "messages",
+                    filter: `message_room_id=eq.${messageRoomId}`,
+                },
+                (payload) => {
+                    console.log("📨 새 메시지 수신:", payload);
+                    const newMessage = payload.new as Message;
+                    setMessages((prev) => {
+                        // 중복 메시지 방지: 이미 존재하는 메시지 ID인지 확인
+                        const exists = prev.some(
+                            (msg) => msg.message_id === newMessage.message_id
+                        );
+                        if (exists) {
+                            console.log("⚠️ 중복 메시지 감지, 무시:", newMessage.message_id);
+                            return prev;
+                        }
+
+                        console.log("✅ 새 메시지 추가:", newMessage.content);
+                        // 새 메시지를 추가하고 created_at 기준으로 정렬
+                        return [...prev, newMessage].sort(
+                            (a, b) =>
+                                new Date(a.created_at).getTime() -
+                                new Date(b.created_at).getTime()
+                        );
+                    });
+                }
+            )
+            .subscribe((status) => {
+                console.log("🔌 Realtime 구독 상태:", status);
+                if (status === "SUBSCRIBED") {
+                    console.log("✅ 메시지 룸 구독 성공:", messageRoomId);
+                } else if (status === "CHANNEL_ERROR") {
+                    console.error("❌ 채널 구독 실패:", messageRoomId);
+                }
+            });
+
+        return () => {
+            console.log("🧹 구독 정리:", messageRoomId);
+            supabase.removeChannel(channel);
+        };
+    }, [params.messageRoomId]);
     return (
         <div className="h-full flex flex-col justify-between">
             <Card>
@@ -89,15 +157,26 @@ export default function MessagePage({
                 </CardHeader>
             </Card>
             <div className="py-10 overflow-y-scroll space-y-4 flex flex-col justify-start h-full">
-                {loaderData.messages.map((message) => (
-                    <MessageBubble
-                        key={message.message_id}
-                        avatarUrl={message.sender?.avatar ?? ""}
-                        avatarFallback={message.sender?.name.charAt(0) ?? ""}
-                        content={message.content}
-                        isCurrentUser={message.sender?.profile_id === userId}
-                    />
-                ))}
+                {messages.map((message) => {
+                    const isCurrentUser = message.sender_id === userId;
+                    return (
+                        <MessageBubble
+                            key={message.message_id}
+                            avatarUrl={
+                                isCurrentUser
+                                    ? avatar
+                                    : loaderData.participant?.profile?.avatar ?? ""
+                            }
+                            avatarFallback={
+                                isCurrentUser
+                                    ? name.charAt(0)
+                                    : loaderData.participant?.profile?.name.charAt(0) ?? ""
+                            }
+                            content={message.content}
+                            isCurrentUser={isCurrentUser}
+                        />
+                    );
+                })}
             </div>
             <Card>
                 <CardHeader>

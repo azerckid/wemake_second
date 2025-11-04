@@ -1,4 +1,5 @@
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { redirect } from "react-router";
 import type { Database } from "database.types";
 
@@ -54,7 +55,7 @@ export async function getSession(request: Request) {
 
     if (error) {
         // Refresh Token이 없는 경우는 정상적인 만료 상황으로 처리
-        const isRefreshTokenNotFound = 
+        const isRefreshTokenNotFound =
             error.code === 'refresh_token_not_found' ||
             error.message?.includes('Refresh Token Not Found');
 
@@ -83,7 +84,7 @@ export async function getUser(request: Request) {
 
     if (error) {
         // Refresh Token이 없는 경우는 정상적인 만료 상황으로 처리
-        const isRefreshTokenNotFound = 
+        const isRefreshTokenNotFound =
             error.code === 'refresh_token_not_found' ||
             error.message?.includes('Refresh Token Not Found');
 
@@ -169,3 +170,43 @@ export async function requireProfile(request: Request) {
 //     }
 //     return user;
 // }
+
+/**
+ * 서버 사이드에서만 사용 가능한 관리자 클라이언트입니다.
+ * RLS(Row Level Security)를 우회하여 데이터베이스에 접근할 수 있습니다.
+ * 
+ * ⚠️ 주의사항:
+ * - 절대 브라우저에 노출되지 않도록 주의하세요
+ * - 신뢰할 수 있는 서버 사이드 코드에서만 사용하세요
+ * - SUPABASE_SERVICE_ROLE_KEY 환경 변수가 필요합니다
+ */
+export function createAdminClient() {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    // 디버깅을 위한 로그 (개발 환경에서만)
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Environment variables check:');
+        console.log('SUPABASE_URL:', supabaseUrl ? `✅ Set (length: ${supabaseUrl.length})` : '❌ Missing');
+        console.log('SUPABASE_SERVICE_ROLE_KEY:', serviceRoleKey ? `✅ Set (length: ${serviceRoleKey.length})` : '❌ Missing');
+        if (serviceRoleKey) {
+            console.log('Service Role Key prefix:', serviceRoleKey.substring(0, 30) + '...');
+        }
+    }
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        throw new Error(
+            "Missing required environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set"
+        );
+    }
+
+    // 키에서 앞뒤 공백과 줄바꿈 제거
+    const cleanedKey = serviceRoleKey.trim();
+
+    return createClient<Database>(supabaseUrl, cleanedKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        },
+    });
+}

@@ -1,19 +1,20 @@
 import { Form, useOutletContext, useParams } from "react-router";
-import { SendIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+
+import type { Route } from "./+types/message-page";
+
+import { SendIcon } from "lucide-react";
+import { MessageBubble } from "../components/message-bubble";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { createSupabaseBrowserClient } from "~/lib/supabase.client";
-import type { Database } from "database.types";
 import {
     getLoggedInUserId,
     getMessagesByMessagesRoomId,
     getRoomsParticipant,
     sendMessageToRoom,
+    type MessageRow,
 } from "../queries";
-import { MessageBubble } from "../components/message-bubble";
-import type { Route } from "./+types/message-page";
 
-import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import { Textarea } from "~/common/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avatar";
@@ -63,8 +64,6 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 
 export const shouldRevalidate = () => false;
 
-type Message = Database["public"]["Tables"]["messages"]["Row"];
-
 export default function MessagePage({
     loaderData,
     actionData,
@@ -76,7 +75,7 @@ export default function MessagePage({
         avatar: string;
     }>();
     const formRef = useRef<HTMLFormElement>(null);
-    const [messages, setMessages] = useState<Message[]>(
+    const [messages, setMessages] = useState<MessageRow[]>(
         loaderData.messages || []
     );
 
@@ -103,7 +102,7 @@ export default function MessagePage({
                 },
                 (payload) => {
                     console.log("📨 새 메시지 수신:", payload);
-                    const newMessage = payload.new as Message;
+                    const newMessage = payload.new as MessageRow;
                     setMessages((prev) => {
                         // 중복 메시지 방지: 이미 존재하는 메시지 ID인지 확인
                         const exists = prev.some(

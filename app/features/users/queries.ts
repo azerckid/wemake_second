@@ -6,6 +6,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import { productListSelect } from "../products/queries";
 
+// Realtime 메시지 타입 (데이터베이스 Row 타입)
+export type MessageRow = Database["public"]["Tables"]["messages"]["Row"];
+
 type UserProfile = {
     profile_id: string;
     name: string;

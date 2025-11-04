@@ -57,3 +57,43 @@ export const toggleIdeaLike = async (
         return true; // Like added
     }
 };
+
+export const insertIdeas = async (
+    client: SupabaseClient<Database>,
+    ideas: string[]
+) => {
+    // 데이터 검증 및 로깅
+    const validIdeas = ideas
+        .filter((idea): idea is string => {
+            if (typeof idea !== 'string') {
+                console.warn('⚠️ Invalid idea (not a string):', idea);
+                return false;
+            }
+            if (idea.trim().length === 0) {
+                console.warn('⚠️ Invalid idea (empty string):', idea);
+                return false;
+            }
+            return true;
+        })
+        .map((idea) => ({
+            idea: idea.trim(),
+        }));
+
+    if (validIdeas.length === 0) {
+        throw new Error('No valid ideas to insert');
+    }
+
+    console.log(`📝 Inserting ${validIdeas.length} ideas`);
+    console.log('Sample idea:', validIdeas[0]?.idea);
+
+    const { data, error } = await client.from("gpt_ideas").insert(validIdeas).select();
+
+    if (error) {
+        console.error('❌ Insert error:', error);
+        console.error('Tried to insert:', JSON.stringify(validIdeas, null, 2));
+        throw error;
+    }
+
+    console.log(`✅ Successfully inserted ${data?.length || 0} ideas`);
+    return data;
+};

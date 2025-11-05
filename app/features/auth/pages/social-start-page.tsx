@@ -15,10 +15,14 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
         return redirect("/auth/login");
     }
     const { provider } = data;
-    const redirectTo = `http://localhost:5173/auth/social/${provider}/complete`;
+
+    // 현재 요청의 origin을 사용하여 동적으로 콜백 URL 생성
+    const url = new URL(request.url);
+    const redirectTo = `${url.origin}/auth/social/${provider}/complete`;
+
     const { supabase, headers } = createSupabaseServerClient(request);
     const {
-        data: { url },
+        data: { url: authUrl },
         error,
     } = await supabase.auth.signInWithOAuth({
         provider,
@@ -26,8 +30,8 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
             redirectTo,
         },
     });
-    if (url) {
-        return redirect(url, { headers });
+    if (authUrl) {
+        return redirect(authUrl, { headers });
     }
     if (error) {
         throw error;

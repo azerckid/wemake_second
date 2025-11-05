@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { BarChart3Icon, BellIcon, LogOut, Menu, MessageCircleIcon, Settings, User, X } from "lucide-react";
+import { BarChart3Icon, BellIcon, LogOut, Menu, MessageCircleIcon, Settings, User } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";

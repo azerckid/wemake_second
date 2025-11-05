@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation } from "react-router";
 
 import type { Route } from "./+types/dashboard-layout";
 
-import { HomeIcon, PackageIcon, RocketIcon, SparklesIcon, BriefcaseIcon } from "lucide-react";
+import { HomeIcon, PackageIcon, SparklesIcon, BriefcaseIcon } from "lucide-react";
 import { getLoggedInUserId, getProductsByUserId } from "../queries";
 import { createSupabaseServerClient } from "~/lib/supabase.server";
 import {

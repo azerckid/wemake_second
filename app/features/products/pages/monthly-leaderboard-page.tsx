@@ -31,7 +31,9 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     const date = DateTime.fromObject({
         year: parsedData.year,
         month: parsedData.month,
-    }).setZone("Asia/Seoul");
+    })
+      .setZone("Asia/Seoul")
+      .startOf("month");
     if (!date.isValid) {
         throw data(
             {

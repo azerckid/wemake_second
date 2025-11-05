@@ -30,7 +30,9 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
             { status: 400 }
         );
     }
-    const date = DateTime.fromObject(parsedData).setZone("Asia/Seoul");
+    const date = DateTime.fromObject(parsedData)
+      .setZone("Asia/Seoul")
+      .startOf("day");
     if (!date.isValid) {
         throw data(
             {

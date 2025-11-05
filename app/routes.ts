@@ -131,4 +131,9 @@ export default [
         ]),
         route("/messages", "features/users/pages/send-message-page.tsx"),
     ]),
+
+    ...prefix("/test", [
+        route("/sentry", "features/test/pages/test-sentry-page.tsx"),
+        route("/sentry/error", "features/test/pages/test-sentry-error-page.tsx"),
+    ]),
 ] satisfies RouteConfig;

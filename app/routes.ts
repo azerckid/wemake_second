@@ -37,6 +37,10 @@ export default [
         route("/search", "features/products/pages/search-page.tsx"),
         route("/submit", "features/products/pages/submit-product-page.tsx"),
         route("/promote", "features/products/pages/promote-page.tsx"),
+        route(
+            "/promote/success",
+            "features/products/pages/promote-success-page.tsx"
+        ),
         route("/:productId/upvote", "features/products/pages/upvote-product-page.tsx"),
         ...prefix("/:productId", [
             index("features/products/pages/product-redirect-page.tsx"),

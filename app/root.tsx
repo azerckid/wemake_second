@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
-  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -68,13 +67,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   const { pathname } = useLocation();
-  const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
   const isLoggedIn = loaderData.user !== null;
   return (
     <div className={cn({
       "py-28 px-5 md:px-20": !pathname.includes("/auth/"),
-      "transition-opacity animate-pulse": isLoading,
     })}>
       {
         pathname.includes("/auth") ? null : (

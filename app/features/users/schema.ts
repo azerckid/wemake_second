@@ -1,24 +1,27 @@
 import {
     bigint,
+    boolean,
     jsonb,
     primaryKey,
     pgEnum,
+    pgPolicy,
     pgSchema,
     pgTable,
     text,
     timestamp,
     uuid,
 } from "drizzle-orm/pg-core";
+import { authenticatedRole, authUid, authUsers } from "drizzle-orm/supabase";
+import { sql } from "drizzle-orm";
 import { products } from "../products/schema";
 import { posts } from "../community/schema";
 
-// auth 스키마 정의
-const authSchema = pgSchema("auth");
-
-// auth.users 테이블 (Supabase auth.users 참조용)
-const users = authSchema.table("users", {
-    id: uuid().primaryKey(),
-});
+// auth 스키마 정의 (Supabase auth.users 참조용)
+// drizzle-orm/supabase의 authUsers를 사용하므로 주석 처리
+// const authSchema = pgSchema("auth");
+// const users = authSchema.table("users", {
+//     id: uuid().primaryKey(),
+// });
 
 export const roles = pgEnum("role", [
     "developer",
@@ -31,7 +34,7 @@ export const roles = pgEnum("role", [
 export const profiles = pgTable("profiles", {
     profile_id: uuid()
         .primaryKey()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => authUsers.id, { onDelete: "cascade" }),
     avatar: text(),
     name: text().notNull(),
     username: text().notNull(),
@@ -134,6 +137,51 @@ export const messages = pgTable("messages", {
     created_at: timestamp().notNull().defaultNow(),
 });
 
+// todos 테이블 - pgPolicy를 사용한 RLS 정책 정의 예제
+export const todos = pgTable(
+    "todos",
+    {
+        todo_id: bigint({ mode: "number" })
+            .primaryKey()
+            .generatedAlwaysAsIdentity(),
+        title: text().notNull(),
+        completed: boolean().notNull().default(false),
+        created_at: timestamp().notNull().defaultNow(),
+        profile_id: uuid()
+            .references(() => profiles.profile_id, {
+                onDelete: "cascade",
+            })
+            .notNull(),
+    },
+    (table) => [
+        pgPolicy("todos-insert-policy", {
+            for: "insert",
+            to: authenticatedRole,
+            as: "permissive",
+            withCheck: sql`${authUid} = ${table.profile_id}`,
+        }),
+        pgPolicy("todos-select-policy", {
+            for: "select",
+            to: authenticatedRole,
+            as: "permissive",
+            using: sql`${authUid} = ${table.profile_id}`,
+        }),
+        pgPolicy("todos-update-policy", {
+            for: "update",
+            to: authenticatedRole,
+            as: "permissive",
+            using: sql`${authUid} = ${table.profile_id}`,
+            withCheck: sql`${authUid} = ${table.profile_id}`,
+        }),
+        pgPolicy("todos-delete-policy", {
+            for: "delete",
+            to: authenticatedRole,
+            as: "permissive",
+            using: sql`${authUid} = ${table.profile_id}`,
+        }),
+    ]
+);
+
 // TypeScript 타입 추론을 위한 타입 정의
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;
@@ -152,3 +200,6 @@ export type SelectMessageRoomMember = typeof messageRoomMembers.$inferSelect;
 
 export type InsertMessage = typeof messages.$inferInsert;
 export type SelectMessage = typeof messages.$inferSelect;
+
+export type InsertTodo = typeof todos.$inferInsert;
+export type SelectTodo = typeof todos.$inferSelect;
